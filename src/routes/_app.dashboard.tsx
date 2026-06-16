@@ -6,8 +6,7 @@ import {
 } from "recharts";
 import {
   Users, DollarSign, AlertTriangle, CheckCircle2,
-  Sparkles, ArrowUpRight, ArrowDownRight, Quote,
-  Lightbulb, ChevronRight,
+  ArrowUpRight, ArrowDownRight, Quote, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,32 +92,28 @@ function Dashboard() {
         <KpiCard icon={CheckCircle2} label="Interview completion" value="71%" delta="+3.1%" trend="up" tone="good" />
       </div>
 
-      {/* AI Insight */}
-      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card p-6 shadow-soft">
+      {/* Insight */}
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-soft md:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 opacity-60"
-          style={{ background: "radial-gradient(60% 80% at 0% 0%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 70%)" }}
+          style={{ background: "radial-gradient(60% 80% at 0% 0%, color-mix(in oklab, var(--primary) 8%, transparent), transparent 70%)" }}
         />
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-soft">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold tracking-wide uppercase text-primary">AI Insight of the Week</h2>
-              <span className="rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                Updated 2h ago
-              </span>
-            </div>
-            <p className="mt-2 max-w-3xl text-lg font-medium leading-snug">
-              Most users are not reaching value quickly enough. Onboarding friction is the primary churn driver, accounting for 42% of all cancellations this week — up 6 points vs. last week.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button size="sm">Review onboarding funnel</Button>
-              <Button size="sm" variant="outline">View source interviews</Button>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+            Insight of the week
+          </span>
+          <span className="text-[10px] font-medium text-muted-foreground">Updated 2h ago</span>
+        </div>
+        <p className="mt-3 max-w-3xl text-xl font-medium leading-snug tracking-tight md:text-2xl">
+          Most users are not reaching value quickly enough.{" "}
+          <span className="text-muted-foreground">
+            Onboarding friction drove 42% of cancellations this week — up 6 points vs. last week.
+          </span>
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button size="sm">Review onboarding funnel</Button>
+          <Button size="sm" variant="outline">View source interviews</Button>
         </div>
       </div>
 
@@ -209,9 +204,8 @@ function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-semibold">Recommended actions</h3>
-              <p className="text-sm text-muted-foreground">AI-suggested moves to reduce churn.</p>
+              <p className="text-sm text-muted-foreground">Suggested moves to reduce churn.</p>
             </div>
-            <Lightbulb className="h-4 w-4 text-primary" />
           </div>
           <ul className="mt-5 space-y-3">
             {actions.map((a) => (
