@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, MessageSquareText, Sparkles, ShieldCheck, LineChart, Brain } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -50,22 +50,22 @@ function Landing() {
               "radial-gradient(80% 50% at 50% 0%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 70%)",
           }}
         />
-        <div className="mx-auto max-w-6xl px-6 pt-20 pb-24 text-center">
-          <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground shadow-soft">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            AI-powered churn intelligence
+        <div className="mx-auto max-w-6xl px-6 pt-24 pb-24 text-center">
+          <div className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            Churn intelligence for modern SaaS
           </div>
-          <h1 className="mx-auto max-w-3xl text-balance text-5xl font-semibold tracking-tight md:text-6xl">
+          <h1 className="mx-auto max-w-3xl text-balance text-5xl font-semibold tracking-tight md:text-[64px] md:leading-[1.05]">
             Understand why customers leave.{" "}
             <span className="text-muted-foreground">Fix churn before it grows.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-balance text-lg text-muted-foreground">
-            ExitIQ runs AI-driven exit interviews with your churning customers and turns raw feedback into clear, founder-ready insights.
+            ExitIQ interviews every churning customer and turns raw feedback into clear, founder-ready insights.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link to="/exit-interview">
               <Button size="lg" className="gap-2">
-                Start exit interview demo <ArrowRight className="h-4 w-4" />
+                Start interview demo <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link to="/dashboard">
@@ -103,27 +103,24 @@ function Landing() {
           <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
               {
-                icon: MessageSquareText,
-                title: "AI exit interviews",
-                body: "An empathetic AI interviewer talks to every churning customer — no human required.",
+                title: "Conversational interviews",
+                body: "An empathetic interviewer talks to every churning customer — adaptive follow-ups, no human required.",
               },
               {
-                icon: Brain,
                 title: "Pattern detection",
                 body: "Cluster thousands of responses into the few root causes that actually move retention.",
               },
               {
-                icon: BarChart3,
                 title: "Founder dashboard",
                 body: "A single view of churn reasons, revenue at risk, and what to do about it next.",
               },
-            ].map((f) => (
+            ].map((f, i) => (
               <div key={f.title} className="rounded-xl border border-border bg-card p-6 shadow-soft">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <f.icon className="h-5 w-5" />
-                </div>
+                <span className="text-xs font-semibold tabular-nums tracking-wider text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{f.body}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
               </div>
             ))}
           </div>
@@ -159,14 +156,13 @@ function Landing() {
           <p className="text-sm font-medium text-primary">Why teams use ExitIQ</p>
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
-              { icon: LineChart, title: "Reduce churn", body: "Catch root causes early and ship targeted fixes that compound." },
-              { icon: ShieldCheck, title: "Improve retention", body: "Win-back signals surface customers worth a personal follow-up." },
-              { icon: Brain, title: "Find root causes", body: "Stop debating opinions. Start operating on customer evidence." },
+              { title: "Reduce churn", body: "Catch root causes early and ship targeted fixes that compound." },
+              { title: "Improve retention", body: "Win-back signals surface customers worth a personal follow-up." },
+              { title: "Operate on evidence", body: "Stop debating opinions. Start shipping based on customer truth." },
             ].map((b) => (
               <div key={b.title} className="rounded-xl border border-border bg-card p-6 shadow-soft">
-                <b.icon className="h-5 w-5 text-primary" />
-                <h3 className="mt-4 text-lg font-semibold">{b.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{b.body}</p>
+                <h3 className="text-lg font-semibold">{b.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{b.body}</p>
               </div>
             ))}
           </div>
