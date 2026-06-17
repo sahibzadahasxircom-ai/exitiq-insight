@@ -30,11 +30,11 @@ function Landing() {
             <a href="#benefits" className="hover:text-foreground transition-colors">Benefits</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="sm">View dashboard</Button>
+            <Link to="/auth">
+              <Button variant="ghost" size="sm">Sign in</Button>
             </Link>
-            <Link to="/exit-interview">
-              <Button size="sm">Try demo</Button>
+            <Link to="/auth">
+              <Button size="sm">Get started</Button>
             </Link>
           </div>
         </div>
@@ -63,13 +63,13 @@ function Landing() {
             ExitIQ interviews every churning customer and turns raw feedback into clear, founder-ready insights.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/exit-interview">
+            <Link to="/auth">
               <Button size="lg" className="gap-2">
-                Start interview demo <ArrowRight className="h-4 w-4" />
+                Start free <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/dashboard">
-              <Button size="lg" variant="outline">View dashboard</Button>
+            <Link to="/exit-interview">
+              <Button size="lg" variant="outline">See interview demo</Button>
             </Link>
           </div>
 
@@ -173,8 +173,8 @@ function Landing() {
               <p className="mt-1 text-sm text-muted-foreground">Try the customer-facing interview, then explore the founder dashboard.</p>
             </div>
             <div className="flex gap-3">
-              <Link to="/exit-interview"><Button>Start demo</Button></Link>
-              <Link to="/dashboard"><Button variant="outline">Open dashboard</Button></Link>
+              <Link to="/auth"><Button>Get started</Button></Link>
+              <Link to="/exit-interview"><Button variant="outline">See demo</Button></Link>
             </div>
           </div>
         </div>

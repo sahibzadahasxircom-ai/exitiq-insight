@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, MessagesSquare, Settings } from "lucide-react";
+import { LayoutDashboard, MessagesSquare, Lightbulb, Users, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +14,9 @@ import {
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Exit Interviews", url: "/exit-interview", icon: MessagesSquare },
+  { title: "Interviews", url: "/interviews", icon: MessagesSquare },
+  { title: "Insights", url: "/insights", icon: Lightbulb },
+  { title: "Team", url: "/team", icon: Users },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
