@@ -32,6 +32,79 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message_content: string
+          role: Database["public"]["Enums"]["interview_role"]
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_content: string
+          role: Database["public"]["Enums"]["interview_role"]
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_content?: string
+          role?: Database["public"]["Enums"]["interview_role"]
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_sessions: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string
+          id: string
+          interview_progress: Database["public"]["Enums"]["interview_progress"]
+          interview_status: Database["public"]["Enums"]["interview_status"]
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          interview_progress?: Database["public"]["Enums"]["interview_progress"]
+          interview_status?: Database["public"]["Enums"]["interview_status"]
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          interview_progress?: Database["public"]["Enums"]["interview_progress"]
+          interview_status?: Database["public"]["Enums"]["interview_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           company_id: string | null
@@ -117,6 +190,14 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "member"
+      interview_progress:
+        | "started"
+        | "discovery"
+        | "deep_dive"
+        | "root_cause"
+        | "completed"
+      interview_role: "assistant" | "user"
+      interview_status: "active" | "completed" | "abandoned"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -245,6 +326,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "member"],
+      interview_progress: [
+        "started",
+        "discovery",
+        "deep_dive",
+        "root_cause",
+        "completed",
+      ],
+      interview_role: ["assistant", "user"],
+      interview_status: ["active", "completed", "abandoned"],
     },
   },
 } as const
