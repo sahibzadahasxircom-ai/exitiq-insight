@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { format } from "date-fns";
 import { ArrowLeft, Copy } from "lucide-react";
@@ -19,14 +19,18 @@ export const Route = createFileRoute("/_authenticated/interviews/$id")({
 function InterviewDetail() {
   const { id } = Route.useParams();
   const getFn = useServerFn(getInterviewSession);
-  const { data } = useSuspenseQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["interview-session", id],
     queryFn: () => getFn({ data: { id } }),
   });
 
+  if (isLoading) return <div className="px-6 py-10 text-sm text-muted-foreground">Loading…</div>;
+  if (error || !data) return <div className="px-6 py-10 text-sm text-muted-foreground">Interview not found.</div>;
+
   const { session, messages } = data;
   const status = session.interview_status as InterviewStatus;
   const stage = session.interview_progress as Stage;
+
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
