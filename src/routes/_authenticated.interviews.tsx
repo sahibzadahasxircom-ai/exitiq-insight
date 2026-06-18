@@ -28,7 +28,7 @@ type FilterTab = "all" | InterviewStatus;
 
 function InterviewsPage() {
   const listFn = useServerFn(listInterviewSessions);
-  const { data: sessions } = useSuspenseQuery({
+  const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["interview-sessions"],
     queryFn: () => listFn(),
   });
