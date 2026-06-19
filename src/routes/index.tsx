@@ -53,14 +53,15 @@ function Landing() {
         <div className="mx-auto max-w-6xl px-6 pt-24 pb-24 text-center">
           <div className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Churn intelligence for modern SaaS
+            Embedded churn intelligence — install once, runs forever
           </div>
           <h1 className="mx-auto max-w-3xl text-balance text-5xl font-semibold tracking-tight md:text-[64px] md:leading-[1.05]">
-            Understand why customers leave.{" "}
-            <span className="text-muted-foreground">Fix churn before it grows.</span>
+            Every cancellation,{" "}
+            <span className="text-muted-foreground">automatically interviewed.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-balance text-lg text-muted-foreground">
-            ExitIQ interviews every churning customer and turns raw feedback into clear, founder-ready insights.
+            ExitIQ embeds into your cancel flow. The moment a customer tries to leave, our AI runs an adaptive
+            exit interview and turns the conversation into churn intelligence — automatically.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link to="/auth">
@@ -69,24 +70,46 @@ function Landing() {
               </Button>
             </Link>
             <Link to="/exit-interview">
-              <Button size="lg" variant="outline">See interview demo</Button>
+              <Button size="lg" variant="outline">See the widget</Button>
             </Link>
           </div>
 
-          {/* Preview mock */}
-          <div className="mx-auto mt-16 max-w-4xl rounded-2xl border border-border bg-card p-3 shadow-elevated">
-            <div className="rounded-xl border border-border/70 bg-muted/40 p-6">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {[
-                  { label: "Churned customers", value: "248" },
-                  { label: "Revenue at risk", value: "$42,180" },
-                  { label: "Top churn reason", value: "Onboarding friction" },
-                ].map((k) => (
-                  <div key={k.label} className="rounded-lg border border-border bg-background p-4 text-left">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{k.label}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight">{k.value}</p>
+          {/* Embed mock */}
+          <div className="mx-auto mt-16 max-w-4xl">
+            <div className="relative rounded-2xl border border-border bg-card p-3 shadow-elevated">
+              {/* Faux host SaaS */}
+              <div className="rounded-xl border border-border/70 bg-muted/40 p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded bg-foreground/80" />
+                    <span className="text-xs font-medium text-muted-foreground">your-saas.com / billing</span>
                   </div>
-                ))}
+                  <span className="rounded-md border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
+                    Cancel subscription
+                  </span>
+                </div>
+                {/* ExitIQ widget overlay */}
+                <div className="rounded-xl border border-border bg-background p-5 text-left shadow-soft">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground">
+                      <span className="text-[9px] font-bold">EQ</span>
+                    </div>
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                      ExitIQ · Interviewer
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm">
+                    Sorry to see you go. Before you cancel — what stopped working for you?
+                  </p>
+                  <div className="mt-4 flex justify-end">
+                    <div className="max-w-[70%] rounded-2xl rounded-tr-md bg-foreground px-3 py-1.5 text-xs text-background">
+                      Honestly, the reporting just wasn't flexible enough for my team.
+                    </div>
+                  </div>
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    Got it — can you tell me which report you tried to build first?
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -136,9 +159,9 @@ function Landing() {
           </h2>
           <ol className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
-              { step: "01", title: "Customer cancels", body: "Trigger ExitIQ from your cancel flow, billing webhook, or CRM." },
-              { step: "02", title: "AI runs the interview", body: "Adaptive follow-ups extract the real reason — not just a checkbox." },
-              { step: "03", title: "You get insights", body: "Trends, quotes, and recommended actions land in your dashboard." },
+              { step: "01", title: "Install once", body: "Drop in a script tag or connect Stripe. Setup takes under five minutes." },
+              { step: "02", title: "Auto-interview every cancel", body: "When a customer hits cancel, the AI runs an adaptive interview — 3 to 15 questions, no humans involved." },
+              { step: "03", title: "Intelligence in your dashboard", body: "Root causes, competitor mentions, and recommended actions update automatically." },
             ].map((s) => (
               <li key={s.step} className="rounded-xl border border-border bg-card p-6 shadow-soft">
                 <span className="text-xs font-semibold tracking-wider text-muted-foreground">{s.step}</span>
