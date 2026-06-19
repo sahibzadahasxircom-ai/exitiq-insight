@@ -19,8 +19,10 @@ import { Route as InterviewSessionIdRouteImport } from './routes/interview.$sess
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated.team'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedInterviewsRouteImport } from './routes/_authenticated.interviews'
+import { Route as AuthenticatedInstallRouteImport } from './routes/_authenticated.install'
 import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated.insights'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedCompetitorsRouteImport } from './routes/_authenticated.competitors'
 import { Route as AuthenticatedInterviewsIdRouteImport } from './routes/_authenticated.interviews.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -72,6 +74,11 @@ const AuthenticatedInterviewsRoute = AuthenticatedInterviewsRouteImport.update({
   path: '/interviews',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedInstallRoute = AuthenticatedInstallRouteImport.update({
+  id: '/install',
+  path: '/install',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
@@ -82,6 +89,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedCompetitorsRoute =
+  AuthenticatedCompetitorsRouteImport.update({
+    id: '/competitors',
+    path: '/competitors',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedInterviewsIdRoute =
   AuthenticatedInterviewsIdRouteImport.update({
     id: '/$id',
@@ -95,8 +108,10 @@ export interface FileRoutesByFullPath {
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/competitors': typeof AuthenticatedCompetitorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/insights': typeof AuthenticatedInsightsRoute
+  '/install': typeof AuthenticatedInstallRoute
   '/interviews': typeof AuthenticatedInterviewsRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
@@ -109,8 +124,10 @@ export interface FileRoutesByTo {
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/competitors': typeof AuthenticatedCompetitorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/insights': typeof AuthenticatedInsightsRoute
+  '/install': typeof AuthenticatedInstallRoute
   '/interviews': typeof AuthenticatedInterviewsRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
@@ -125,8 +142,10 @@ export interface FileRoutesById {
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/competitors': typeof AuthenticatedCompetitorsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
+  '/_authenticated/install': typeof AuthenticatedInstallRoute
   '/_authenticated/interviews': typeof AuthenticatedInterviewsRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
@@ -141,8 +160,10 @@ export interface FileRouteTypes {
     | '/exit-interview'
     | '/forgot-password'
     | '/reset-password'
+    | '/competitors'
     | '/dashboard'
     | '/insights'
+    | '/install'
     | '/interviews'
     | '/settings'
     | '/team'
@@ -155,8 +176,10 @@ export interface FileRouteTypes {
     | '/exit-interview'
     | '/forgot-password'
     | '/reset-password'
+    | '/competitors'
     | '/dashboard'
     | '/insights'
+    | '/install'
     | '/interviews'
     | '/settings'
     | '/team'
@@ -170,8 +193,10 @@ export interface FileRouteTypes {
     | '/exit-interview'
     | '/forgot-password'
     | '/reset-password'
+    | '/_authenticated/competitors'
     | '/_authenticated/dashboard'
     | '/_authenticated/insights'
+    | '/_authenticated/install'
     | '/_authenticated/interviews'
     | '/_authenticated/settings'
     | '/_authenticated/team'
@@ -261,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInterviewsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/install': {
+      id: '/_authenticated/install'
+      path: '/install'
+      fullPath: '/install'
+      preLoaderRoute: typeof AuthenticatedInstallRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/insights': {
       id: '/_authenticated/insights'
       path: '/insights'
@@ -273,6 +305,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/competitors': {
+      id: '/_authenticated/competitors'
+      path: '/competitors'
+      fullPath: '/competitors'
+      preLoaderRoute: typeof AuthenticatedCompetitorsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/interviews/$id': {
@@ -300,16 +339,20 @@ const AuthenticatedInterviewsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedCompetitorsRoute: typeof AuthenticatedCompetitorsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
+  AuthenticatedInstallRoute: typeof AuthenticatedInstallRoute
   AuthenticatedInterviewsRoute: typeof AuthenticatedInterviewsRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCompetitorsRoute: AuthenticatedCompetitorsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
+  AuthenticatedInstallRoute: AuthenticatedInstallRoute,
   AuthenticatedInterviewsRoute: AuthenticatedInterviewsRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
@@ -331,13 +374,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

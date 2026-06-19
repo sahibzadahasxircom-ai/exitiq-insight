@@ -49,8 +49,13 @@ function Dashboard() {
     <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{company?.company_name ?? "Workspace"} dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Churn intelligence across your customer base.</p>
+          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-0.5 text-[11px] font-medium text-success">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" /> Auto-pilot active
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight">{company?.company_name ?? "Workspace"}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Automated churn intelligence — updated as new cancellations roll in.
+          </p>
         </div>
         <Select defaultValue="30">
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
@@ -62,10 +67,11 @@ function Dashboard() {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Kpi icon={Users} label="Churned customers" value="248" delta="+12%" up />
-        <Kpi icon={DollarSign} label="Revenue at risk" value="$42,180" delta="+8%" up />
+        <Kpi icon={DollarSign} label="Revenue lost" value="$42,180" delta="+8%" up />
         <Kpi icon={CheckCircle2} label="Interview completion" value="71%" delta="-3%" />
+        <Kpi icon={AlertTriangle} label="Top churn reason" value="Onboarding" delta="42% of cancels" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
