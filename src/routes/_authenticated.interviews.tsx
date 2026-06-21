@@ -10,7 +10,6 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { StatusBadge, type InterviewStatus } from "@/components/status-badge";
-import { stageLabel, type Stage } from "@/components/interview-progress";
 import { listInterviewSessions } from "@/lib/interview.functions";
 
 export const Route = createFileRoute("/_authenticated/interviews")({
@@ -86,7 +85,6 @@ function InterviewsPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Depth reached</TableHead>
                 <TableHead>Triggered</TableHead>
                 <TableHead className="text-right">Completed</TableHead>
               </TableRow>
@@ -109,9 +107,6 @@ function InterviewsPage() {
                   <TableCell className="text-muted-foreground">{s.customer_email || "—"}</TableCell>
                   <TableCell>
                     <StatusBadge status={s.interview_status as InterviewStatus} />
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {stageLabel(s.interview_progress as Stage)}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {format(new Date(s.created_at), "MMM d, yyyy")}
