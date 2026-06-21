@@ -2,12 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { format } from "date-fns";
-import { ArrowLeft, Copy } from "lucide-react";
+import { ArrowLeft, Copy, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { StatusBadge, type InterviewStatus } from "@/components/status-badge";
-import { InterviewProgress, stageLabel, type Stage } from "@/components/interview-progress";
 import { getInterviewSession } from "@/lib/interview.functions";
 import { toast } from "sonner";
 
@@ -27,21 +26,14 @@ function InterviewDetail() {
   if (isLoading) return <div className="px-6 py-10 text-sm text-muted-foreground">Loading…</div>;
   if (error || !data) return <div className="px-6 py-10 text-sm text-muted-foreground">Interview not found.</div>;
 
-  const { session, messages } = data;
+  const { session, messages, insight } = data;
   const status = session.interview_status as InterviewStatus;
-  const stage = session.interview_progress as Stage;
-
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
-      <div>
-        <Link
-          to="/interviews"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> All interviews
-        </Link>
-      </div>
+      <Link to="/interviews" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-4 w-4" /> All cancellations
+      </Link>
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
@@ -52,11 +44,13 @@ function InterviewDetail() {
             <StatusBadge status={status} />
           </div>
           <p className="text-sm text-muted-foreground">{session.customer_email || "No email on file"}</p>
+          <p className="text-xs text-muted-foreground">
+            Started {format(new Date(session.created_at), "MMM d, yyyy · HH:mm")}
+            {session.completed_at && ` · Completed ${format(new Date(session.completed_at), "MMM d · HH:mm")}`}
+          </p>
         </div>
         <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
+          variant="outline" size="sm" className="gap-2"
           onClick={() => {
             const url = `${window.location.origin}/interview/${session.id}`;
             navigator.clipboard.writeText(url);
@@ -67,21 +61,50 @@ function InterviewDetail() {
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="space-y-4 p-5">
-          <InterviewProgress stage={stage} />
-          <Separator />
-          <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-            <Meta label="Status" value={status} />
-            <Meta label="Current stage" value={stageLabel(stage)} />
-            <Meta label="Created" value={format(new Date(session.created_at), "MMM d, yyyy · HH:mm")} />
-            <Meta
-              label="Completed"
-              value={session.completed_at ? format(new Date(session.completed_at), "MMM d, yyyy · HH:mm") : "—"}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {insight && (
+        <Card>
+          <CardContent className="space-y-4 p-6">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-foreground" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                AI insight
+              </span>
+            </div>
+            <div>
+              <h3 className="text-base font-semibold">{insight.churn_reason}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{insight.summary}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {insight.category && <Badge variant="outline" className="capitalize">{insight.category}</Badge>}
+              {insight.sentiment && <Badge variant="outline" className="capitalize">{insight.sentiment}</Badge>}
+              {insight.journey_failure_point && (
+                <Badge variant="outline" className="capitalize">Failure: {insight.journey_failure_point.replace("_", " ")}</Badge>
+              )}
+              {insight.competitor_mentioned && (
+                <Badge variant="outline">Competitor: {insight.competitor_mentioned}</Badge>
+              )}
+              {insight.pricing_issue && <Badge variant="outline">Pricing</Badge>}
+              {insight.onboarding_issue && <Badge variant="outline">Onboarding</Badge>}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Block label="Root cause" value={insight.root_cause ?? "—"} />
+              <Block
+                label="Missing features"
+                value={
+                  insight.missing_features && insight.missing_features.length > 0
+                    ? insight.missing_features.join(", ")
+                    : "—"
+                }
+              />
+            </div>
+            {insight.quote && (
+              <blockquote className="rounded-lg border-l-2 border-foreground/40 bg-muted/30 px-4 py-3 text-sm italic text-foreground">
+                "{insight.quote}"
+              </blockquote>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div>
         <h2 className="mb-3 text-sm font-semibold tracking-tight">Transcript</h2>
@@ -103,11 +126,11 @@ function InterviewDetail() {
   );
 }
 
-function Meta({ label, value }: { label: string; value: string }) {
+function Block({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-1 text-sm font-medium capitalize text-foreground">{value}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-1 text-sm text-foreground">{value}</p>
     </div>
   );
 }
