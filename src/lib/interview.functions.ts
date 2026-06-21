@@ -65,7 +65,12 @@ export const getInterviewSession = createServerFn({ method: "GET" })
       .eq("session_id", data.id)
       .order("created_at", { ascending: true });
     if (mErr) throw mErr;
-    return { session, messages: messages ?? [] };
+    const { data: insight } = await context.supabase
+      .from("interview_insights")
+      .select("*")
+      .eq("session_id", data.id)
+      .maybeSingle();
+    return { session, messages: messages ?? [], insight: insight ?? null };
   });
 
 export const deleteInterviewSession = createServerFn({ method: "POST" })
@@ -77,8 +82,44 @@ export const deleteInterviewSession = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Dashboard aggregates from real interview_insights
+export const getDashboardData = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", userId)
+      .maybeSingle();
+    if (!profile?.company_id) return null;
+
+    const [{ data: sessions }, { data: insights }] = await Promise.all([
+      supabase
+        .from("interview_sessions")
+        .select("id, interview_status, created_at, completed_at")
+        .eq("company_id", profile.company_id),
+      supabase
+        .from("interview_insights")
+        .select("*")
+        .eq("company_id", profile.company_id)
+        .order("created_at", { ascending: false }),
+    ]);
+    return { sessions: sessions ?? [], insights: insights ?? [] };
+  });
+
+export const listInsights = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("interview_insights")
+      .select("*, interview_sessions(customer_name, customer_email, created_at)")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  });
+
 // ---------- Public (customer interview link) ----------
-// These run with service role but are strictly scoped to the provided sessionId.
 
 export const publicGetInterview = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ sessionId: z.string().uuid() }).parse(d))
@@ -86,7 +127,7 @@ export const publicGetInterview = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: session, error } = await supabaseAdmin
       .from("interview_sessions")
-      .select("id, customer_name, interview_status, interview_progress, created_at, completed_at")
+      .select("id, customer_name, interview_status, created_at, completed_at")
       .eq("id", data.sessionId)
       .maybeSingle();
     if (error) throw error;
@@ -120,7 +161,7 @@ export const publicStartInterview = createServerFn({ method: "POST" })
       .eq("session_id", data.sessionId);
     if ((count ?? 0) > 0) return { ok: true, skipped: true };
 
-    const { text } = await generateInterviewerReply({ history: [], stage: "started" });
+    const { text } = await generateInterviewerReply({ history: [] });
     await supabaseAdmin
       .from("interview_messages")
       .insert({ session_id: data.sessionId, role: "assistant", message_content: text });
@@ -133,50 +174,73 @@ export const publicSendMessage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { generateInterviewerReply, nextStage } = await import("./interview.server");
+    const { generateInterviewerReply, extractInsights } = await import("./interview.server");
 
     const { data: session, error } = await supabaseAdmin
       .from("interview_sessions")
-      .select("id, interview_status, interview_progress")
+      .select("id, company_id, interview_status")
       .eq("id", data.sessionId)
       .maybeSingle();
     if (error) throw error;
     if (!session) throw new Error("Interview not found");
     if (session.interview_status !== "active") throw new Error("Interview already closed");
 
-    // Persist user message
     await supabaseAdmin
       .from("interview_messages")
       .insert({ session_id: data.sessionId, role: "user", message_content: data.content });
 
-    // Load full history (ordered)
     const { data: history } = await supabaseAdmin
       .from("interview_messages")
       .select("role, message_content")
       .eq("session_id", data.sessionId)
       .order("created_at", { ascending: true });
 
-    const userTurns = (history ?? []).filter((m) => m.role === "user").length;
-    const stage = nextStage(session.interview_progress as never, userTurns);
-
-    const { text, complete } = await generateInterviewerReply({
-      history: (history ?? []) as { role: "assistant" | "user"; message_content: string }[],
-      stage,
-    });
+    const fullHistory = (history ?? []) as { role: "assistant" | "user"; message_content: string }[];
+    const { text, complete } = await generateInterviewerReply({ history: fullHistory });
 
     await supabaseAdmin
       .from("interview_messages")
       .insert({ session_id: data.sessionId, role: "assistant", message_content: text });
 
-    const finalStage = complete ? "completed" : stage;
-    await supabaseAdmin
-      .from("interview_sessions")
-      .update({
-        interview_progress: finalStage,
-        interview_status: complete ? "completed" : "active",
-        completed_at: complete ? new Date().toISOString() : null,
-      })
-      .eq("id", data.sessionId);
+    if (complete) {
+      await supabaseAdmin
+        .from("interview_sessions")
+        .update({
+          interview_status: "completed",
+          interview_progress: "completed",
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", data.sessionId);
 
-    return { text, stage: finalStage, complete };
+      // Extract structured insight (best-effort; don't fail the message on extraction error)
+      try {
+        const finalHistory = [
+          ...fullHistory,
+          { role: "assistant" as const, message_content: text },
+        ];
+        const insight = await extractInsights(finalHistory);
+        await supabaseAdmin.from("interview_insights").upsert(
+          {
+            session_id: data.sessionId,
+            company_id: session.company_id,
+            churn_reason: insight.churn_reason,
+            root_cause: insight.root_cause,
+            category: insight.category,
+            competitor_mentioned: insight.competitor_mentioned,
+            missing_features: insight.missing_features,
+            pricing_issue: insight.pricing_issue,
+            onboarding_issue: insight.onboarding_issue,
+            sentiment: insight.sentiment,
+            journey_failure_point: insight.journey_failure_point,
+            quote: insight.quote,
+            summary: insight.summary,
+          },
+          { onConflict: "session_id" },
+        );
+      } catch (e) {
+        console.error("Insight extraction failed", e);
+      }
+    }
+
+    return { text, complete };
   });
