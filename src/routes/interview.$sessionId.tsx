@@ -4,8 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Send, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StatusBadge, type InterviewStatus } from "@/components/status-badge";
-import { InterviewProgress, type Stage } from "@/components/interview-progress";
 import { publicGetInterview, publicSendMessage, publicStartInterview } from "@/lib/interview.functions";
 
 export const Route = createFileRoute("/interview/$sessionId")({
@@ -31,7 +29,6 @@ function CustomerInterview() {
     refetchOnWindowFocus: false,
   });
 
-  // Auto-start (post first assistant message) if no messages yet
   useEffect(() => {
     if (data && data.messages.length === 0 && data.session.interview_status === "active") {
       startFn({ data: { sessionId } }).then(() => {
@@ -48,22 +45,16 @@ function CustomerInterview() {
 
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [data?.messages.length, send.isPending]);
 
-  if (isLoading) {
-    return <CenterMessage text="Loading interview…" />;
-  }
-  if (error || !data) {
-    return <CenterMessage text="This interview link is invalid or has been removed." />;
-  }
+  if (isLoading) return <CenterMessage text="Loading interview…" />;
+  if (error || !data) return <CenterMessage text="This interview link is invalid or has been removed." />;
 
   const { session, messages } = data;
-  const status = session.interview_status as InterviewStatus;
-  const stage = session.interview_progress as Stage;
+  const status = session.interview_status;
   const done = status === "completed" || status === "abandoned";
 
   function handleSend() {
@@ -76,19 +67,14 @@ function CustomerInterview() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto max-w-3xl px-4">
-          <div className="flex h-14 items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
-                <span className="text-[11px] font-bold">EQ</span>
-              </div>
-              <span className="text-sm font-semibold tracking-tight">ExitIQ</span>
-            </Link>
-            <StatusBadge status={status} />
-          </div>
-          <div className="pb-3 pt-1">
-            <InterviewProgress stage={stage} />
-          </div>
+        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
+              <span className="text-[11px] font-bold">EQ</span>
+            </div>
+            <span className="text-sm font-semibold tracking-tight">ExitIQ</span>
+          </Link>
+          <span className="text-[11px] text-muted-foreground">Confidential conversation</span>
         </div>
       </header>
 
@@ -98,9 +84,7 @@ function CustomerInterview() {
             <EndState />
           ) : (
             <div className="space-y-6">
-              {messages.length === 0 && (
-                <p className="text-sm text-muted-foreground">Connecting you with our interviewer…</p>
-              )}
+              {messages.length === 0 && <Typing />}
               {messages.map((m) => (
                 <Bubble key={m.id} role={m.role as "assistant" | "user"} text={m.message_content} />
               ))}
@@ -115,7 +99,6 @@ function CustomerInterview() {
           <div className="mx-auto max-w-3xl px-4 py-4">
             <div className="flex items-end gap-2 rounded-2xl border border-border bg-card p-2 shadow-soft focus-within:border-foreground/30 focus-within:ring-2 focus-within:ring-foreground/10">
               <textarea
-                ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
