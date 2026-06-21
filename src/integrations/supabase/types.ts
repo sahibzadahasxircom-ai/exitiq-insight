@@ -32,6 +32,78 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_insights: {
+        Row: {
+          category: string | null
+          churn_reason: string | null
+          company_id: string
+          competitor_mentioned: string | null
+          created_at: string
+          id: string
+          journey_failure_point: string | null
+          missing_features: string[]
+          onboarding_issue: boolean
+          pricing_issue: boolean
+          quote: string | null
+          revenue_impact: number | null
+          root_cause: string | null
+          sentiment: string | null
+          session_id: string
+          summary: string | null
+        }
+        Insert: {
+          category?: string | null
+          churn_reason?: string | null
+          company_id: string
+          competitor_mentioned?: string | null
+          created_at?: string
+          id?: string
+          journey_failure_point?: string | null
+          missing_features?: string[]
+          onboarding_issue?: boolean
+          pricing_issue?: boolean
+          quote?: string | null
+          revenue_impact?: number | null
+          root_cause?: string | null
+          sentiment?: string | null
+          session_id: string
+          summary?: string | null
+        }
+        Update: {
+          category?: string | null
+          churn_reason?: string | null
+          company_id?: string
+          competitor_mentioned?: string | null
+          created_at?: string
+          id?: string
+          journey_failure_point?: string | null
+          missing_features?: string[]
+          onboarding_issue?: boolean
+          pricing_issue?: boolean
+          quote?: string | null
+          revenue_impact?: number | null
+          root_cause?: string | null
+          sentiment?: string | null
+          session_id?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_insights_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_insights_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interview_messages: {
         Row: {
           created_at: string
