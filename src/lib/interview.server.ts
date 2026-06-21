@@ -1,5 +1,5 @@
 import { generateText, type ModelMessage } from "ai";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { createOpenAI } from "@ai-sdk/openai";
 
 export const INTERVIEW_SYSTEM_PROMPT = `You are an empathetic customer retention researcher conducting an exit interview for a SaaS product. Your goal is to uncover the true root cause behind why a customer is leaving.
 
@@ -34,10 +34,10 @@ export async function generateInterviewerReply(opts: {
   history: { role: "assistant" | "user"; message_content: string }[];
   stage: Stage;
 }): Promise<{ text: string; complete: boolean }> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const gateway = createLovableAiGatewayProvider(key);
-  const model = gateway("google/gemini-3-flash-preview");
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) throw new Error("Missing OPENAI_API_KEY");
+  const openai = createOpenAI({ apiKey: key });
+  const model = openai("gpt-4o-mini");
 
   const messages: ModelMessage[] = [
     { role: "system", content: `${INTERVIEW_SYSTEM_PROMPT}\n\nCurrent stage: ${opts.stage}` },
