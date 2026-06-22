@@ -76,45 +76,11 @@ function Landing() {
             </Link>
           </div>
 
-          {/* Embed mock */}
-          <div className="mx-auto mt-16 max-w-4xl">
-            <div className="relative rounded-2xl border border-border bg-card p-3 shadow-elevated">
-              {/* Faux host SaaS */}
-              <div className="rounded-xl border border-border/70 bg-muted/40 p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-5 w-5 rounded bg-foreground/80" />
-                    <span className="text-xs font-medium text-muted-foreground">your-saas.com / billing</span>
-                  </div>
-                  <span className="rounded-md border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
-                    Cancel subscription
-                  </span>
-                </div>
-                {/* ExitIQ widget overlay */}
-                <div className="rounded-xl border border-border bg-background p-5 text-left shadow-soft">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground">
-                      <span className="text-[9px] font-bold">EQ</span>
-                    </div>
-                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                      ExitIQ · Interviewer
-                    </span>
-                  </div>
-                  <p className="mt-3 text-sm">
-                    Sorry to see you go. Before you cancel — what stopped working for you?
-                  </p>
-                  <div className="mt-4 flex justify-end">
-                    <div className="max-w-[70%] rounded-2xl rounded-tr-md bg-foreground px-3 py-1.5 text-xs text-background">
-                      Honestly, the reporting just wasn't flexible enough for my team.
-                    </div>
-                  </div>
-                  <div className="mt-4 text-sm text-muted-foreground">
-                    Got it — can you tell me which report you tried to build first?
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Live auto-playing demo */}
+          <div className="mx-auto mt-16 max-w-5xl text-left">
+            <LandingLiveDemo />
           </div>
+
         </div>
       </section>
 
