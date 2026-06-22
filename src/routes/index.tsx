@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LandingLiveDemo } from "@/components/landing-live-demo";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
