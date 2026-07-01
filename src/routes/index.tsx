@@ -1,16 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BarChart3, Building2, LineChart, Rocket, Target, Users, Workflow, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LandingLiveDemo } from "@/components/landing-live-demo";
-
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ExitIQ — Understand why customers leave" },
-      { name: "description", content: "AI-powered exit interviews and churn intelligence. Stop guessing why customers leave — fix churn before it grows." },
-      { property: "og:title", content: "ExitIQ — Churn intelligence for SaaS" },
-      { property: "og:description", content: "Run AI-driven exit interviews and surface the real reasons customers leave." },
+      { title: "ExitIQ — Understand why customers leave. Know what to fix." },
+      {
+        name: "description",
+        content:
+          "AI-powered exit interviews that automatically uncover churn reasons, competitor insights, revenue risks, and product opportunities.",
+      },
+      { property: "og:title", content: "ExitIQ — Churn intelligence for modern SaaS" },
+      {
+        property: "og:description",
+        content:
+          "Replace one-line cancel forms with professional AI conversations. Turn every cancellation into structured, actionable customer intelligence.",
+      },
     ],
   }),
   component: Landing,
@@ -27,9 +34,10 @@ function Landing() {
             <span className="text-base font-semibold tracking-tight">ExitIQ</span>
           </Link>
           <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-            <a href="#features" className="hover:text-foreground transition-colors">Product</a>
-            <a href="#how" className="hover:text-foreground transition-colors">How it works</a>
-            <a href="#benefits" className="hover:text-foreground transition-colors">Benefits</a>
+            <a href="#product" className="hover:text-foreground transition-colors">Product</a>
+            <a href="#dashboard" className="hover:text-foreground transition-colors">Dashboard</a>
+            <a href="#teams" className="hover:text-foreground transition-colors">Teams</a>
+            <a href="#workflow" className="hover:text-foreground transition-colors">Workflow</a>
           </nav>
           <div className="flex items-center gap-2">
             <Link to="/auth">
@@ -55,15 +63,15 @@ function Landing() {
         <div className="mx-auto max-w-6xl px-6 pt-24 pb-24 text-center">
           <div className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Embedded churn intelligence — install once, runs forever
+            Embedded churn intelligence for modern SaaS
           </div>
           <h1 className="mx-auto max-w-3xl text-balance text-5xl font-semibold tracking-tight md:text-[64px] md:leading-[1.05]">
-            Every cancellation,{" "}
-            <span className="text-muted-foreground">automatically interviewed.</span>
+            Understand why customers leave.{" "}
+            <span className="text-muted-foreground">Know what to fix.</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-balance text-lg text-muted-foreground">
-            ExitIQ embeds into your cancel flow. The moment a customer tries to leave, our AI runs an adaptive
-            exit interview and turns the conversation into churn intelligence — automatically.
+          <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
+            AI-powered exit interviews that automatically uncover churn reasons, competitor insights,
+            revenue risks, and product opportunities.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link to="/auth">
@@ -80,36 +88,61 @@ function Landing() {
           <div className="mx-auto mt-16 max-w-5xl text-left">
             <LandingLiveDemo />
           </div>
-
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="border-t border-border/60 bg-muted/30">
+      {/* Problem */}
+      <section id="product" className="border-t border-border/60 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <p className="text-sm font-medium text-primary">What it does</p>
-          <h2 className="mt-2 max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl">
-            Replace one-line cancel forms with real conversations.
+          <p className="text-sm font-medium text-primary">Stop losing the reason behind churn</p>
+          <h2 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight md:text-4xl">
+            Most businesses know who left. ExitIQ shows you why.
           </h2>
+          <p className="mt-4 max-w-2xl text-base text-muted-foreground">
+            Replace one-line cancellation forms with professional AI conversations that uncover the
+            real reasons customers decide to leave.
+          </p>
+        </div>
+      </section>
+
+      {/* Interview quality */}
+      <section className="border-t border-border/60">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <p className="text-sm font-medium text-primary">Every customer gets a professional exit interview</p>
+          <h2 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight md:text-4xl">
+            AI that asks better questions — and finds better answers.
+          </h2>
+          <p className="mt-4 max-w-2xl text-base text-muted-foreground">
+            Every interview adapts in real time, asks intelligent follow-up questions, and uncovers
+            insights that traditional surveys never capture.
+          </p>
           <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
             {[
               {
-                title: "Conversational interviews",
-                body: "An empathetic interviewer talks to every churning customer — adaptive follow-ups, no human required.",
+                icon: Workflow,
+                title: "Adaptive conversations",
+                body: "The interviewer changes direction based on each answer, drilling into the root cause instead of collecting checkboxes.",
               },
               {
-                title: "Pattern detection",
-                body: "Cluster thousands of responses into the few root causes that actually move retention.",
+                icon: Target,
+                title: "Structured extraction",
+                body: "Every conversation is parsed into category, root cause, competitor, pricing signal, and revenue impact.",
               },
               {
-                title: "Founder dashboard",
-                body: "A single view of churn reasons, revenue at risk, and what to do about it next.",
+                icon: Zap,
+                title: "Zero manual work",
+                body: "Installs once. Runs on every cancellation. No forms to design, no interviews to schedule, no analysis to do by hand.",
               },
             ].map((f, i) => (
               <div key={f.title} className="rounded-xl border border-border bg-card p-6 shadow-soft">
-                <span className="text-xs font-semibold tabular-nums tracking-wider text-muted-foreground">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <f.icon className="h-4 w-4" />
+                  </span>
+                  <span className="text-xs font-semibold tabular-nums tracking-wider text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
                 <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
               </div>
@@ -118,22 +151,129 @@ function Landing() {
         </div>
       </section>
 
-      {/* How it works */}
-      <section id="how" className="border-t border-border/60">
+      {/* Dashboard capabilities */}
+      <section id="dashboard" className="border-t border-border/60 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <p className="text-sm font-medium text-primary">How it works</p>
-          <h2 className="mt-2 max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl">
-            From cancellation to clarity in three steps.
+          <p className="text-sm font-medium text-primary">Everything your team needs in one dashboard</p>
+          <h2 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight md:text-4xl">
+            From one conversation to company-wide intelligence.
           </h2>
-          <ol className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <p className="mt-4 max-w-2xl text-base text-muted-foreground">
+            ExitIQ automatically surfaces the metrics leadership, product, and success teams need — no
+            spreadsheets, no manual tagging.
+          </p>
+          <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4">
             {[
-              { step: "01", title: "Install once", body: "Drop in a script tag or connect Stripe. Setup takes under five minutes." },
-              { step: "02", title: "Auto-interview every cancel", body: "When a customer hits cancel, the AI runs an adaptive interview — 3 to 15 questions, no humans involved." },
-              { step: "03", title: "Intelligence in your dashboard", body: "Root causes, competitor mentions, and recommended actions update automatically." },
+              "Root causes",
+              "Churn trends",
+              "Revenue at risk",
+              "Competitor mentions",
+              "Feature requests",
+              "Customer sentiment",
+              "Journey drop-offs",
+              "AI recommendations",
+            ].map((label) => (
+              <div key={label} className="rounded-lg border border-border bg-card p-4 shadow-soft">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  {label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Prioritization */}
+      <section className="border-t border-border/60">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-20 md:grid-cols-2 md:items-center">
+          <div>
+            <p className="text-sm font-medium text-primary">Know what to fix first</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+              Prioritize improvements based on real customer evidence.
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground">
+              Identify the biggest churn drivers, understand their business impact, and focus your team
+              on the improvements that matter most.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Priority queue
+              </span>
+              <span className="text-[10px] text-muted-foreground">Ranked by revenue impact</span>
+            </div>
+            <ul className="mt-4 space-y-3">
+              {[
+                { name: "Ship cohort reporting", impact: "$12.4k / mo", tag: "Product" },
+                { name: "Launch viewer-tier pricing", impact: "$8.9k / mo", tag: "Pricing" },
+                { name: "Rebuild Slack integration", impact: "$6.1k / mo", tag: "Product" },
+                { name: "Fix onboarding drop-off (step 3)", impact: "$3.4k / mo", tag: "Growth" },
+              ].map((row, i) => (
+                <li key={row.name} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background p-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-md border border-border bg-muted text-[10px] font-semibold tabular-nums">
+                      {i + 1}
+                    </span>
+                    <div>
+                      <div className="text-sm font-medium">{row.name}</div>
+                      <div className="text-[11px] text-muted-foreground">{row.tag}</div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold tabular-nums text-primary">{row.impact}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Teams */}
+      <section id="teams" className="border-t border-border/60 bg-muted/30">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <p className="text-sm font-medium text-primary">Built for every team</p>
+          <h2 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight md:text-4xl">
+            One platform. Shared customer intelligence.
+          </h2>
+          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { icon: Rocket, role: "Founders", body: "Understand why customers leave and where the business is bleeding." },
+              { icon: Target, role: "Product teams", body: "Discover what to build next based on evidence, not opinion." },
+              { icon: Users, role: "Customer success", body: "Identify retention opportunities and win-back candidates in real time." },
+              { icon: LineChart, role: "Marketing", body: "Learn why prospects choose competitors and sharpen positioning." },
+              { icon: BarChart3, role: "Leadership", body: "Track churn, revenue risk, and long-term retention trends in one view." },
+              { icon: Building2, role: "RevOps", body: "Feed structured churn data back into your CRM, warehouse, and forecasts." },
+            ].map((t) => (
+              <div key={t.role} className="rounded-xl border border-border bg-card p-6 shadow-soft">
+                <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <t.icon className="h-4 w-4" />
+                </span>
+                <h3 className="mt-4 text-base font-semibold">{t.role}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Workflow */}
+      <section id="workflow" className="border-t border-border/60">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <p className="text-sm font-medium text-primary">Fully automated</p>
+          <h2 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight md:text-4xl">
+            Runs automatically every time a customer leaves.
+          </h2>
+          <ol className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-4">
+            {[
+              { step: "01", title: "Customer clicks cancel", body: "ExitIQ activates the moment cancellation begins." },
+              { step: "02", title: "AI runs the interview", body: "An adaptive conversation captures the real reason — no forms, no humans." },
+              { step: "03", title: "Responses are analyzed", body: "Every answer is parsed into category, root cause, competitor, and revenue impact." },
+              { step: "04", title: "Insights appear instantly", body: "Your dashboard updates in real time. No manual work required." },
             ].map((s) => (
               <li key={s.step} className="rounded-xl border border-border bg-card p-6 shadow-soft">
                 <span className="text-xs font-semibold tracking-wider text-muted-foreground">{s.step}</span>
-                <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
+                <h3 className="mt-3 text-base font-semibold">{s.title}</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">{s.body}</p>
               </li>
             ))}
@@ -141,31 +281,42 @@ function Landing() {
         </div>
       </section>
 
-      {/* Benefits */}
-      <section id="benefits" className="border-t border-border/60 bg-muted/30">
+      {/* Feedback to action */}
+      <section className="border-t border-border/60 bg-muted/30">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <p className="text-sm font-medium text-primary">Why teams use ExitIQ</p>
-          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {[
-              { title: "Reduce churn", body: "Catch root causes early and ship targeted fixes that compound." },
-              { title: "Improve retention", body: "Win-back signals surface customers worth a personal follow-up." },
-              { title: "Operate on evidence", body: "Stop debating opinions. Start shipping based on customer truth." },
-            ].map((b) => (
-              <div key={b.title} className="rounded-xl border border-border bg-card p-6 shadow-soft">
-                <h3 className="text-lg font-semibold">{b.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{b.body}</p>
-              </div>
-            ))}
-          </div>
+          <p className="text-sm font-medium text-primary">From feedback to action</p>
+          <h2 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight md:text-4xl">
+            More than customer feedback. A clear action plan.
+          </h2>
+          <p className="mt-4 max-w-2xl text-base text-muted-foreground">
+            Every interview ends with structured insights, business impact, and AI-powered
+            recommendations your team can act on immediately.
+          </p>
+        </div>
+      </section>
 
-          <div className="mt-16 flex flex-col items-center justify-between gap-6 rounded-2xl border border-border bg-card p-8 shadow-soft md:flex-row">
+      {/* Final CTA */}
+      <section className="border-t border-border/60">
+        <div className="mx-auto max-w-6xl px-6 py-24">
+          <div className="flex flex-col items-center justify-between gap-6 rounded-2xl border border-border bg-card p-10 text-center shadow-soft md:flex-row md:text-left">
             <div>
-              <h3 className="text-xl font-semibold tracking-tight">See ExitIQ in action</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Try the customer-facing interview, then explore the founder dashboard.</p>
+              <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                Understand every customer exit. Improve every business decision.
+              </h3>
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+                Install ExitIQ once and turn every cancellation into clear, actionable customer
+                intelligence.
+              </p>
             </div>
             <div className="flex gap-3">
-              <Link to="/auth"><Button>Get started</Button></Link>
-              <Link to="/exit-interview"><Button variant="outline">See demo</Button></Link>
+              <Link to="/auth">
+                <Button size="lg" className="gap-2">
+                  Start free <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/exit-interview">
+                <Button size="lg" variant="outline">See demo</Button>
+              </Link>
             </div>
           </div>
         </div>
