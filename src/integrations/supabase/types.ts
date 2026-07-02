@@ -38,54 +38,78 @@ export type Database = {
           churn_reason: string | null
           company_id: string
           competitor_mentioned: string | null
+          confidence_score: number | null
           created_at: string
+          executive_summary: string | null
           id: string
           journey_failure_point: string | null
           missing_features: string[]
           onboarding_issue: boolean
           pricing_issue: boolean
           quote: string | null
+          recommended_actions: string[] | null
+          retention_opportunity: string | null
           revenue_impact: number | null
           root_cause: string | null
+          secondary_reasons: string[] | null
           sentiment: string | null
           session_id: string
+          suggestions: string[] | null
           summary: string | null
+          support_issue: boolean | null
+          tags: string[] | null
         }
         Insert: {
           category?: string | null
           churn_reason?: string | null
           company_id: string
           competitor_mentioned?: string | null
+          confidence_score?: number | null
           created_at?: string
+          executive_summary?: string | null
           id?: string
           journey_failure_point?: string | null
           missing_features?: string[]
           onboarding_issue?: boolean
           pricing_issue?: boolean
           quote?: string | null
+          recommended_actions?: string[] | null
+          retention_opportunity?: string | null
           revenue_impact?: number | null
           root_cause?: string | null
+          secondary_reasons?: string[] | null
           sentiment?: string | null
           session_id: string
+          suggestions?: string[] | null
           summary?: string | null
+          support_issue?: boolean | null
+          tags?: string[] | null
         }
         Update: {
           category?: string | null
           churn_reason?: string | null
           company_id?: string
           competitor_mentioned?: string | null
+          confidence_score?: number | null
           created_at?: string
+          executive_summary?: string | null
           id?: string
           journey_failure_point?: string | null
           missing_features?: string[]
           onboarding_issue?: boolean
           pricing_issue?: boolean
           quote?: string | null
+          recommended_actions?: string[] | null
+          retention_opportunity?: string | null
           revenue_impact?: number | null
           root_cause?: string | null
+          secondary_reasons?: string[] | null
           sentiment?: string | null
           session_id?: string
+          suggestions?: string[] | null
           summary?: string | null
+          support_issue?: boolean | null
+          tags?: string[] | null
         }
         Relationships: [
           {
