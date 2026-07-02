@@ -2,6 +2,37 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// ---------- TEMPORARY: test route helper (remove when done) ----------
+export const publicCreateTestSession = createServerFn({ method: "POST" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let { data: company } = await supabaseAdmin
+      .from("companies")
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+    if (!company) {
+      const { data: created, error: cErr } = await supabaseAdmin
+        .from("companies")
+        .insert({ name: "Test Workspace" })
+        .select("id")
+        .single();
+      if (cErr) throw cErr;
+      company = created;
+    }
+    const { data: session, error } = await supabaseAdmin
+      .from("interview_sessions")
+      .insert({
+        company_id: company.id,
+        customer_name: "Test Customer",
+        customer_email: "test@example.com",
+      })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return { sessionId: session.id as string };
+  });
+
 // ---------- Authenticated (founders / team) ----------
 
 export const createInterviewSession = createServerFn({ method: "POST" })
