@@ -14,7 +14,7 @@ export const publicCreateTestSession = createServerFn({ method: "POST" })
     if (!company) {
       const { data: created, error: cErr } = await supabaseAdmin
         .from("companies")
-        .insert({ name: "Test Workspace" })
+        .insert({ company_name: "Test Workspace" })
         .select("id")
         .single();
       if (cErr) throw cErr;
