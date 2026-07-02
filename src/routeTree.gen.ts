@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestInterviewRouteImport } from './routes/test-interview'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ExitInterviewRouteImport } from './routes/exit-interview'
@@ -25,6 +26,11 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCompetitorsRouteImport } from './routes/_authenticated.competitors'
 import { Route as AuthenticatedInterviewsIdRouteImport } from './routes/_authenticated.interviews.$id'
 
+const TestInterviewRoute = TestInterviewRouteImport.update({
+  id: '/test-interview',
+  path: '/test-interview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/test-interview': typeof TestInterviewRoute
   '/competitors': typeof AuthenticatedCompetitorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/insights': typeof AuthenticatedInsightsRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/test-interview': typeof TestInterviewRoute
   '/competitors': typeof AuthenticatedCompetitorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/insights': typeof AuthenticatedInsightsRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/test-interview': typeof TestInterviewRoute
   '/_authenticated/competitors': typeof AuthenticatedCompetitorsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/exit-interview'
     | '/forgot-password'
     | '/reset-password'
+    | '/test-interview'
     | '/competitors'
     | '/dashboard'
     | '/insights'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/exit-interview'
     | '/forgot-password'
     | '/reset-password'
+    | '/test-interview'
     | '/competitors'
     | '/dashboard'
     | '/insights'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/exit-interview'
     | '/forgot-password'
     | '/reset-password'
+    | '/test-interview'
     | '/_authenticated/competitors'
     | '/_authenticated/dashboard'
     | '/_authenticated/insights'
@@ -211,11 +223,19 @@ export interface RootRouteChildren {
   ExitInterviewRoute: typeof ExitInterviewRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TestInterviewRoute: typeof TestInterviewRoute
   InterviewSessionIdRoute: typeof InterviewSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/test-interview': {
+      id: '/test-interview'
+      path: '/test-interview'
+      fullPath: '/test-interview'
+      preLoaderRoute: typeof TestInterviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -369,18 +389,9 @@ const rootRouteChildren: RootRouteChildren = {
   ExitInterviewRoute: ExitInterviewRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TestInterviewRoute: TestInterviewRoute,
   InterviewSessionIdRoute: InterviewSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
