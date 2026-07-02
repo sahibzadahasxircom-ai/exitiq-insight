@@ -63,7 +63,7 @@ function Landing() {
         <div className="mx-auto max-w-6xl px-6 pt-24 pb-24 text-center">
           <div className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Embedded churn intelligence for modern SaaS
+            Embedded churn intelligence for modern Softwares
           </div>
           <h1 className="mx-auto max-w-3xl text-balance text-5xl font-semibold tracking-tight md:text-[64px] md:leading-[1.05]">
             Understand why customers leave.{" "}
