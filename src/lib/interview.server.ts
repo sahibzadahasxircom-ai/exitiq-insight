@@ -1,6 +1,6 @@
 import { generateText, generateObject, type ModelMessage } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
+import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 
 export const INTERVIEW_SYSTEM_PROMPT = `You are an elite SaaS churn intelligence interviewer.
 
@@ -32,21 +32,24 @@ Ending:
 - When ending: thank them briefly (1-2 sentences) and append the exact token [INTERVIEW_COMPLETE] at the very end.
 - Do NOT end prematurely on the first vague answer. Do NOT drag on past a clear root cause.`;
 
-function client() {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error("Missing OPENAI_API_KEY");
-  return createOpenAI({ apiKey: key });
+function gateway() {
+  const key = process.env.LOVABLE_API_KEY;
+  if (!key) throw new Error("Missing LOVABLE_API_KEY");
+  return createLovableAiGatewayProvider(key);
 }
 
 export async function generateInterviewerReply(opts: {
   history: { role: "assistant" | "user"; message_content: string }[];
 }): Promise<{ text: string; complete: boolean }> {
-  const openai = client();
+  const provider = gateway();
   const messages: ModelMessage[] = [
     { role: "system", content: INTERVIEW_SYSTEM_PROMPT },
     ...opts.history.map((m) => ({ role: m.role, content: m.message_content }) as ModelMessage),
   ];
-  const { text } = await generateText({ model: openai("gpt-4.1-mini"), messages });
+  const { text } = await generateText({
+    model: provider("google/gemini-2.5-flash"),
+    messages,
+  });
   const complete = text.includes("[INTERVIEW_COMPLETE]");
   return { text: text.replace("[INTERVIEW_COMPLETE]", "").trim(), complete };
 }
@@ -86,12 +89,12 @@ export type ExtractedInsight = z.infer<typeof InsightSchema>;
 export async function extractInsights(
   history: { role: "assistant" | "user"; message_content: string }[],
 ): Promise<ExtractedInsight> {
-  const openai = client();
+  const provider = gateway();
   const transcript = history
     .map((m) => `${m.role === "user" ? "Customer" : "Interviewer"}: ${m.message_content}`)
     .join("\n");
   const { object } = await generateObject({
-    model: openai("gpt-4.1"),
+    model: provider("google/gemini-2.5-pro"),
     schema: InsightSchema,
     system:
       "You are a senior SaaS churn analyst. Read the exit interview transcript and extract structured insight. Be precise; never invent facts not present in the transcript. If something isn't mentioned, leave arrays empty or use null/neutral defaults.",
