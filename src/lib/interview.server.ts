@@ -72,19 +72,19 @@ export async function generateInterviewerReply(opts: {
     ),
   ];
 
-  // Bootstrap: no prior turns — open the conversation warmly.
+  // Bootstrap: no prior turns — open the conversation.
   if (opts.history.length === 0) {
     messages.push({
       role: "system",
       content:
-        "Open the interview with a single warm, human sentence acknowledging they've decided to cancel, then ask one open question about what led to the decision. Do not thank them for their business. Do not introduce yourself as an AI.",
+        "Open with ONE short, human sentence acknowledging their decision to cancel, then ONE open question about what led to it. Maximum two sentences total. No thanks-for-your-business, no introductions, no AI mentions.",
     });
   } else {
-    // Ongoing: force real reasoning about what's still unknown.
+    // Ongoing: force investigator reasoning about what's still unknown.
     messages.push({
       role: "system",
       content:
-        "Silently review the transcript. Identify (a) what churn signals are already covered, (b) what is still vague or unknown from the objectives list, and (c) the single most valuable thing to explore next given the customer's LAST message. Then respond with ONE contextual follow-up question that references their own words. If — and only if — you already have a clear primary reason, root cause, and at least one of {competitor / missing feature / pricing / onboarding / expectation gap}, close the interview per the ending rules.",
+        "Silently reason: (1) which objectives are already answered, (2) which are still unknown or vague, (3) given the customer's LAST message, what is the single highest-value unknown to investigate next — a new topic if the current one is sufficiently covered, or a deeper probe if not. Then respond in ONE or TWO short sentences ending in ONE sharp question that collects NEW information. Do NOT restate or paraphrase what the customer just said. Do NOT open with 'Understood', 'Thanks', 'Got it', 'That makes sense', or 'So you're saying'. If you already have a clear primary reason, root cause, one of {competitor / missing feature / pricing / onboarding / expectation gap}, and a sense of the retention counterfactual — end the interview now per the ending rules instead of asking another question.",
     });
   }
 
