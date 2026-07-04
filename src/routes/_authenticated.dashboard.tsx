@@ -1,360 +1,340 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, AreaChart, Area,
 } from "recharts";
 import {
-  Users, DollarSign, CheckCircle2, AlertTriangle, Quote, Sparkles, Swords, Lightbulb, Activity,
+  Users, DollarSign, CheckCircle2, TrendingUp, Sparkles,
+  Activity, ShieldCheck, AlertTriangle, Flame, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
-import { getDashboardData } from "@/lib/interview.functions";
+import {
+  KPIS, CATEGORY_DISTRIBUTION, CHURN_TREND, INTERVIEW_VOLUME,
+  SENTIMENT_DISTRIBUTION, RECOMMENDATIONS, INTELLIGENCE_CARDS,
+  CATEGORY_LABEL, formatMoney,
+} from "@/lib/mock-intelligence";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — ExitIQ" },
-      { name: "description", content: "Churn intelligence command center — root causes, competitors, revenue impact, and feature requests." },
+      { name: "description", content: "Churn intelligence command center — root causes, competitors, revenue impact, and recommendations." },
     ],
   }),
   component: Dashboard,
 });
 
-const COLORS = ["hsl(var(--primary))", "#8b5cf6", "#f59e0b", "#ef4444", "#10b981", "#64748b", "#0ea5e9", "#ec4899"];
-const CATEGORY_LABELS: Record<string, string> = {
-  onboarding: "Onboarding friction",
-  features: "Missing features",
-  pricing: "Pricing concerns",
-  competitor: "Switched to competitor",
-  value: "Value gap",
-  ux: "UX issues",
-  activation: "Activation failure",
-  other: "Other",
-};
-const JOURNEY_LABELS: Record<string, string> = {
-  signup: "Signup",
-  onboarding: "Onboarding",
-  activation: "Activation",
-  first_use: "First use",
-  upgrade: "Upgrade",
-  other: "Other",
-};
-const ASSUMED_MRR = 99; // for revenue-lost estimates
+const CHART_COLORS = [
+  "oklch(0.52 0.18 257)", "oklch(0.65 0.16 200)", "oklch(0.72 0.15 70)",
+  "oklch(0.62 0.18 330)", "oklch(0.62 0.15 155)", "oklch(0.58 0.22 27)",
+  "oklch(0.55 0.14 290)", "oklch(0.7 0.12 240)",
+];
+const SENTIMENT_COLORS = ["oklch(0.62 0.15 155)", "oklch(0.65 0.03 260)", "oklch(0.72 0.17 70)", "oklch(0.58 0.22 27)"];
 
 function Dashboard() {
-  const { company } = useAuth();
-  const fn = useServerFn(getDashboardData);
-  const { data, isLoading } = useQuery({ queryKey: ["dashboard"], queryFn: () => fn() });
-
-  const stats = useMemo(() => computeStats(data), [data]);
-
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+    <div className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+      {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-0.5 text-[11px] font-medium text-success">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" /> Auto-pilot active
+            <span className="h-1.5 w-1.5 rounded-full bg-success" /> Intelligence engine live · demo data
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">{company?.company_name ?? "Workspace"}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Founder dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Churn intelligence command center — generated from real customer interviews.
+            Every completed interview is auto-analysed and folded into the metrics below.
           </p>
         </div>
       </div>
 
-      {/* 1. EXECUTIVE OVERVIEW */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-        <Kpi icon={Users} label="Churned customers" value={String(stats.totalChurned)} />
-        <Kpi icon={DollarSign} label="Est. revenue lost" value={fmtMoney(stats.revenueLost)} />
-        <Kpi icon={Activity} label="Active interviews" value={String(stats.active)} />
-        <Kpi icon={CheckCircle2} label="Completed" value={String(stats.completed)} />
-        <Kpi icon={AlertTriangle} label="Top churn reason" value={stats.topReasonLabel} note />
-      </div>
+      {/* ---- 1. Executive Overview ---- */}
+      <Section title="Executive overview" subtitle="The 8 metrics that answer 'what's happening this quarter'.">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <Kpi icon={Users} label="Total AI interviews" value={String(KPIS.total_interviews)} delta="+18% MoM" trend="up" />
+          <Kpi icon={CheckCircle2} label="Completed" value={String(KPIS.completed_interviews)} delta="86% completion" />
+          <Kpi icon={DollarSign} label="Revenue lost" value={formatMoney(KPIS.revenue_lost)} delta="+$12k MoM" trend="up" tone="destructive" />
+          <Kpi icon={ShieldCheck} label="Revenue saveable" value={formatMoney(KPIS.revenue_saveable)} delta="High-retention set" tone="success" />
+          <Kpi icon={Users} label="Customers interviewed" value={String(KPIS.customers_interviewed)} delta="Across 10 countries" />
+          <Kpi icon={Activity} label="AI health score" value={`${KPIS.ai_health_score}%`} delta="All models nominal" tone="success" />
+          <Kpi icon={AlertTriangle} label="Top churn reason" value={CATEGORY_LABEL[KPIS.top_churn_category]} delta="31% of churn" />
+          <Kpi icon={Flame} label="Fastest growing" value={CATEGORY_LABEL[KPIS.fastest_growing_category]} delta="+42% WoW" trend="up" tone="warning" />
+        </div>
+      </Section>
 
-      {isLoading ? (
-        <EmptyCard text="Loading…" />
-      ) : stats.totalInsights === 0 ? (
-        <EmptyCard text="No completed interviews yet. As your customers go through ExitIQ, structured intelligence will appear here." />
-      ) : (
-        <>
-          {/* 2. AI INSIGHT SUMMARY */}
-          <Card>
-            <div className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
-                <Sparkles className="h-4 w-4" />
-              </span>
-              <div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  AI insight summary
-                </span>
-                <p className="mt-1 text-base leading-relaxed text-foreground">{stats.narrative}</p>
-              </div>
+      {/* ---- 2. Churn Analytics ---- */}
+      <Section title="Churn analytics" subtitle="Distribution, trend, and revenue impact across every completed interview.">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <Card className="lg:col-span-1">
+            <CardHead title="Root cause distribution" subtitle="Share of churn by category" />
+            <div className="h-56">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={CATEGORY_DISTRIBUTION} dataKey="count" nameKey="label" innerRadius={50} outerRadius={84} paddingAngle={2}>
+                    {CATEGORY_DISTRIBUTION.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={tooltipStyle} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <ul className="mt-2 max-h-40 space-y-1.5 overflow-auto pr-1 text-sm">
+              {CATEGORY_DISTRIBUTION.slice(0, 6).map((r, i) => (
+                <li key={r.key} className="flex items-center justify-between text-muted-foreground">
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                    {r.label}
+                  </span>
+                  <span className="font-medium text-foreground">{r.pct}%</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHead title="Churn trend (12 months)" subtitle="Cancellations and revenue lost per month" />
+            <div className="h-56">
+              <ResponsiveContainer>
+                <LineChart data={CHURN_TREND}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={11} />
+                  <YAxis yAxisId="left" stroke="var(--muted-foreground)" fontSize={11} />
+                  <YAxis yAxisId="right" orientation="right" stroke="var(--muted-foreground)" fontSize={11} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Line yAxisId="left" type="monotone" dataKey="churned" stroke={CHART_COLORS[0]} strokeWidth={2} dot={false} />
+                  <Line yAxisId="right" type="monotone" dataKey="revenue" stroke={CHART_COLORS[3]} strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </Card>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-            {/* 3. ROOT CAUSE BREAKDOWN */}
-            <Card className="lg:col-span-2">
-              <CardHead title="Root cause breakdown" subtitle="Ranked by share of churn" />
-              <div className="h-56">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie data={stats.categoryChart} dataKey="value" nameKey="name" innerRadius={50} outerRadius={84} paddingAngle={2}>
-                      {stats.categoryChart.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+          <Card className="lg:col-span-2">
+            <CardHead title="Revenue lost by category" subtitle="Estimated ARR impact" />
+            <div className="h-56">
+              <ResponsiveContainer>
+                <BarChart data={CATEGORY_DISTRIBUTION} layout="vertical" margin={{ left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={11} tickFormatter={(v) => formatMoney(Number(v))} />
+                  <YAxis type="category" dataKey="label" width={130} stroke="var(--muted-foreground)" fontSize={11} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatMoney(v)} />
+                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
+                    {CATEGORY_DISTRIBUTION.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card>
+            <CardHead title="Interview volume" subtitle="Triggered vs. completed" />
+            <div className="h-56">
+              <ResponsiveContainer>
+                <AreaChart data={INTERVIEW_VOLUME}>
+                  <defs>
+                    <linearGradient id="grad-int" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={CHART_COLORS[0]} stopOpacity={0.4} />
+                      <stop offset="100%" stopColor={CHART_COLORS[0]} stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="grad-done" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={CHART_COLORS[4]} stopOpacity={0.4} />
+                      <stop offset="100%" stopColor={CHART_COLORS[4]} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={11} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={11} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Area type="monotone" dataKey="interviews" stroke={CHART_COLORS[0]} fill="url(#grad-int)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="completed" stroke={CHART_COLORS[4]} fill="url(#grad-done)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card>
+            <CardHead title="Sentiment distribution" subtitle="How churned customers felt" />
+            <div className="h-56">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={SENTIMENT_DISTRIBUTION} dataKey="value" nameKey="label" innerRadius={44} outerRadius={80} paddingAngle={2}>
+                    {SENTIMENT_DISTRIBUTION.map((_, i) => <Cell key={i} fill={SENTIMENT_COLORS[i]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={tooltipStyle} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <ul className="mt-2 grid grid-cols-2 gap-1.5 text-xs text-muted-foreground">
+              {SENTIMENT_DISTRIBUTION.map((s, i) => (
+                <li key={s.label} className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full" style={{ background: SENTIMENT_COLORS[i] }} />
+                  {s.label} <span className="ml-auto font-medium text-foreground">{s.value}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          <Card>
+            <CardHead title="Sentiment trend" subtitle="Rolling positivity score" />
+            <div className="h-56">
+              <ResponsiveContainer>
+                <LineChart data={CHURN_TREND}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={11} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={11} domain={[30, 80]} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Line type="monotone" dataKey="sentiment" stroke={CHART_COLORS[1]} strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </div>
+      </Section>
+
+      {/* ---- 3. AI Intelligence Center (compact preview) ---- */}
+      <Section
+        title="AI intelligence center"
+        subtitle="Highest-signal insights synthesised across every interview."
+        action={<Link to="/insights" className="text-sm font-medium text-primary hover:underline">Open intelligence center →</Link>}
+      >
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {INTELLIGENCE_CARDS.map((c) => (
+            <div key={c.title} className="rounded-xl border border-border bg-card p-5 shadow-soft">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{c.title}</span>
+                <PriorityPill priority={c.priority} />
               </div>
-              <ul className="mt-2 space-y-1.5 text-sm">
-                {stats.categoryChart.map((r, i) => (
-                  <li key={r.name} className="flex items-center justify-between text-muted-foreground">
-                    <span className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
-                      {r.name}
-                    </span>
-                    <span className="font-medium text-foreground">{r.pct}%</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
+              <p className="mt-2 line-clamp-2 text-sm font-semibold leading-snug">{c.value}</p>
+              <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                <span>{c.customers} customers</span>
+                <span className="font-semibold text-foreground">{formatMoney(c.revenue)}</span>
+              </div>
+              <div className="mt-2 flex items-center gap-1 text-[11px] text-success">
+                {c.trend === "up" ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                {c.pct}% share
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
 
-            {/* 5. REVENUE IMPACT */}
-            <Card className="lg:col-span-3">
-              <CardHead title="Revenue impact by root cause" subtitle={`Estimated at ${fmtMoney(ASSUMED_MRR)} MRR per customer`} />
-              <ul className="divide-y divide-border">
-                {stats.revenueByCategory.map((r) => (
-                  <li key={r.name} className="flex items-center justify-between py-3">
-                    <span className="text-sm">{r.name}</span>
-                    <div className="flex w-1/2 items-center gap-3">
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                        <div className="h-full rounded-full bg-foreground" style={{ width: `${r.pctOfMax}%` }} />
-                      </div>
-                      <span className="w-20 text-right text-sm font-semibold">{fmtMoney(r.dollars)}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
-
-          {/* 4. COMPETITOR INTELLIGENCE */}
-          {stats.competitors.length > 0 && (
-            <Card>
-              <CardHead title="Competitor intelligence" subtitle="Where churned customers went" />
-              <ul className="divide-y divide-border">
-                {stats.competitors.map((c) => (
-                  <li key={c.name} className="flex items-center justify-between py-3">
-                    <span className="flex items-center gap-2.5">
-                      <Swords className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">{c.name}</span>
-                    </span>
-                    <span className="text-sm text-muted-foreground">{c.count} mention{c.count > 1 ? "s" : ""}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* 6. FEATURE REQUEST ENGINE */}
-            <Card>
-              <CardHead title="Most requested features" subtitle="Mentioned across exit interviews" />
-              {stats.features.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No feature requests captured yet.</p>
-              ) : (
-                <ul className="divide-y divide-border">
-                  {stats.features.map((f) => (
-                    <li key={f.name} className="flex items-center justify-between py-3">
-                      <span className="flex items-center gap-2.5">
-                        <Lightbulb className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{f.name}</span>
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{f.count}×</span>
-                        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${f.impact === "High" ? "border-destructive/30 bg-destructive/10 text-destructive" : f.impact === "Medium" ? "border-warning/30 bg-warning/10 text-warning" : "border-border bg-muted text-muted-foreground"}`}>
-                          {f.impact}
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Card>
-
-            {/* 8. JOURNEY FAILURE POINTS */}
-            <Card>
-              <CardHead title="Journey failure points" subtitle="Where customers fell off" />
-              <ul className="space-y-3">
-                {stats.journeyChart.map((j) => (
-                  <li key={j.name}>
-                    <div className="mb-1 flex items-center justify-between text-sm">
-                      <span>{j.name}</span>
-                      <span className="font-medium text-foreground">{j.pct}%</span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-foreground" style={{ width: `${j.pct}%` }} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
-
-          {/* 7. REAL CUSTOMER QUOTES */}
-          {stats.quotes.length > 0 && (
-            <Card>
-              <CardHead title="Real customer quotes" subtitle="Raw voice from your exit interviews" />
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                {stats.quotes.map((q, i) => (
-                  <div key={i} className="rounded-lg border border-border bg-background p-4">
-                    <Quote className="h-4 w-4 text-muted-foreground" />
-                    <p className="mt-2 text-sm">"{q.text}"</p>
-                    <p className="mt-3 text-xs text-muted-foreground">{CATEGORY_LABELS[q.category] ?? q.category}</p>
+      {/* ---- 4. AI Recommendations ---- */}
+      <Section
+        title="AI recommendations"
+        subtitle="Ranked by expected revenue impact. Each is auto-generated from patterns across interviews."
+        action={<Link to="/insights" className="text-sm font-medium text-primary hover:underline">See all recommendations →</Link>}
+      >
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {RECOMMENDATIONS.slice(0, 4).map((r) => (
+            <div key={r.id} className="rounded-xl border border-border bg-card p-5 shadow-soft">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <Sparkles className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Problem</p>
+                    <p className="text-sm">{r.problem}</p>
                   </div>
-                ))}
+                </div>
+                <PriorityPill priority={r.priority} />
               </div>
-            </Card>
-          )}
-        </>
+              <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendation</p>
+                <p className="mt-1 text-sm font-medium">{r.recommendation}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{r.expected_impact}</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                <span>{r.affected_customers} customers · {formatMoney(r.affected_revenue)} ARR</span>
+                <span className="inline-flex items-center gap-1"><TrendingUp className="h-3 w-3" /> {Math.round(r.confidence * 100)}% confidence</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+/* ---------- shared UI atoms ---------- */
+
+const tooltipStyle = {
+  backgroundColor: "var(--card)",
+  border: "1px solid var(--border)",
+  borderRadius: 8,
+  fontSize: 12,
+  color: "var(--foreground)",
+};
+
+function Section({
+  title, subtitle, children, action,
+}: { title: string; subtitle?: string; children: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`rounded-xl border border-border bg-card p-5 shadow-soft ${className}`}>{children}</div>;
+}
+function CardHead({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-4">
+      <h3 className="text-sm font-semibold">{title}</h3>
+      {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+    </div>
+  );
+}
+
+function Kpi({
+  icon: Icon, label, value, delta, tone, trend,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  delta?: string;
+  tone?: "success" | "destructive" | "warning";
+  trend?: "up" | "down";
+}) {
+  const toneClass =
+    tone === "success" ? "text-success" :
+    tone === "destructive" ? "text-destructive" :
+    tone === "warning" ? "text-warning" :
+    "text-muted-foreground";
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 shadow-soft">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <p className="mt-2 truncate text-xl font-semibold tracking-tight">{value}</p>
+      {delta && (
+        <p className={`mt-1 flex items-center gap-1 text-[11px] ${toneClass}`}>
+          {trend === "up" && <ArrowUpRight className="h-3 w-3" />}
+          {trend === "down" && <ArrowDownRight className="h-3 w-3" />}
+          {delta}
+        </p>
       )}
     </div>
   );
 }
 
-type DashData = Awaited<ReturnType<typeof getDashboardData>>;
-
-function computeStats(data: DashData | undefined) {
-  const sessions = data?.sessions ?? [];
-  const insights = data?.insights ?? [];
-  const totalChurned = sessions.length;
-  const active = sessions.filter((s) => s.interview_status === "active").length;
-  const completed = sessions.filter((s) => s.interview_status === "completed").length;
-  const revenueLost = totalChurned * ASSUMED_MRR;
-  const totalInsights = insights.length;
-
-  // Category breakdown
-  const catCounts = new Map<string, number>();
-  insights.forEach((i) => {
-    const c = i.category ?? "other";
-    catCounts.set(c, (catCounts.get(c) ?? 0) + 1);
-  });
-  const categoryChart = [...catCounts.entries()]
-    .map(([k, v]) => ({ name: CATEGORY_LABELS[k] ?? k, key: k, value: v, pct: Math.round((v / totalInsights) * 100) }))
-    .sort((a, b) => b.value - a.value);
-
-  const topReason = categoryChart[0];
-  const topReasonLabel = topReason ? `${topReason.name} (${topReason.pct}%)` : "—";
-
-  // Revenue per category (proportional)
-  const revenueByCategoryAll = categoryChart.map((c) => ({
-    name: c.name,
-    dollars: Math.round((c.value / totalInsights) * revenueLost),
-  }));
-  const maxRev = Math.max(1, ...revenueByCategoryAll.map((r) => r.dollars));
-  const revenueByCategory = revenueByCategoryAll.map((r) => ({ ...r, pctOfMax: Math.round((r.dollars / maxRev) * 100) }));
-
-  // Competitors
-  const compCounts = new Map<string, number>();
-  insights.forEach((i) => {
-    if (i.competitor_mentioned) {
-      const name = i.competitor_mentioned.trim();
-      if (name) compCounts.set(name, (compCounts.get(name) ?? 0) + 1);
-    }
-  });
-  const competitors = [...compCounts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 6);
-
-  // Features
-  const featCounts = new Map<string, number>();
-  insights.forEach((i) => {
-    (i.missing_features ?? []).forEach((f) => {
-      const k = f.trim();
-      if (k) featCounts.set(k, (featCounts.get(k) ?? 0) + 1);
-    });
-  });
-  const features = [...featCounts.entries()]
-    .map(([name, count]) => ({
-      name, count,
-      impact: count >= 3 ? "High" : count === 2 ? "Medium" : "Low",
-    }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 6);
-
-  // Journey
-  const journeyCounts = new Map<string, number>();
-  insights.forEach((i) => {
-    const j = i.journey_failure_point ?? "other";
-    journeyCounts.set(j, (journeyCounts.get(j) ?? 0) + 1);
-  });
-  const journeyChart = ["signup", "onboarding", "activation", "first_use", "upgrade", "other"].map((k) => {
-    const v = journeyCounts.get(k) ?? 0;
-    return { name: JOURNEY_LABELS[k], pct: totalInsights ? Math.round((v / totalInsights) * 100) : 0 };
-  });
-
-  // Quotes
-  const quotes = insights
-    .filter((i) => i.quote)
-    .slice(0, 3)
-    .map((i) => ({ text: i.quote as string, category: i.category ?? "other" }));
-
-  // Narrative
-  const onboardingPct = insights.length
-    ? Math.round((insights.filter((i) => i.onboarding_issue).length / insights.length) * 100)
-    : 0;
-  const topComp = competitors[0];
-  let narrative = "Not enough interviews yet to summarize patterns.";
-  if (totalInsights > 0) {
-    const parts = [
-      topReason ? `Most churn is driven by ${topReason.name.toLowerCase()} (${topReason.pct}% of cancellations).` : "",
-      onboardingPct >= 20 ? `${onboardingPct}% of customers cited onboarding friction.` : "",
-      topComp ? `${topComp.name} is the most-mentioned alternative customers are switching to.` : "",
-    ].filter(Boolean);
-    narrative = parts.join(" ");
-  }
-
-  return {
-    totalChurned, active, completed, revenueLost, totalInsights,
-    topReasonLabel, categoryChart, revenueByCategory, competitors, features, journeyChart, quotes, narrative,
+function PriorityPill({ priority }: { priority: string }) {
+  const styles: Record<string, string> = {
+    critical: "border-destructive/30 bg-destructive/10 text-destructive",
+    high: "border-warning/30 bg-warning/10 text-warning",
+    medium: "border-border bg-muted text-muted-foreground",
+    low: "border-border bg-muted text-muted-foreground",
   };
-}
-
-function fmtMoney(n: number) {
-  if (n >= 1000) return `$${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k`;
-  return `$${n}`;
-}
-
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-xl border border-border bg-card p-6 shadow-soft ${className}`}>{children}</section>;
-}
-function CardHead({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-4">
-      <h3 className="text-base font-semibold">{title}</h3>
-      {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-    </div>
-  );
-}
-function EmptyCard({ text }: { text: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">
-      {text}
-    </div>
-  );
-}
-function Kpi({
-  icon: Icon, label, value, note,
-}: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; note?: boolean }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-soft">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</span>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <p className={`mt-2 font-semibold tracking-tight ${note ? "text-base leading-snug" : "text-2xl"}`}>{value}</p>
-    </div>
+    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${styles[priority] ?? styles.medium}`}>
+      {priority}
+    </span>
   );
 }
