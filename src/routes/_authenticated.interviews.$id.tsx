@@ -4,7 +4,7 @@ import {
   ArrowLeft, Sparkles, TrendingUp, DollarSign, ShieldCheck, Swords,
   Lightbulb, AlertTriangle, Users, Tag, Target, MessageSquare,
 } from "lucide-react";
-import { getMockInterview, CATEGORY_LABEL, formatMoney } from "@/lib/mock-intelligence";
+import { getMockInterview, CATEGORY_LABEL, formatMoney, type MockInterview } from "@/lib/mock-intelligence";
 
 export const Route = createFileRoute("/_authenticated/interviews/$id")({
   head: ({ params }) => ({ meta: [{ title: `Interview ${params.id} — ExitIQ` }] }),
@@ -29,7 +29,7 @@ const SENTIMENT_COLORS: Record<string, string> = {
 };
 
 function InterviewAnalysis() {
-  const { interview: i } = Route.useLoaderData();
+  const { interview: i } = Route.useLoaderData() as { interview: MockInterview };
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
