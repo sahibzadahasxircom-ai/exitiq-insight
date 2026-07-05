@@ -848,3 +848,102 @@ export function formatMoney(n: number): string {
   if (n >= 1_000) return `$${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k`;
   return `$${n}`;
 }
+
+// ---------- Executive narrative layer ----------
+
+export const EXECUTIVE_BRIEFING = {
+  headline:
+    "41% of this week's cancellations trace back to workspace navigation problems introduced in the March redesign.",
+  detail:
+    "Customers on the Growth and Scale plans describe the new workspace as slower and harder to navigate. The pattern is concentrated in teams that adopted the product before Q1 — long-time users whose muscle memory broke. Every affected account cites the same three flows: creating a ticket, finding a saved view, and switching between projects.",
+  driver: "Navigation & Discoverability regressions in the workspace redesign",
+  product_area: "Workspace shell · global navigation · command surface",
+  revenue_at_risk: 38400,
+  affected_customers: 14,
+  confidence: 0.93,
+  next_best_action:
+    "Ship a global command palette and restore one-click access to saved views. Roll a targeted re-onboarding email to pre-Q1 accounts within 10 days.",
+  window: "Last 7 days · 27 completed interviews",
+};
+
+export const CUSTOMER_VOICE: Array<{ quote: string; attribution: string; category: CategoryKey }> = [
+  { quote: "Honestly, I loved the product until the redesign made simple tasks difficult.", attribution: "Sarah C. · Growth plan · 14 months", category: "ux" },
+  { quote: "Everything feels hidden now.", attribution: "Marcus A. · Scale plan · 22 months", category: "ux" },
+  { quote: "The product is still powerful, but my workflow became slower.", attribution: "Priya R. · Growth plan · 9 months", category: "performance" },
+  { quote: "We didn't leave because of price. We left because we couldn't get our team to actually use it.", attribution: "Elena K. · Enterprise · 7 months", category: "onboarding" },
+  { quote: "Support answered in two days with a copy-paste. On a paid plan that's the answer.", attribution: "Ryan O. · Growth plan · 11 months", category: "support" },
+  { quote: "Notion isn't better. It's just where the team already lives.", attribution: "Mei W. · Scale plan · 18 months", category: "competitor" },
+  { quote: "The reports timed out three weeks in a row. I can't defend the spend.", attribution: "Tomás R. · Enterprise · 3 years", category: "performance" },
+  { quote: "You silently moved us to the next tier. That broke trust more than the invoice did.", attribution: "Hannah W. · Growth plan · 8 months", category: "billing" },
+];
+
+export const WEEKLY_BRIEF = {
+  week_of: "Week of Jun 24",
+  sections: [
+    { title: "What changed this week", body: "Navigation-related churn surged +42% week over week and is now the single largest driver, overtaking pricing. Three long-tenured Scale accounts cited the same friction in the workspace redesign. This is not a general UX complaint — it is a specific regression against previously-learned muscle memory." },
+    { title: "New customer behaviour patterns", body: "Multi-tool consolidation appeared in 6 interviews this week (up from 1 last week). Buyers are auditing overlapping subscriptions and cutting whichever tool has weakest team adoption. Adoption depth, not feature parity, is deciding these renewals." },
+    { title: "Emerging churn trends", body: "A silent auto-upgrade billing pattern is starting to show up in negative sentiment — 4 mentions this week, all from admins who felt blindsided. This is currently a trust issue, not a pricing one, and it compounds every other complaint they raise." },
+    { title: "Competitor activity", body: "Notion mentions rose 28% WoW. In every case, the pivot reason was 'the team already uses Notion for docs' — not feature superiority. Linear is a distant second, mentioned almost exclusively by product-led teams citing keyboard-driven flow." },
+    { title: "Growing feature requests", body: "Native docs surface, command palette, and per-seat SMB pricing are the three requests with the highest revenue attached. Together they touch $79k ARR across 26 at-risk accounts." },
+    { title: "Recommended priorities", body: "1) Command palette and saved-view restoration — highest revenue-per-effort ratio. 2) Introduce per-seat SMB tier before the next renewal cliff. 3) Add pre-upgrade billing notification with 7-day admin approval. Everything else can wait a sprint." },
+  ],
+};
+
+const LEAKAGE_DECISIONS: Record<CategoryKey, string> = {
+  competitor: "Delayed unification of docs and tasks into a single workspace",
+  ux: "Workspace redesign shipped without preserving muscle-memory affordances",
+  pricing: "Growth-tier price step doesn't reflect SMB usage patterns",
+  performance: "Reporting layer never re-architected for enterprise dataset sizes",
+  onboarding: "Slack integration requires admin — no non-admin fallback path",
+  support: "No tier-aware ticket routing; paid customers wait behind free",
+  integrations: "Reliance on third-party Zapier for critical mid-market workflows",
+  bugs: "Bulk import lacks pre-validation preview and per-record rollback",
+  billing: "Silent auto-upgrade with no advance admin notification",
+  features: "Enterprise compliance surface (SSO, audit log) incomplete",
+  not_needed: "External customer pivots — largely non-preventable",
+  other: "Uncategorised — needs deeper investigation",
+};
+
+export const REVENUE_LEAKAGE = CATEGORY_DISTRIBUTION.slice(0, 6).map((c, idx) => ({
+  category: c.key,
+  label: c.label,
+  revenue: c.revenue,
+  customers: c.count,
+  pct: c.pct,
+  product_decision: LEAKAGE_DECISIONS[c.key],
+  trend: (["up", "up", "flat", "up", "down", "up"] as Trend[])[idx],
+})).sort((a, b) => b.revenue - a.revenue);
+
+/** Normalized business-language churn drivers (not raw customer wording). */
+export const CHURN_DRIVERS = ROOT_CAUSES.slice(0, 6).map((r) => {
+  const businessName: Record<string, string> = {
+    "Fragmented workspace — needs docs and tasks in one place": "Workspace Fragmentation",
+    "Perceived price-to-value gap at plan cap": "Price-to-Value Misalignment",
+    "Reporting performance blocking core workflow": "Enterprise Reporting Performance",
+    "Failed activation — Slack integration blocker": "Activation & Onboarding Friction",
+    "UI slowness and friction vs. competitor": "Navigation & Discoverability Issues",
+    "Billing surprise from silent auto-upgrade": "Billing Transparency Failures",
+    "Unreliable Zapier integration": "Integration Reliability",
+    "Critical data bug in bulk import": "Data Integrity Incidents",
+    "Missing SSO + audit log for their compliance requirement": "Enterprise Compliance Gaps",
+    "Poor support experience on paid plan": "Paid-Tier Support Experience",
+  };
+  const explanation: Record<string, string> = {
+    "Fragmented workspace — needs docs and tasks in one place": "Customers consistently describe having to switch between our product and a second tool for documentation, breaking planning workflows and eroding team-wide adoption.",
+    "Perceived price-to-value gap at plan cap": "As usage plateaus mid-contract, teams re-evaluate the Growth-tier price and find it doesn't scale down to their actual seat activity.",
+    "Reporting performance blocking core workflow": "Large-dataset reports time out or lag, blocking recurring executive workflows that the product is specifically bought for.",
+    "Failed activation — Slack integration blocker": "Non-admin users hit a hard stop during setup with no fallback path, abandoning the trial before reaching first value.",
+    "UI slowness and friction vs. competitor": "Repetitive actions take too many clicks and page transitions feel slow compared to keyboard-driven alternatives customers use elsewhere.",
+    "Billing surprise from silent auto-upgrade": "Automatic tier changes trigger invoices without advance notice, causing an immediate trust breakdown that no product improvement can recover.",
+  };
+  return {
+    name: businessName[r.name] ?? r.name,
+    pct: Math.round((r.mentions / completed.length) * 100),
+    revenue: r.revenue,
+    customers: r.customers,
+    trend: r.trend,
+    explanation: explanation[r.name] ?? r.recommended_fix,
+    category: r.category,
+  };
+});
+
