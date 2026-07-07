@@ -1,10 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { format } from "date-fns";
-import {
-  ArrowLeft, Sparkles, TrendingUp, DollarSign, ShieldCheck, Swords,
-  Lightbulb, AlertTriangle, Users, Tag, Target, MessageSquare,
-} from "lucide-react";
-import { getMockInterview, CATEGORY_LABEL, formatMoney, type MockInterview } from "@/lib/mock-intelligence";
+import { ArrowLeft } from "lucide-react";
+import { getMockInterview, formatMoney, type MockInterview } from "@/lib/mock-intelligence";
 
 export const Route = createFileRoute("/_authenticated/interviews/$id")({
   head: ({ params }) => ({ meta: [{ title: `Interview ${params.id} — ExitIQ` }] }),
@@ -15,244 +12,226 @@ export const Route = createFileRoute("/_authenticated/interviews/$id")({
   },
   component: InterviewAnalysis,
   notFoundComponent: () => (
-    <div className="mx-auto max-w-2xl px-6 py-16 text-center text-sm text-muted-foreground">
-      Interview not found. <Link to="/interviews" className="text-primary hover:underline">Back to library</Link>.
+    <div className="mx-auto max-w-2xl px-6 py-16 text-center text-sm text-slate-500">
+      Interview not found.{" "}
+      <Link to="/interviews" className="text-blue-700 hover:underline">Back to cancellations</Link>.
     </div>
   ),
 });
 
-const SENTIMENT_COLORS: Record<string, string> = {
-  positive: "border-success/30 bg-success/10 text-success",
-  neutral: "border-border bg-muted text-muted-foreground",
-  frustrated: "border-warning/30 bg-warning/10 text-warning",
-  angry: "border-destructive/30 bg-destructive/10 text-destructive",
-};
+/** Build highlight phrases from the structured intelligence,
+ * then wrap them (case-insensitive) inside customer statements. */
+function buildHighlightPhrases(i: MockInterview): string[] {
+  const raw = [
+    ...i.pain_points,
+    ...i.workflow_problems,
+    ...i.pricing_concerns,
+    ...i.onboarding_issues,
+    ...i.support_issues,
+    ...i.requested_features,
+    i.competitor ?? "",
+    i.expectation_gap ?? "",
+  ]
+    .flatMap((s) =>
+      s
+        .split(/[,.—·]/)
+        .map((x) => x.trim())
+        .filter((x) => x.length > 4)
+    );
+  // Also add notable keywords derived from primary_reason (nouns > 4 chars)
+  const nouns = i.primary_reason
+    .split(/[\s—,·]+/)
+    .map((w) => w.replace(/[^\w-]/g, ""))
+    .filter((w) => w.length > 4);
+
+  return Array.from(new Set([...raw, ...nouns])).sort((a, b) => b.length - a.length);
+}
+
+function highlight(text: string, phrases: string[]) {
+  if (phrases.length === 0) return text;
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`(${phrases.slice(0, 30).map(escape).join("|")})`, "gi");
+  const parts = text.split(pattern);
+  return parts.map((part, idx) =>
+    idx % 2 === 1 ? (
+      <mark key={idx} className="rounded-[3px] bg-yellow-200/70 px-0.5 py-0 text-slate-900">
+        {part}
+      </mark>
+    ) : (
+      <span key={idx}>{part}</span>
+    )
+  );
+}
 
 function InterviewAnalysis() {
   const { interview: i } = Route.useLoaderData() as { interview: MockInterview };
+  const phrases = buildHighlightPhrases(i);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-6 py-8">
-      <Link to="/interviews" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Interview library
+    <div className="mx-auto max-w-4xl space-y-10 px-6 py-10">
+      <Link
+        to="/interviews"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
+      >
+        <ArrowLeft className="h-4 w-4" /> Cancellations
       </Link>
 
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{i.customer_name}</h1>
-            <PriorityPill priority={i.priority} />
-            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium capitalize ${SENTIMENT_COLORS[i.sentiment]}`}>
-              {i.sentiment} · {Math.round(i.sentiment_confidence * 100)}%
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {i.company} · {i.plan} · {i.segment} · {i.country}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Started {format(new Date(i.started_at), "MMM d, yyyy · HH:mm")} · Completed {format(new Date(i.completed_at), "HH:mm")} · {i.duration_min} min
-          </p>
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-right">
-          <MiniStat label="Revenue impact" value={formatMoney(i.revenue_impact)} />
-          <MiniStat label="AI confidence" value={`${Math.round(i.ai_confidence * 100)}%`} />
-          <MiniStat label="Save opportunity" value={i.retention_opportunity} capitalize />
-        </div>
-      </div>
+      <header className="border-b border-slate-200 pb-8">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+          {i.customer_name}
+        </h1>
+        <p className="mt-2 text-sm text-slate-600">
+          {i.company} · {i.plan} plan · {i.segment} · {i.country}
+        </p>
+        <p className="mt-1 text-xs text-slate-500">
+          Interviewed {format(new Date(i.completed_at), "MMMM d, yyyy · HH:mm")} · {i.duration_min} minute conversation
+        </p>
 
-      {/* Executive summary */}
-      <Card>
-        <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          <div className="flex-1">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Executive summary</p>
-            <p className="mt-1 text-base leading-relaxed">{i.executive_summary}</p>
-          </div>
+        <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-4">
+          <Stat label="Monthly revenue" value={formatMoney(i.mrr)} />
+          <Stat label="Annual revenue lost" value={formatMoney(i.mrr * 12)} />
+          <Stat label="Retention opportunity" value={i.retention_opportunity} capitalize />
+          <Stat label="Tenure signal" value={i.sentiment_confidence > 0.85 ? "Strong" : "Moderate"} />
         </div>
-      </Card>
+      </header>
 
-      {/* Reasons + root cause */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHead icon={Target} title="Primary churn reason" />
-          <p className="text-sm font-medium">{i.primary_reason}</p>
-          <div className="mt-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Secondary factors</p>
-            {i.secondary_factors.length === 0 ? (
-              <p className="mt-1 text-sm text-muted-foreground">None identified.</p>
-            ) : (
+      {/* Summary */}
+      <Section title="Summary">
+        <p className="text-[15px] leading-relaxed text-slate-800">{i.executive_summary}</p>
+      </Section>
+
+      {/* Why they left */}
+      <Section title="Why they left">
+        <div className="space-y-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Primary reason</p>
+            <p className="mt-1 text-base font-medium text-slate-900">{i.primary_reason}</p>
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Root cause</p>
+            <p className="mt-1 text-[15px] leading-relaxed text-slate-800">{i.root_cause}</p>
+          </div>
+          {i.secondary_factors.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Contributing factors</p>
               <ul className="mt-2 space-y-1.5">
                 {i.secondary_factors.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground" />
+                  <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />
                     {f}
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
-          <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Root cause</p>
-            <p className="mt-1 text-sm">{i.root_cause}</p>
-          </div>
-        </Card>
-
-        <Card>
-          <CardHead icon={Swords} title="Competitor mentioned" />
-          {i.competitor ? (
-            <>
-              <p className="text-base font-semibold">{i.competitor}</p>
-              <p className="mt-2 text-sm text-muted-foreground">{i.competitor_reason}</p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">No competitor mentioned.</p>
-          )}
-          {i.expectation_gap && (
-            <div className="mt-4 rounded-lg border border-warning/30 bg-warning/5 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-warning">Expectation gap</p>
-              <p className="mt-1 text-sm">{i.expectation_gap}</p>
             </div>
           )}
-        </Card>
-      </div>
+        </div>
+      </Section>
 
-      {/* Feature requests + pain points */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHead icon={Lightbulb} title="Requested features" />
-          <ListOrEmpty items={i.requested_features} empty="No features requested." />
-        </Card>
-        <Card>
-          <CardHead icon={AlertTriangle} title="Product pain points" />
-          <ListOrEmpty items={i.pain_points} empty="No pain points captured." />
-        </Card>
-        <Card>
-          <CardHead icon={Users} title="Workflow problems" />
-          <ListOrEmpty items={i.workflow_problems} empty="No workflow problems captured." />
-        </Card>
-        <Card>
-          <CardHead icon={DollarSign} title="Pricing concerns" />
-          <ListOrEmpty items={i.pricing_concerns} empty="No pricing concerns captured." />
-        </Card>
-        <Card>
-          <CardHead icon={ShieldCheck} title="Onboarding issues" />
-          <ListOrEmpty items={i.onboarding_issues} empty="Onboarding was not cited." />
-        </Card>
-        <Card>
-          <CardHead icon={MessageSquare} title="Support issues" />
-          <ListOrEmpty items={i.support_issues} empty="Support was not cited." />
-        </Card>
-      </div>
+      {/* Competitor / expectation gap */}
+      {(i.competitor || i.expectation_gap) && (
+        <Section title="Context">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {i.competitor && (
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Chose instead</p>
+                <p className="mt-1 text-base font-semibold text-slate-900">{i.competitor}</p>
+                {i.competitor_reason && <p className="mt-1 text-sm text-slate-600">{i.competitor_reason}</p>}
+              </div>
+            )}
+            {i.expectation_gap && (
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Expectation gap</p>
+                <p className="mt-1 text-sm text-slate-700">{i.expectation_gap}</p>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
 
-      {/* AI recommendations */}
-      <Card>
-        <CardHead icon={TrendingUp} title="AI recommended actions" subtitle="Ranked by expected impact" />
-        <ul className="mt-2 space-y-2">
+      {/* Feedback columns */}
+      <Section title="What they told us">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <FeedbackList title="Product pain points" items={i.pain_points} />
+          <FeedbackList title="Workflow problems" items={i.workflow_problems} />
+          <FeedbackList title="Requested features" items={i.requested_features} />
+          <FeedbackList title="Pricing concerns" items={i.pricing_concerns} />
+          <FeedbackList title="Onboarding issues" items={i.onboarding_issues} />
+          <FeedbackList title="Support issues" items={i.support_issues} />
+        </div>
+      </Section>
+
+      {/* Recommended actions */}
+      <Section title="Recommended actions">
+        <ol className="space-y-3">
           {i.recommended_actions.map((a, idx) => (
-            <li key={a} className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+            <li key={a} className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
                 {idx + 1}
               </span>
-              <span className="text-sm">{a}</span>
+              <span className="text-sm text-slate-800">{a}</span>
             </li>
           ))}
-        </ul>
-      </Card>
+        </ol>
+      </Section>
 
-      {/* Tags */}
-      <Card>
-        <CardHead icon={Tag} title="Auto-generated tags" />
-        <div className="flex flex-wrap gap-1.5">
-          <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-            {CATEGORY_LABEL[i.category]}
-          </span>
-          {i.tags.map((t) => (
-            <span key={t} className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              #{t}
-            </span>
-          ))}
-        </div>
-      </Card>
-
-      {/* Transcript */}
-      <Card>
-        <CardHead icon={MessageSquare} title="Conversation transcript" subtitle="Raw interview — analysis lives above" />
-        <div className="space-y-4">
+      {/* Transcript with yellow highlights */}
+      <Section
+        title="Interview transcript"
+        subtitle="Customer statements are shown as-said. Key phrases are highlighted."
+      >
+        <div className="space-y-6">
           {i.transcript.map((m, idx) => {
-            const isUser = m.role === "user";
+            const isCustomer = m.role === "user";
             return (
-              <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] ${isUser ? "text-right" : ""}`}>
-                  <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    {isUser ? "Customer" : "Interviewer"} · {format(new Date(m.ts), "HH:mm")}
-                  </p>
-                  <div className={
-                    isUser
-                      ? "inline-block rounded-2xl rounded-tr-md bg-foreground px-4 py-2.5 text-sm leading-relaxed text-background"
-                      : "inline-block rounded-2xl rounded-tl-md border border-border bg-muted/40 px-4 py-2.5 text-sm leading-relaxed text-foreground"
-                  }>
-                    {m.content}
-                  </div>
-                </div>
+              <div key={idx} className="border-l-2 pl-4" style={{ borderColor: isCustomer ? "#2563eb" : "#e2e8f0" }}>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  {isCustomer ? "Customer" : "Interviewer"} · {format(new Date(m.ts), "HH:mm")}
+                </p>
+                <p className="text-[15px] leading-relaxed text-slate-800">
+                  {isCustomer ? highlight(m.content, phrases) : m.content}
+                </p>
               </div>
             );
           })}
         </div>
-      </Card>
+      </Section>
     </div>
   );
 }
 
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-xl border border-border bg-card p-5 shadow-soft ${className}`}>{children}</div>;
-}
-function CardHead({
-  icon: Icon, title, subtitle,
-}: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle?: string }) {
+function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="mb-3 flex items-start gap-2">
-      <Icon className="mt-0.5 h-4 w-4 text-muted-foreground" />
-      <div>
-        <h3 className="text-sm font-semibold">{title}</h3>
-        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-      </div>
+    <section>
+      <h2 className="text-lg font-semibold tracking-tight text-slate-900">{title}</h2>
+      {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+      <div className="mt-4">{children}</div>
+    </section>
+  );
+}
+
+function FeedbackList({ title, items }: { title: string; items: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</p>
+      <ul className="mt-2 space-y-1.5">
+        {items.map((x) => (
+          <li key={x} className="flex items-start gap-2 text-sm text-slate-700">
+            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />
+            {x}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
-function ListOrEmpty({ items, empty }: { items: string[]; empty: string }) {
-  if (items.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
+
+function Stat({ label, value, capitalize = false }: { label: string; value: string; capitalize?: boolean }) {
   return (
-    <ul className="space-y-1.5">
-      {items.map((x) => (
-        <li key={x} className="flex items-start gap-2 text-sm">
-          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground" />
-          {x}
-        </li>
-      ))}
-    </ul>
-  );
-}
-function MiniStat({ label, value, capitalize = false }: { label: string; value: string; capitalize?: boolean }) {
-  return (
-    <div className="rounded-lg border border-border bg-card px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={`text-sm font-semibold ${capitalize ? "capitalize" : ""}`}>{value}</p>
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+      <p className={`mt-1.5 text-sm font-semibold text-slate-900 ${capitalize ? "capitalize" : ""}`}>{value}</p>
     </div>
-  );
-}
-function PriorityPill({ priority }: { priority: string }) {
-  const styles: Record<string, string> = {
-    critical: "border-destructive/30 bg-destructive/10 text-destructive",
-    high: "border-warning/30 bg-warning/10 text-warning",
-    medium: "border-border bg-muted text-muted-foreground",
-    low: "border-border bg-muted text-muted-foreground",
-  };
-  return (
-    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${styles[priority] ?? styles.medium}`}>
-      {priority}
-    </span>
   );
 }

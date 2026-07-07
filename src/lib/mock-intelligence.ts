@@ -947,3 +947,22 @@ export const CHURN_DRIVERS = ROOT_CAUSES.slice(0, 6).map((r) => {
   };
 });
 
+
+// ---------- Trend datasets for the Business Trends section ----------
+export const CATEGORY_TREND = [
+  { month: "Jan", "Navigation & UX": 4, "Missing Features": 3, Pricing: 5, Performance: 2, Integrations: 1 },
+  { month: "Feb", "Navigation & UX": 5, "Missing Features": 4, Pricing: 5, Performance: 2, Integrations: 2 },
+  { month: "Mar", "Navigation & UX": 9, "Missing Features": 4, Pricing: 4, Performance: 3, Integrations: 2 },
+  { month: "Apr", "Navigation & UX": 12, "Missing Features": 5, Pricing: 4, Performance: 3, Integrations: 2 },
+  { month: "May", "Navigation & UX": 14, "Missing Features": 6, Pricing: 3, Performance: 4, Integrations: 3 },
+  { month: "Jun", "Navigation & UX": 17, "Missing Features": 7, Pricing: 3, Performance: 4, Integrations: 3 },
+];
+
+export const COMPETITOR_TREND = [
+  { month: "Jan", Notion: 3, Linear: 2, Airtable: 2 },
+  { month: "Feb", Notion: 4, Linear: 2, Airtable: 2 },
+  { month: "Mar", Notion: 6, Linear: 3, Airtable: 2 },
+  { month: "Apr", Notion: 8, Linear: 3, Airtable: 3 },
+  { month: "May", Notion: 10, Linear: 4, Airtable: 3 },
+  { month: "Jun", Notion: 13, Linear: 5, Airtable: 3 },
+];
