@@ -56,7 +56,15 @@
       };
       
       // Use navigator.sendBeacon for reliable delivery
-      var apiUrl = (window.location.origin || 'http://localhost:8080') + '/api/widget/events';
+      // Determine API URL from widget script source (cross-origin support)
+      var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
+      var apiUrl;
+      if (script && script.src) {
+        var scriptUrl = new URL(script.src);
+        apiUrl = scriptUrl.origin + '/api/widget/events';
+      } else {
+        apiUrl = (window.location.origin || 'http://localhost:8080') + '/api/widget/events';
+      }
       
       if (navigator.sendBeacon) {
         navigator.sendBeacon(apiUrl, JSON.stringify(payload));
