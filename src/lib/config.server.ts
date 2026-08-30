@@ -17,10 +17,23 @@ import process from "node:process";
 //     VITE_ prefix. Never put secrets here — they ship to the browser.
 
 export function getServerConfig() {
+  const appUrl = process.env.VITE_APP_URL || 'http://localhost:8080';
+  const isLocal = appUrl.includes('localhost') || appUrl.includes('127.0.0.1');
+
   return {
-    nodeEnv: process.env.NODE_ENV,
-    // Add server-only values here, e.g.:
-    //   databaseUrl: process.env.DATABASE_URL,
-    //   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    nodeEnv: process.env.NODE_ENV || 'development',
+    appUrl,
+    apiUrl: process.env.VITE_API_URL || (isLocal ? 'http://localhost:8080' : appUrl),
+    widgetUrl: process.env.VITE_WIDGET_URL || (isLocal ? 'http://localhost:8080/widget.js' : `${appUrl}/widget.js`),
+    webhookUrl: process.env.VITE_WEBHOOK_URL || (isLocal ? 'http://localhost:8080/api/webhook' : `${appUrl}/api/webhook`),
+    // Stripe configuration (server-side only)
+    stripeClientId: process.env.STRIPE_CLIENT_ID,
+    stripeClientSecret: process.env.STRIPE_CLIENT_SECRET,
+    stripeRedirectUri: process.env.STRIPE_REDIRECT_URI || `${appUrl}/api/integrations/stripe/oauth/callback`,
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    // AI configuration
+    geminiApiKey: process.env.GEMINI_API_KEY,
+    // Security
+    encryptionKey: process.env.ENCRYPTION_KEY,
   };
 }

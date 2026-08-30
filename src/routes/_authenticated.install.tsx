@@ -4,25 +4,23 @@ import { Check, Copy, Code2, Webhook, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { getWidgetScriptUrl, getWebhookUrl } from "@/lib/config";
 
 export const Route = createFileRoute("/_authenticated/install")({
-  head: () => ({ meta: [{ title: "Install — ExitIQ" }] }),
+  head: () => ({ meta: [{ title: "Install — leaveesy" }] }),
   component: InstallPage,
 });
 
 function InstallPage() {
   const { company } = useAuth();
   const workspaceKey = company?.id ? `wk_${company.id.slice(0, 18)}` : "wk_••••••••••••••••";
-  const webhookUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/api/public/cancellation/${company?.id ?? "your-workspace"}`
-      : "https://exitiq.app/api/public/cancellation/your-workspace";
+  const webhookUrl = getWebhookUrl(company?.id ?? "your-workspace");
 
-  const snippet = `<!-- ExitIQ widget — install once, runs automatically on every cancel -->
-<script src="https://cdn.exitiq.app/v1/widget.js" defer></script>
+  const snippet = `<!-- leaveesy widget — install once, runs automatically on every cancel -->
+<script src="${getWidgetScriptUrl(company?.id ?? "your-company-id")}" defer></script>
 <script>
-  window.ExitIQ = window.ExitIQ || [];
-  ExitIQ.init({
+  window.leaveesy = window.leaveesy || [];
+  leaveesy.init({
     workspaceKey: "${workspaceKey}",
     trigger: "[data-cancel-subscription]", // any element that starts cancellation
     user: { id: currentUser.id, email: currentUser.email, name: currentUser.name },
@@ -32,9 +30,9 @@ function InstallPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-6 py-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Install ExitIQ</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Install leaveesy</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Install once. ExitIQ activates automatically whenever a customer tries to cancel.
+          Install once. leaveesy activates automatically whenever a customer tries to cancel.
         </p>
       </div>
 
@@ -92,7 +90,7 @@ function InstallPage() {
           <ShieldCheck className="mt-0.5 h-4 w-4 text-muted-foreground" />
           <div className="text-xs text-muted-foreground">
             All customer responses are encrypted at rest and never used to train external models.
-            ExitIQ is SOC 2 Type II and GDPR compliant.
+            leaveesy is SOC 2 Type II and GDPR compliant.
           </div>
         </div>
       </div>
@@ -167,3 +165,4 @@ function CopyButton({ text }: { text: string }) {
     </Button>
   );
 }
+
