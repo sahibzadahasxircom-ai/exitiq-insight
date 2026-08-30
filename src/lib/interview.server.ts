@@ -1,6 +1,6 @@
-import { generateText, generateObject, type ModelMessage } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { getGeminiModel } from "./ai-gateway.server";
+import { getProductKnowledgeForAI } from "./product-knowledge.functions";
 
 /**
  * Senior Customer Success interviewer.
@@ -82,44 +82,41 @@ When ending:
 - Append the exact token [INTERVIEW_COMPLETE] on its own at the very end.
 `;
 
-function gateway() {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  return createLovableAiGatewayProvider(key);
-}
-
 export async function generateInterviewerReply(opts: {
   history: { role: "assistant" | "user"; message_content: string }[];
+  companyId?: string;
 }): Promise<{ text: string; complete: boolean }> {
-  const provider = gateway();
-  const messages: ModelMessage[] = [
-    { role: "system", content: INTERVIEW_SYSTEM_PROMPT },
-    ...opts.history.map(
-      (m) => ({ role: m.role, content: m.message_content }) as ModelMessage,
-    ),
-  ];
+  const model = getGeminiModel("gemini-3.6-flash");
+  
+  let prompt = INTERVIEW_SYSTEM_PROMPT + "\n\n";
+
+  // Add product knowledge if companyId is provided
+  let productKnowledgeContext = "";
+  if (opts.companyId) {
+    productKnowledgeContext = await getProductKnowledgeForAI(opts.companyId);
+  }
+
+  if (productKnowledgeContext) {
+    prompt += `# Product Knowledge Context\nYou are interviewing a customer of this company. Here is information about their product, features, and recent updates that you should reference when relevant:\n\n${productKnowledgeContext}\n\n`;
+    prompt += `When the customer mentions specific features, updates, or aspects of the product, reference this knowledge to provide more contextual and informed responses. For example, if they mention a "sidebar redesign" and you know about a recent sidebar update, acknowledge that context in your follow-up.\n\n`;
+  }
 
   // Bootstrap: no prior turns — open the conversation.
   if (opts.history.length === 0) {
-    messages.push({
-      role: "system",
-      content:
-        "Open with ONE short, human sentence acknowledging their decision to cancel, then ONE open question about what led to it. Maximum two sentences total. No thanks-for-your-business, no introductions, no AI mentions.",
-    });
+    prompt += "Open with ONE short, human sentence acknowledging their decision to cancel, then ONE open question about what led to it. Maximum two sentences total. No thanks-for-your-business, no introductions, no AI mentions.\n\n";
   } else {
+    // Add conversation history
+    const transcript = opts.history
+      .map((m) => `${m.role === "user" ? "Customer" : "Interviewer"}: ${m.message_content}`)
+      .join("\n");
+    prompt += `Conversation so far:\n${transcript}\n\n`;
+    
     // Ongoing: force investigator reasoning about what's still unknown.
-    messages.push({
-      role: "system",
-      content:
-        "Think silently, output only the human reply. Internally figure out what you already know, what you can infer, what is still missing across the 12 objectives, and which single next question yields the highest-value insight (deeper probe on the current topic — nature → impact → causal weight → retention counterfactual — or a clean transition to a new objective if covered). Your VISIBLE output must be ONE or TWO short natural sentences ending in ONE sharp question, and nothing else. Never expose your reasoning: no words like KNOW, INFER, UNKNOWN, objective, step, framework, analysis; no lists; no meta preambles ('Based on what you shared', 'Let me think', 'My next question'); no headings, brackets, or markdown. Never restate or paraphrase the customer's last message. Never ask something already inferable. Never open with 'Understood', 'Thanks', 'Got it', 'That makes sense', or 'So you're saying'. If primary reason, root cause, one of {competitor / missing feature / pricing nature / onboarding / expectation gap}, business impact, and retention counterfactual are all clear — end the interview now with a short human closing (no reasoning shown) instead of asking another question.",
-    });
+    prompt += "Think silently, output only the human reply. Internally figure out what you already know, what you can infer, what is still missing across the 12 objectives, and which single next question yields the highest-value insight (deeper probe on the current topic — nature → impact → causal weight → retention counterfactual — or a clean transition to a new objective if covered). Your VISIBLE output must be ONE or TWO short natural sentences ending in ONE sharp question, and nothing else. Never expose your reasoning: no words like KNOW, INFER, UNKNOWN, objective, step, framework, analysis; no lists; no meta preambles ('Based on what you shared', 'Let me think', 'My next question'); no headings, brackets, or markdown. Never restate or paraphrase the customer's last message. Never ask something already inferable. Never open with 'Understood', 'Thanks', 'Got it', 'That makes sense', or 'So you're saying'. If primary reason, root cause, one of {competitor / missing feature / pricing nature / onboarding / expectation gap}, business impact, and retention counterfactual are all clear — end the interview now with a short human closing (no reasoning shown) instead of asking another question.\n\n";
   }
 
-  const { text } = await generateText({
-    model: provider("google/gemini-2.5-flash"),
-    messages,
-    temperature: 0.7,
-  });
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
 
   const complete = text.includes("[INTERVIEW_COMPLETE]");
   return { text: text.replace("[INTERVIEW_COMPLETE]", "").trim(), complete };
@@ -194,17 +191,51 @@ export type ExtractedInsight = z.infer<typeof InsightSchema>;
 export async function extractInsights(
   history: { role: "assistant" | "user"; message_content: string }[],
 ): Promise<ExtractedInsight> {
-  const provider = gateway();
+  const model = getGeminiModel("gemini-3.6-flash");
   const transcript = history
     .map((m) => `${m.role === "user" ? "Customer" : "Interviewer"}: ${m.message_content}`)
     .join("\n");
-  const { object } = await generateObject({
-    model: provider("google/gemini-2.5-pro"),
-    schema: InsightSchema,
-    system:
-      "You are a senior SaaS churn analyst. Read the exit interview transcript and produce a rigorous structured intelligence report. Be precise and specific. NEVER invent facts that are not supported by the transcript. If something is not mentioned, use an empty array, null, or a neutral value. Prefer the customer's own words in the quote. Recommended actions must be concrete and derived from what the customer actually said.",
-    prompt: `Exit interview transcript:\n\n${transcript}`,
-    temperature: 0.2,
-  });
-  return object;
+  
+  const prompt = `You are a senior SaaS churn analyst. Read the exit interview transcript and produce a rigorous structured intelligence report. Be precise and specific. NEVER invent facts that are not supported by the transcript. If something is not mentioned, use an empty array, null, or a neutral value. Prefer the customer's own words in the quote. Recommended actions must be concrete and derived from what the customer actually said.
+
+Exit interview transcript:
+
+${transcript}
+
+Return your response as a valid JSON object with this exact structure:
+{
+  "executive_summary": "2-4 sentence executive summary written for a founder. Concrete, no fluff.",
+  "churn_reason": "One-line plain-language PRIMARY reason the customer churned.",
+  "secondary_reasons": ["Other contributing factors mentioned. Empty array if none."],
+  "root_cause": "The deeper underlying root cause behind the surface reason.",
+  "category": "onboarding|features|pricing|competitor|value|ux|activation|support|other",
+  "competitor_mentioned": "Name of competitor mentioned, or null if none.",
+  "missing_features": ["List of missing features mentioned. Empty array if none."],
+  "suggestions": ["Product/experience improvements the customer suggested or clearly implied. Empty array if none."],
+  "pricing_issue": true|false,
+  "onboarding_issue": true|false,
+  "support_issue": true|false,
+  "sentiment": "positive|negative|neutral|frustrated|disappointed",
+  "journey_failure_point": "signup|onboarding|activation|first_use|ongoing_use|upgrade|other",
+  "retention_opportunity": "One sentence: is there a realistic path to have retained this customer, and what would it have required? Say 'None' if no.",
+  "confidence_score": 0.0-1.0,
+  "recommended_actions": ["2-5 concrete actions the product/CS team should take based on this interview."],
+  "tags": ["3-6 short lowercase tags categorising this interview (e.g. 'pricing', 'stripe-competitor', 'missing-api', 'onboarding-friction')."],
+  "quote": "The single most revealing direct quote from the customer, verbatim.",
+  "summary": "Short 1-2 sentence summary (used as a dashboard subtitle)."
+}
+
+Respond ONLY with the JSON object, no other text.`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  
+  // Parse JSON response
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error("Failed to parse JSON response from Gemini");
+  }
+  
+  const parsed = JSON.parse(jsonMatch[0]);
+  return InsightSchema.parse(parsed);
 }

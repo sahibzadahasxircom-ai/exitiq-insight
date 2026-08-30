@@ -3,7 +3,7 @@ import { Swords, ArrowRight, ArrowUpRight, ArrowDownRight, Minus, Lightbulb } fr
 import { COMPETITORS, formatMoney } from "@/lib/mock-intelligence";
 
 export const Route = createFileRoute("/_authenticated/competitors")({
-  head: () => ({ meta: [{ title: "Competitor Intelligence — ExitIQ" }] }),
+  head: () => ({ meta: [{ title: "Competitor Intelligence — leaveesy" }] }),
   component: Competitors,
 });
 
@@ -90,3 +90,4 @@ function TrendPill({ trend }: { trend: "up" | "down" | "flat" }) {
   if (trend === "down") return <span className="inline-flex items-center gap-1 text-xs font-medium text-success"><ArrowDownRight className="h-3 w-3" /> losing ground</span>;
   return <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"><Minus className="h-3 w-3" /> steady</span>;
 }
+

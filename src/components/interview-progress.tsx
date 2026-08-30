@@ -51,3 +51,4 @@ export function InterviewProgress({ stage }: { stage: Stage }) {
 export function stageLabel(stage: Stage) {
   return STAGES.find((s) => s.key === stage)?.label ?? stage;
 }
+

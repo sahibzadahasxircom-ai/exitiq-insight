@@ -1,22 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Sparkles, Lightbulb, Target, TrendingUp, ArrowUpRight, ArrowDownRight, Minus,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { listInsights } from "@/lib/interview.functions";
 import {
   INTELLIGENCE_CARDS, ROOT_CAUSES, FEATURE_REQUESTS, RECOMMENDATIONS,
   CATEGORY_LABEL, formatMoney,
 } from "@/lib/mock-intelligence";
 
 export const Route = createFileRoute("/_authenticated/insights")({
-  head: () => ({ meta: [{ title: "AI Intelligence Center — ExitIQ" }] }),
+  head: () => ({ meta: [{ title: "AI Intelligence Center — leaveesy" }] }),
   component: IntelligenceCenter,
 });
 
 function IntelligenceCenter() {
   const [tab, setTab] = useState("overview");
+  const listFn = useServerFn(listInsights);
+  const { data: insights = [] } = useQuery({
+    queryKey: ["insights"],
+    queryFn: () => listFn({ data: undefined }),
+    retry: false, // Don't retry on error to avoid hanging
+  });
 
+  // For now, always use mock data for display
+  // TODO: Replace with real data aggregation when sufficient insights exist
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <div>
@@ -163,6 +174,33 @@ function IntelligenceCenter() {
   );
 }
 
+function InsightsLoading() {
+  return (
+    <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="animate-pulse space-y-4">
+        <div className="h-8 w-1/3 rounded bg-slate-200" />
+        <div className="h-4 w-1/4 rounded bg-slate-200" />
+        <div className="grid grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 rounded bg-slate-200" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InsightsError() {
+  return (
+    <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
+        <p className="text-lg font-medium text-red-900">Failed to load intelligence data</p>
+        <p className="mt-2 text-sm text-red-700">Please refresh the page or try again later.</p>
+      </div>
+    </div>
+  );
+}
+
 function Stat({ label, value, icon: Icon }: { label: string; value: string; icon?: React.ComponentType<{ className?: string }> }) {
   return (
     <div className="rounded-lg border border-border bg-card px-3 py-2">
@@ -192,3 +230,4 @@ function TrendPill({ trend }: { trend: "up" | "down" | "flat" }) {
   if (trend === "down") return <span className="inline-flex items-center gap-1 text-xs font-medium text-success"><ArrowDownRight className="h-3 w-3" /> falling</span>;
   return <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"><Minus className="h-3 w-3" /> flat</span>;
 }
+

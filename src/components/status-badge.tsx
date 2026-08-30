@@ -19,3 +19,4 @@ export function StatusBadge({ status }: { status: InterviewStatus }) {
     </Badge>
   );
 }
+

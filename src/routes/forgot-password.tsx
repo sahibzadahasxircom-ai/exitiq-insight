@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset password — ExitIQ" }] }),
+  head: () => ({ meta: [{ title: "Reset password — leaveesy" }] }),
   component: ForgotPassword,
 });
 
@@ -54,3 +54,4 @@ function ForgotPassword() {
     </div>
   );
 }
+

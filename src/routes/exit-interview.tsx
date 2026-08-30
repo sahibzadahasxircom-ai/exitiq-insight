@@ -25,11 +25,11 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/exit-interview")({
   head: () => ({
     meta: [
-      { title: "Live Demo — ExitIQ" },
+      { title: "Live Demo — leaveesy" },
       {
         name: "description",
         content:
-          "Watch ExitIQ run a live cancellation interview and turn the conversation into churn intelligence in real time.",
+          "Watch leaveesy run a live cancellation interview and turn the conversation into churn intelligence in real time.",
       },
     ],
   }),
@@ -409,13 +409,7 @@ function DemoPlayer() {
       <header className="border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <span className="text-[11px] font-bold">EQ</span>
-            </div>
-            <span className="text-sm font-semibold tracking-tight">ExitIQ</span>
-            <span className="ml-2 hidden text-xs text-muted-foreground sm:inline">
-              · Interactive demo
-            </span>
+            <img src="/leaveesy.png" alt="leaveesy" className="h-32 w-auto object-contain" />
           </Link>
           <Link to="/">
             <Button variant="ghost" size="sm" className="gap-1.5">
@@ -471,7 +465,7 @@ function DemoPlayer() {
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
               your-saas.com · Cancellation flow
             </p>
-            <p className="mt-0.5 text-sm font-medium">ExitIQ widget — live conversation</p>
+            <p className="mt-0.5 text-sm font-medium">leaveesy widget — live conversation</p>
           </div>
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8">
             <div className="mx-auto max-w-2xl space-y-6">
@@ -673,3 +667,4 @@ function InsightRow({
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+

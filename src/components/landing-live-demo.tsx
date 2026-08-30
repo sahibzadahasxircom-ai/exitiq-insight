@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Activity, DollarSign, Swords, TrendingDown, Sparkles, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MousePointer2, MessageSquare, TrendingUp, Lightbulb, BarChart3, CheckCircle2, ArrowRight, User, Zap, Database } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -7,141 +7,66 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Line,
-  LineChart,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 
-/**
- * Auto-playing, fully visual ExitIQ demo for the landing page.
- * - No backend, no OpenAI, no user input.
- * - Rotates through 3 scripted interview scenarios (Missing feature, Pricing, Competitor),
- *   then reveals the founder dashboard aggregating all of them. Loops forever.
- */
+type DemoPhase = "website" | "text1" | "text2" | "form" | "interview" | "flow" | "dashboard";
 
-type Turn = { role: "ai" | "user"; text: string };
-type Scenario = {
-  id: string;
-  label: string;
-  category: string;
-  rootCause: string;
-  competitor: string | "—";
-  pricingIssue: "Yes" | "No";
-  revenue: string;
-  winback: string;
-  script: Turn[];
+const USERS = [
+  { name: "Mark", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" },
+  { name: "Harry", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" },
+  { name: "Tom", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" },
+  { name: "Sarah", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" },
+  { name: "Genna", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" },
+];
+
+const INTERVIEW_SCRIPT = [
+  { role: "ai" as const, text: "Thank you for using our platform. What prompted your decision to leave?" },
+  { role: "user" as const, text: "We needed more advanced reporting features for our enterprise team." },
+  { role: "ai" as const, text: "Could you share which specific reports were most important to you?" },
+  { role: "user" as const, text: "Custom cohort analysis by plan type and revenue attribution." },
+  { role: "ai" as const, text: "Did you evaluate any alternatives before making this decision?" },
+  { role: "user" as const, text: "Yes, we tested Mixpanel and Amplitude for comparison." },
+  { role: "ai" as const, text: "What stood out about those platforms compared to ours?" },
+  { role: "user" as const, text: "Their custom report builders and real-time data streaming." },
+  { role: "ai" as const, text: "We appreciate your honest feedback. This will help us improve." },
+];
+
+const DASHBOARD_DATA = {
+  causes: [
+    { name: "Missing features", value: 42, color: "#3b82f6" },
+    { name: "Pricing", value: 23, color: "#64748b" },
+    { name: "Competitor", value: 18, color: "#94a3b8" },
+    { name: "Onboarding", value: 11, color: "#cbd5e1" },
+    { name: "Other", value: 6, color: "#e2e8f0" },
+  ],
+  trend: [
+    { week: "W1", causes: 12 },
+    { week: "W2", causes: 18 },
+    { week: "W3", causes: 24 },
+    { week: "W4", causes: 31 },
+    { week: "W5", causes: 39 },
+    { week: "W6", causes: 48 },
+  ],
 };
 
-const SCENARIOS: Scenario[] = [
-  {
-    id: "feature",
-    label: "Missing feature",
-    category: "Missing features",
-    rootCause: "No cohort reporting",
-    competitor: "ChartMogul",
-    pricingIssue: "No",
-    revenue: "$2,400 / mo",
-    winback: "High (8/10)",
-    script: [
-      { role: "ai", text: "Sorry to see you go. Before you cancel — what stopped working for you?" },
-      { role: "user", text: "Honestly, the reporting just wasn't flexible enough for my team." },
-      { role: "ai", text: "Got it. Which specific report did you try to build first?" },
-      { role: "user", text: "A weekly revenue cohort by plan — we ended up exporting to a spreadsheet." },
-      { role: "ai", text: "Were you comparing us to another tool while you were trying to build that?" },
-      { role: "user", text: "Yeah, we tested ChartMogul last week and the cohort view was already there." },
-      { role: "ai", text: "If we shipped flexible cohort reporting next month, would you stay?" },
-      { role: "user", text: "Probably yes. That's the only blocker right now." },
-      { role: "ai", text: "Thank you — that's incredibly useful. Your feedback has been shared with the product team." },
-    ],
-  },
-  {
-    id: "pricing",
-    label: "Pricing",
-    category: "Pricing",
-    rootCause: "Per-seat cost scaled faster than value",
-    competitor: "—",
-    pricingIssue: "Yes",
-    revenue: "$1,850 / mo",
-    winback: "Medium (6/10)",
-    script: [
-      { role: "ai", text: "Before you cancel — can you share what changed for your team recently?" },
-      { role: "user", text: "We grew from 8 to 22 seats and the bill nearly tripled overnight." },
-      { role: "ai", text: "Understood. Is it the per-seat model itself, or the specific price point?" },
-      { role: "user", text: "The per-seat model. Half our seats are read-only viewers." },
-      { role: "ai", text: "Got it. Would a viewer-tier at a lower price change your decision?" },
-      { role: "user", text: "100%. That would keep us on the platform." },
-      { role: "ai", text: "Are you evaluating other tools, or is this purely a cost decision?" },
-      { role: "user", text: "Purely cost. The product itself is great." },
-      { role: "ai", text: "Thanks — I've flagged this for the pricing team as high-priority." },
-    ],
-  },
-  {
-    id: "competitor",
-    label: "Competitor switch",
-    category: "Competitor",
-    rootCause: "Native Slack workflows on competitor",
-    competitor: "Linear",
-    pricingIssue: "No",
-    revenue: "$3,120 / mo",
-    winback: "Low (3/10)",
-    script: [
-      { role: "ai", text: "Sorry to see you go. What made you look at other tools?" },
-      { role: "user", text: "Our engineering team standardized on Linear last quarter." },
-      { role: "ai", text: "Understood. Was it a specific feature, or a broader workflow fit?" },
-      { role: "user", text: "Their Slack triage and cycle planning felt native to how we work." },
-      { role: "ai", text: "Did our integrations play a role in the decision?" },
-      { role: "user", text: "Yeah — your Slack integration required custom setup for every project." },
-      { role: "ai", text: "If we shipped first-class Slack workflows, would you reconsider?" },
-      { role: "user", text: "Honestly, we're two months in already. Probably not now." },
-      { role: "ai", text: "Appreciated. I've logged Linear as the competitor and shared the workflow gap." },
-    ],
-  },
-];
-
-const ROOT_CAUSES = [
-  { name: "Missing features", value: 42, color: "var(--primary)" },
-  { name: "Pricing", value: 23, color: "color-mix(in oklab, var(--primary) 65%, var(--muted-foreground))" },
-  { name: "Competitor", value: 18, color: "color-mix(in oklab, var(--primary) 40%, var(--muted-foreground))" },
-  { name: "Onboarding", value: 11, color: "color-mix(in oklab, var(--muted-foreground) 70%, transparent)" },
-  { name: "Other", value: 6, color: "color-mix(in oklab, var(--muted-foreground) 40%, transparent)" },
-];
-
-const TREND = [
-  { week: "W1", churn: 5.8, saved: 12 },
-  { week: "W2", churn: 5.4, saved: 18 },
-  { week: "W3", churn: 4.9, saved: 24 },
-  { week: "W4", churn: 4.3, saved: 31 },
-  { week: "W5", churn: 3.8, saved: 39 },
-  { week: "W6", churn: 3.2, saved: 48 },
-];
-
-const COMPETITORS = [
-  { name: "ChartMogul", mentions: 31 },
-  { name: "Linear", mentions: 24 },
-  { name: "Baremetrics", mentions: 19 },
-  { name: "ProfitWell", mentions: 12 },
-];
-
-const FEATURE_REQUESTS = [
-  { name: "Cohort reporting", count: 38 },
-  { name: "Viewer-tier pricing", count: 27 },
-  { name: "Native Slack workflows", count: 21 },
-  { name: "SSO / SAML", count: 14 },
-];
-
 export function LandingLiveDemo() {
-  const [phase, setPhase] = useState<"interview" | "dashboard">("interview");
-  const [scenarioIdx, setScenarioIdx] = useState(0);
-  const [visible, setVisible] = useState<Turn[]>([]);
+  const [phase, setPhase] = useState<DemoPhase>("website");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [messages, setMessages] = useState<{ role: "ai" | "user"; text: string }[]>([]);
   const [typing, setTyping] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scenario = SCENARIOS[scenarioIdx];
+  const [overlayText, setOverlayText] = useState("");
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [signOutClicked, setSignOutClicked] = useState(false);
+  const [centerTextLines, setCenterTextLines] = useState<string[]>([]);
+  const [showTextOverlay, setShowTextOverlay] = useState(false);
 
   useEffect(() => {
+    if (!isPlaying) return;
+    
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
@@ -152,315 +77,543 @@ export function LandingLiveDemo() {
       });
     }
 
-    async function playScenario(idx: number) {
-      setScenarioIdx(idx);
-      setPhase("interview");
-      setVisible([]);
-      setTyping(false);
-      const script = SCENARIOS[idx].script;
-      for (let i = 0; i < script.length; i++) {
-        if (cancelled) return;
-        const turn = script[i];
-        if (turn.role === "ai") {
-          setTyping(true);
-          await wait(850);
-          if (cancelled) return;
-          setTyping(false);
-          setVisible((v) => [...v, turn]);
-        } else {
-          await wait(650);
-          if (cancelled) return;
-          setVisible((v) => [...v, turn]);
-        }
-        await wait(turn.role === "ai" ? 900 : 1200);
-      }
-    }
+    async function playFullFlow() {
+      while (!cancelled && isPlaying) {
+        // Phase 1: SaaS Website with background cards
+        setPhase("website");
+        setShowForm(false);
+        setMessages([]);
+        setSignOutClicked(false);
+        setCenterTextLines([]);
+        setShowTextOverlay(false);
+        setOverlayText("");
+        setZoomLevel(1);
+        await wait(3000);
 
-    async function run() {
-      while (!cancelled) {
-        for (let i = 0; i < SCENARIOS.length && !cancelled; i++) {
-          await playScenario(i);
-          if (cancelled) return;
-          await wait(1200);
+        // Phase 2: Animated text "Your Users Cancel Subscription or Sign Out" (wipe effect)
+        setPhase("text1");
+        setCenterTextLines(["Your Users Cancel Subscription or Sign Out"]);
+        setShowTextOverlay(true);
+        await wait(4000);
+
+        // Phase 3: Add second line "leaveesy activates instantly when users sign out"
+        setPhase("text2");
+        setCenterTextLines(["Your Users Cancel Subscription or Sign Out", "leaveesy activates instantly when users sign out"]);
+        await wait(3000);
+
+        // Sign out button turns red
+        setSignOutClicked(true);
+        await wait(1500);
+
+        // Phase 4: Form
+        setPhase("form");
+        setShowForm(true);
+        setCenterTextLines([]);
+        setShowTextOverlay(false);
+        setOverlayText("leaveesy pre-form appears");
+        await wait(6000);
+
+        // Phase 5: Interview
+        setPhase("interview");
+        setShowForm(false);
+        setOverlayText("AI-powered conversation extracts insights");
+        setMessages([]);
+        
+        for (const turn of INTERVIEW_SCRIPT) {
+          if (cancelled || !isPlaying) return;
+          if (turn.role === "ai") {
+            setTyping(true);
+            await wait(1000); // Faster typing
+            if (cancelled || !isPlaying) return;
+            setTyping(false);
+          } else {
+            await wait(800); // Faster user response
+          }
+          setMessages((prev) => [...prev, turn]);
+          await wait(1500); // Faster message display
         }
-        if (cancelled) return;
+        if (cancelled || !isPlaying) return;
+        await wait(1500);
+
+        // Phase 6: Flow Visualization
+        setPhase("flow");
+        setOverlayText("Interviews flow through leaveesy extraction");
+        await wait(6000);
+
+        // Phase 7: Zoom to Dashboard
+        setOverlayText("Dashboard reveals actionable intelligence");
+        setZoomLevel(1.8);
+        await wait(3000);
+
+        // Phase 8: Dashboard
         setPhase("dashboard");
-        await wait(9000);
+        await wait(500);
+        setZoomLevel(1);
+        setOverlayText("");
+        await wait(7000);
       }
     }
 
-    run();
+    playFullFlow();
     return () => {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, []);
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [visible, typing]);
-
-  const insightCount = useMemo(() => visible.filter((v) => v.role === "user").length, [visible]);
+  }, [isPlaying]);
 
   return (
-    <div className="relative rounded-2xl border border-border bg-card p-3 shadow-elevated">
-      {/* faux browser chrome */}
-      <div className="flex items-center justify-between px-3 py-2">
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />
-          <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />
-          <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />
-        </div>
-        <span className="rounded-md border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
-          {phase === "interview" ? "your-saas.com / cancel" : "app.exitiq.com / dashboard"}
-        </span>
-        <span className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
-          <span className={`h-1.5 w-1.5 rounded-full ${phase === "interview" ? "bg-success animate-pulse" : "bg-primary"}`} />
-          {phase === "interview" ? `Live · ${scenario.label}` : "Insights generated"}
-        </span>
-      </div>
-
-      {/* scenario progress rail */}
-      {phase === "interview" && (
-        <div className="mx-3 mb-3 flex items-center gap-2">
-          {SCENARIOS.map((s, i) => (
-            <div key={s.id} className="flex flex-1 items-center gap-2">
-              <span
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  i < scenarioIdx ? "bg-primary/70" : i === scenarioIdx ? "bg-primary" : "bg-border"
-                }`}
-              />
-              <span
-                className={`hidden text-[10px] font-medium sm:inline ${
-                  i === scenarioIdx ? "text-foreground" : "text-muted-foreground"
-                }`}
-              >
-                {s.label}
-              </span>
+    <div className="relative w-full overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
+      <div className="relative h-[500px] w-full overflow-hidden">
+        
+        {/* Play Button Overlay */}
+        {!isPlaying && (
+          <div className="absolute inset-0 bg-slate-900/80 flex flex-col items-center justify-center z-50">
+            <h2 className="text-3xl font-bold text-white mb-4">HOW IT WORKS?</h2>
+            <button
+              onClick={() => setIsPlaying(true)}
+              className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-colors shadow-xl shadow-blue-500/30"
+            >
+              <svg className="h-8 w-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </button>
+            <p className="text-slate-300 mt-4 text-sm">Click to start demo</p>
+          </div>
+        )}
+        
+        {/* Overlay Text Bar - Left side */}
+        {overlayText && isPlaying && (
+          <>
+            <div className="absolute bottom-4 left-4 z-50 bg-slate-900/90 text-white px-4 py-2 rounded-lg shadow-xl backdrop-blur-sm transition-all duration-300">
+              <p className="text-xs font-medium whitespace-nowrap">{overlayText}</p>
             </div>
-          ))}
-        </div>
-      )}
+          </>
+        )}
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
-        {/* Left: chat / dashboard switch */}
-        <div className="md:col-span-3 rounded-xl border border-border/70 bg-muted/30 p-4">
-          {phase === "interview" ? (
-            <div className="flex h-[440px] flex-col">
-              <div className="mb-3 flex items-center gap-2 border-b border-border/60 pb-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground">
-                  <span className="text-[9px] font-bold">EQ</span>
+        {/* Phase 1: SaaS Website with background cards */}
+        {(phase === "website" || phase === "text1" || phase === "text2") && (
+          <div className="absolute inset-0 bg-white flex flex-col">
+            {/* Header */}
+            <div className="border-b border-slate-200 bg-white px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">S</span>
+                  </div>
+                  <span className="font-semibold text-slate-900">Your Software</span>
                 </div>
-                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                  ExitIQ · AI Interviewer
-                </span>
-                <span className="ml-auto rounded-full border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
-                  Scenario {scenarioIdx + 1} of {SCENARIOS.length}
-                </span>
-              </div>
-              <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto pr-1">
-                {visible.map((t, i) => (
-                  <div
-                    key={i}
-                    className={`flex ${t.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
-                        t.role === "user"
-                          ? "rounded-tr-md bg-foreground text-background"
-                          : "rounded-tl-md bg-background border border-border text-foreground"
-                      }`}
-                    >
-                      {t.text}
-                    </div>
-                  </div>
-                ))}
-                {typing && (
-                  <div className="flex justify-start animate-fade-in">
-                    <div className="rounded-2xl rounded-tl-md border border-border bg-background px-3 py-2">
-                      <TypingDots />
-                    </div>
-                  </div>
-                )}
+                <button 
+                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    signOutClicked ? "bg-red-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  Sign Out
+                </button>
               </div>
             </div>
-          ) : (
-            <div className="flex h-[440px] flex-col animate-fade-in">
-              <div className="mb-3 flex items-center justify-between border-b border-border/60 pb-3">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                  Churn intelligence · last 30 days
-                </span>
-                <span className="text-[10px] text-muted-foreground">247 interviews analyzed</span>
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                <Kpi icon={<TrendingDown className="h-3.5 w-3.5" />} label="Churn rate" value="3.2%" delta="-2.6%" positive />
-                <Kpi icon={<DollarSign className="h-3.5 w-3.5" />} label="Revenue saved" value="$48.2k" delta="+18%" positive />
-                <Kpi icon={<Activity className="h-3.5 w-3.5" />} label="Completion" value="91%" delta="+4%" positive />
-                <Kpi icon={<Users className="h-3.5 w-3.5" />} label="Interviews" value="247" delta="+62" positive />
-              </div>
-              <div className="mt-3 grid flex-1 grid-cols-2 gap-2">
-                <div className="rounded-lg border border-border bg-background p-3">
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="text-[11px] font-medium">Churn trend</span>
-                    <span className="text-[10px] text-success">↓ 44%</span>
+
+            {/* Content - Empty cards */}
+            <div className="flex-1 p-6 relative">
+              <div className="max-w-4xl mx-auto">
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-32 rounded-xl bg-slate-50 border border-slate-200 p-4">
+                      <div className="h-4 w-20 bg-slate-200 rounded mb-3" />
+                      <div className="h-8 w-16 bg-slate-300 rounded" />
+                    </div>
+                  ))}
+                </div>
+                <div className="h-64 rounded-xl bg-slate-50 border border-slate-200 p-4">
+                  <div className="h-4 w-32 bg-slate-200 rounded mb-4" />
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-12 bg-slate-100 rounded-lg" />
+                    ))}
                   </div>
-                  <ResponsiveContainer width="100%" height={140}>
-                    <AreaChart data={TREND}>
+                </div>
+              </div>
+
+              {/* Text overlay with wipe effect - background stays visible */}
+              {showTextOverlay && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-4">
+                    {centerTextLines.map((line, i) => (
+                      <h1 
+                        key={i} 
+                        className="text-3xl font-bold text-slate-900 animate-in slide-in-from-bottom-4 duration-700"
+                        style={{ animationDelay: `${i * 300}ms` }}
+                      >
+                        {line}
+                      </h1>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Phase 2: Form */}
+        {phase === "form" && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">S</span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-base text-slate-900">Your Software</div>
+                    <div className="text-xs text-slate-500">Exit Interview</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  Before you go, help us improve
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  We'd love to understand why you're leaving. Your feedback helps us build better products.
+                </p>
+              </div>
+
+              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold text-sm transition-colors">
+                Let's Continue
+              </button>
+
+              <div className="mt-4 text-center text-xs text-slate-500">
+                Powered by leaveesy
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Phase 3: Interview */}
+        {phase === "interview" && (
+          <div className="absolute inset-0 bg-slate-50">
+            <div className="h-full flex flex-col">
+              <div className="border-b border-slate-200 bg-white px-6 py-4">
+                <div className="flex items-center justify-between max-w-3xl mx-auto">
+                  <div className="flex items-center gap-2">
+                    <img src="/leaveesy.png" alt="leaveesy" className="h-16 w-auto object-contain" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-xs text-slate-500">Live</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-6 py-8">
+                <div className="max-w-3xl mx-auto space-y-4">
+                  {messages.map((msg, i) => (
+                    <div key={i} className={`flex items-start gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      {msg.role === "ai" && (
+                        <div className="flex flex-col items-center gap-1">
+                          <img src="/leaveesy.png" alt="leaveesy" className="h-14 w-auto object-contain" />
+                          <span className="text-[10px] text-slate-500">leaveesy</span>
+                        </div>
+                      )}
+                      <div className={`max-w-[60%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
+                        msg.role === "user"
+                          ? "rounded-tr-md bg-slate-900 text-white"
+                          : "rounded-tl-md bg-white border border-slate-200 text-slate-900"
+                      }`}>
+                        {msg.text}
+                      </div>
+                      {msg.role === "user" && (
+                        <div className="flex flex-col items-center">
+                          <div className="h-10 w-10 rounded-full bg-slate-700 overflow-hidden shrink-0">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Mark" className="h-full w-full object-cover" />
+                          </div>
+                          <span className="text-[10px] text-slate-500 mt-1">Mark</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {typing && (
+                    <div className="flex items-start gap-2 justify-start">
+                      <div className="flex flex-col items-center gap-1">
+                        <img src="/leaveesy.png" alt="leaveesy" className="h-14 w-auto object-contain" />
+                        <span className="text-[10px] text-slate-500">leaveesy</span>
+                      </div>
+                      <div className="rounded-xl rounded-tl-md bg-white border border-slate-200 px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "0.15s" }} />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "0.3s" }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Phase 4: Flow Visualization */}
+        {phase === "flow" && (
+          <div className="absolute inset-0 bg-white flex items-center justify-center p-8">
+            <div className="w-full max-w-7xl">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">leaveesy Data Extraction</h2>
+                <p className="text-sm text-slate-500">Powered by high professional LLMs model</p>
+              </div>
+              
+              <div className="flex items-center justify-between gap-8">
+                {/* Users with individual lines */}
+                <div className="flex flex-col gap-6 w-56">
+                  {USERS.map((user, i) => (
+                    <div key={user.name} className="flex items-center gap-3">
+                      <div className="h-14 w-14 rounded-full overflow-hidden border-2 border-slate-300 shadow-md shrink-0">
+                        <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-slate-900 text-sm font-semibold">{user.name}</span>
+                      </div>
+                      {/* Individual line */}
+                      <div className="flex-1 h-0.5 bg-slate-200 relative overflow-hidden ml-3">
+                        <div className="absolute inset-0 bg-slate-900 animate-pulse" />
+                        <div
+                          className="absolute h-2 w-2 bg-slate-900 rounded-full"
+                          style={{
+                            animation: `travelLine 1.5s ease-in-out infinite`,
+                            animationDelay: `${i * 0.3}s`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Lines converge to single line */}
+                <div className="relative">
+                  <svg className="w-40 h-64" viewBox="0 0 160 256">
+                    <path d="M 0 26 L 160 128" stroke="#1e293b" strokeWidth="2" fill="none" className="animate-pulse" />
+                    <path d="M 0 77 L 160 128" stroke="#1e293b" strokeWidth="2" fill="none" className="animate-pulse" style={{ animationDelay: "0.1s" }} />
+                    <path d="M 0 128 L 160 128" stroke="#1e293b" strokeWidth="2" fill="none" className="animate-pulse" style={{ animationDelay: "0.2s" }} />
+                    <path d="M 0 179 L 160 128" stroke="#1e293b" strokeWidth="2" fill="none" className="animate-pulse" style={{ animationDelay: "0.3s" }} />
+                    <path d="M 0 230 L 160 128" stroke="#1e293b" strokeWidth="2" fill="none" className="animate-pulse" style={{ animationDelay: "0.4s" }} />
+                    <circle r="5" fill="#3b82f6" className="animate-ping" style={{ animationDuration: "1s" }} />
+                  </svg>
+                </div>
+
+                {/* Data Extraction Block */}
+                <div className="bg-white rounded-2xl p-8 text-center border-2 border-slate-900 shadow-2xl w-64">
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    <Database className="h-12 w-12 text-slate-900 animate-pulse" />
+                    <div className="h-3 w-3 bg-green-500 rounded-full animate-ping" />
+                  </div>
+                  <div className="text-slate-900 font-bold text-xl mb-2">Data Extraction</div>
+                  <div className="text-slate-500 text-sm mb-1">Trained LLM</div>
+                  <div className="text-slate-400 text-xs">leaveesy</div>
+                  <div className="flex gap-1 justify-center mt-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="h-1.5 w-12 bg-slate-400 rounded animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Single line to dashboard */}
+                <div className="flex-1 h-0.5 bg-slate-200 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-slate-900 animate-pulse" />
+                  {[...Array(3)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute h-2 w-2 bg-slate-900 rounded-full"
+                      style={{
+                        animation: `travelLine 1.5s ease-in-out infinite`,
+                        animationDelay: `${i * 0.5}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Dashboard Block */}
+                <div className="bg-white rounded-2xl p-8 text-center border-2 border-slate-900 shadow-2xl w-64">
+                  <BarChart3 className="h-12 w-12 text-slate-900 mx-auto mb-4 animate-pulse" />
+                  <div className="text-slate-900 font-bold text-xl mb-2">Dashboard</div>
+                  <div className="text-slate-500 text-sm">Executive Brief</div>
+                </div>
+              </div>
+            </div>
+            <style>{`
+              @keyframes travelLine {
+                0% { left: 0%; opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { left: 100%; opacity: 0; }
+              }
+            `}</style>
+          </div>
+        )}
+
+        {/* Phase 5 & 6: Dashboard */}
+        {phase === "dashboard" && (
+          <div 
+            className="absolute inset-0 bg-slate-100 p-4 transition-transform duration-1000 overflow-hidden"
+            style={{ transform: `scale(${zoomLevel})` }}
+          >
+            <div className="h-full flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4 px-2 shrink-0">
+                <img src="/leaveesy.png" alt="leaveesy" className="h-14 w-auto object-contain" />
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-500">Last 30 days</span>
+                  <div className="h-6 w-6 rounded-full bg-slate-300" />
+                </div>
+              </div>
+
+              {/* Dashboard Grid */}
+              <div className="flex-1 grid grid-cols-4 grid-rows-4 gap-3 overflow-hidden">
+                {/* Top Stats Row */}
+                <div className="col-span-1 row-span-1 bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                  <div className="text-[10px] text-slate-500 mb-1">Total Interviews</div>
+                  <div className="text-xl font-bold text-slate-900">247</div>
+                  <div className="text-[10px] text-green-600 mt-1">+23 this week</div>
+                </div>
+                <div className="col-span-1 row-span-1 bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                  <div className="text-[10px] text-slate-500 mb-1">Churn Rate</div>
+                  <div className="text-xl font-bold text-slate-900">3.2%</div>
+                  <div className="text-[10px] text-red-600 mt-1">+0.5%</div>
+                </div>
+                <div className="col-span-1 row-span-1 bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                  <div className="text-[10px] text-slate-500 mb-1">Avg Response</div>
+                  <div className="text-xl font-bold text-slate-900">4.2min</div>
+                  <div className="text-[10px] text-green-600 mt-1">-12%</div>
+                </div>
+                <div className="col-span-1 row-span-1 bg-white rounded-lg p-3 border border-slate-200 shadow-sm">
+                  <div className="text-[10px] text-slate-500 mb-1">Insights Found</div>
+                  <div className="text-xl font-bold text-slate-900">89</div>
+                  <div className="text-[10px] text-green-600 mt-1">+15%</div>
+                </div>
+
+                {/* Executive Brief - Large */}
+                <div className="col-span-2 row-span-2 bg-white rounded-lg p-4 border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Lightbulb className="h-4 w-4 text-blue-600" />
+                    <span className="font-semibold text-sm text-slate-900">Executive Brief</span>
+                  </div>
+                  <div className="space-y-2 overflow-hidden">
+                    <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                      <p className="text-xs text-slate-900 leading-relaxed font-medium">
+                        <span className="bg-yellow-200 px-1">Missing cohort reporting</span> is the primary churn driver. 
+                        <span className="bg-yellow-200 px-1">42% of users</span> cite this as the main reason.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-lg">
+                      <p className="text-xs text-slate-900 leading-relaxed">
+                        <span className="bg-yellow-200 px-1">Pricing concerns</span> affect 23% of cancellations. 
+                        Consider <span className="bg-yellow-200 px-1">viewer-tier pricing</span> to reduce friction.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-lg">
+                      <p className="text-xs text-slate-900 leading-relaxed">
+                        <span className="bg-yellow-200 px-1">Mixpanel & Amplitude</span> mentioned as competitors by 18% of users.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* What to Fix Section */}
+                <div className="col-span-2 row-span-1 bg-white rounded-lg p-4 border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <span className="font-semibold text-sm text-slate-900">What to Fix</span>
+                  </div>
+                  <div className="space-y-2 overflow-hidden">
+                    <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg">
+                      <div className="h-2 w-2 bg-red-500 rounded-full shrink-0" />
+                      <span className="text-xs text-slate-900">Add custom cohort analysis reports</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-orange-50 rounded-lg">
+                      <div className="h-2 w-2 bg-orange-500 rounded-full shrink-0" />
+                      <span className="text-xs text-slate-900">Implement real-time data streaming</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-yellow-50 rounded-lg">
+                      <div className="h-2 w-2 bg-yellow-500 rounded-full shrink-0" />
+                      <span className="text-xs text-slate-900">Introduce viewer-tier pricing plans</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Churn Causes Graph */}
+                <div className="col-span-2 row-span-1 bg-white rounded-lg p-4 border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BarChart3 className="h-4 w-4 text-blue-600" />
+                    <span className="font-semibold text-sm text-slate-900">Churn Causes</span>
+                  </div>
+                  <ResponsiveContainer width="100%" height={70}>
+                    <BarChart data={DASHBOARD_DATA.causes} margin={{ left: 0, right: 8, top: 4, bottom: 4 }} layout="vertical">
+                      <XAxis type="number" stroke="#94a3b8" fontSize={8} tickLine={false} axisLine={false} />
+                      <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={8} tickLine={false} axisLine={false} width={60} />
+                      <Bar dataKey="value" radius={[0, 3, 3, 0]} barSize={16}>
+                        {DASHBOARD_DATA.causes.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Trend Graph */}
+                <div className="col-span-2 row-span-1 bg-white rounded-lg p-4 border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                    <span className="font-semibold text-sm text-slate-900">Churn Trend</span>
+                    <span className="ml-auto text-xs text-green-600 font-medium">+300%</span>
+                  </div>
+                  <ResponsiveContainer width="100%" height={60}>
+                    <AreaChart data={DASHBOARD_DATA.trend}>
                       <defs>
-                        <linearGradient id="churnFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.35} />
-                          <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+                        <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
+                          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                      <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={9} tickLine={false} axisLine={false} />
-                      <YAxis stroke="var(--muted-foreground)" fontSize={9} tickLine={false} axisLine={false} width={22} />
-                      <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", fontSize: 11, borderRadius: 8 }} />
-                      <Area type="monotone" dataKey="churn" stroke="var(--primary)" strokeWidth={2} fill="url(#churnFill)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                      <XAxis dataKey="week" stroke="#94a3b8" fontSize={8} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#94a3b8" fontSize={8} tickLine={false} axisLine={false} width={25} />
+                      <Area type="monotone" dataKey="causes" stroke="#3b82f6" strokeWidth={2} fill="url(#trendFill)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="rounded-lg border border-border bg-background p-3">
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="text-[11px] font-medium">Revenue saved</span>
-                    <span className="text-[10px] text-muted-foreground">$ thousands</span>
+
+                {/* Customer Voice */}
+                <div className="col-span-2 row-span-1 bg-white rounded-lg p-4 border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageSquare className="h-4 w-4 text-blue-600" />
+                    <span className="font-semibold text-sm text-slate-900">Customer Voice</span>
                   </div>
-                  <ResponsiveContainer width="100%" height={140}>
-                    <LineChart data={TREND}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                      <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={9} tickLine={false} axisLine={false} />
-                      <YAxis stroke="var(--muted-foreground)" fontSize={9} tickLine={false} axisLine={false} width={22} />
-                      <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", fontSize: 11, borderRadius: 8 }} />
-                      <Line type="monotone" dataKey="saved" stroke="var(--primary)" strokeWidth={2} dot={{ r: 2.5 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <div className="space-y-2 overflow-hidden">
+                    <div className="p-2 bg-slate-50 rounded-lg">
+                      <p className="text-[11px] text-slate-900">"<span className="bg-yellow-200 px-0.5">Custom cohort analysis</span> was critical for us"</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <div className="h-4 w-4 rounded-full overflow-hidden">
+                          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Mark" className="h-full w-full object-cover" />
+                        </div>
+                        <span className="text-[9px] text-slate-500">Mark</span>
+                      </div>
+                    </div>
+                    <div className="p-2 bg-slate-50 rounded-lg">
+                      <p className="text-[11px] text-slate-900">"<span className="bg-yellow-200 px-0.5">Real-time streaming</span> is a must-have feature"</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <div className="h-4 w-4 rounded-full overflow-hidden">
+                          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" alt="Sarah" className="h-full w-full object-cover" />
+                        </div>
+                        <span className="text-[9px] text-slate-500">Sarah</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Right: live insights panel */}
-        <div className="md:col-span-2 rounded-xl border border-border/70 bg-background p-4">
-          <div className="mb-3 flex items-center justify-between border-b border-border/60 pb-3">
-            <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              <Sparkles className="h-3 w-3 text-primary" />
-              {phase === "interview" ? "Live insights" : "Aggregated intelligence"}
-            </span>
-            <span className="text-[10px] text-muted-foreground">AI-extracted</span>
           </div>
-
-          {phase === "interview" ? (
-            <LiveInsights count={insightCount} scenario={scenario} />
-          ) : (
-            <div className="space-y-3 animate-fade-in">
-              <div>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Root causes
-                </div>
-                <ResponsiveContainer width="100%" height={140}>
-                  <BarChart data={ROOT_CAUSES} layout="vertical" margin={{ left: 0, right: 8, top: 4, bottom: 4 }}>
-                    <XAxis type="number" hide />
-                    <YAxis type="category" dataKey="name" stroke="var(--muted-foreground)" fontSize={10} width={92} tickLine={false} axisLine={false} />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                      {ROOT_CAUSES.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="rounded-lg border border-border bg-muted/30 p-3">
-                <div className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Swords className="h-3 w-3" /> Competitor mentions
-                </div>
-                <ul className="space-y-1.5">
-                  {COMPETITORS.map((c) => (
-                    <li key={c.name} className="flex items-center justify-between text-xs">
-                      <span className="text-foreground">{c.name}</span>
-                      <span className="tabular-nums text-muted-foreground">{c.mentions}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="rounded-lg border border-border bg-muted/30 p-3">
-                <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Top feature requests
-                </div>
-                <ul className="space-y-1.5">
-                  {FEATURE_REQUESTS.map((f) => (
-                    <li key={f.name} className="flex items-center justify-between text-xs">
-                      <span className="text-foreground">{f.name}</span>
-                      <span className="tabular-nums text-muted-foreground">{f.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
-function LiveInsights({ count, scenario }: { count: number; scenario: Scenario }) {
-  const items = [
-    { label: "Root cause", value: count >= 2 ? scenario.rootCause : "Detecting…" },
-    { label: "Category", value: count >= 1 ? scenario.category : "—" },
-    { label: "Competitor", value: count >= 3 ? scenario.competitor : "—" },
-    { label: "Pricing issue", value: count >= 3 ? scenario.pricingIssue : "—" },
-    { label: "Revenue impact", value: count >= 4 ? scenario.revenue : "—" },
-    { label: "Win-back signal", value: count >= 4 ? scenario.winback : "—" },
-  ];
-  return (
-    <ul className="space-y-2.5">
-      {items.map((i) => (
-        <li key={i.label} className="flex items-start justify-between gap-3 text-xs">
-          <span className="text-muted-foreground">{i.label}</span>
-          <span
-            key={i.value}
-            className="max-w-[60%] text-right font-medium text-foreground animate-fade-in"
-          >
-            {i.value}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Kpi({
-  icon,
-  label,
-  value,
-  delta,
-  positive,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  delta: string;
-  positive?: boolean;
-}) {
-  return (
-    <div className="rounded-lg border border-border bg-background p-2.5">
-      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-        {icon}
-        {label}
-      </div>
-      <div className="mt-1 text-lg font-semibold tracking-tight">{value}</div>
-      <div className={`text-[10px] ${positive ? "text-success" : "text-destructive"}`}>{delta}</div>
-    </div>
-  );
-}
-
-function TypingDots() {
-  return (
-    <div className="flex items-center gap-1">
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.3s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60" />
-    </div>
-  );
-}

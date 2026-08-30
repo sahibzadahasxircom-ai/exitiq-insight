@@ -20,12 +20,16 @@ function AuthenticatedLayout() {
     }
   }, [loading, session, navigate]);
 
-  if (loading || !session) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-sm text-muted-foreground">Loading workspace…</div>
       </div>
     );
+  }
+
+  if (!session) {
+    return null;
   }
 
   return (
@@ -36,7 +40,7 @@ function AuthenticatedLayout() {
           <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger />
             <div className="h-5 w-px bg-border" />
-            <span className="text-sm text-muted-foreground">ExitIQ Console</span>
+            <span className="text-sm text-muted-foreground">leaveesy Console</span>
             <div className="ml-auto">
               <UserMenu />
             </div>
@@ -49,3 +53,4 @@ function AuthenticatedLayout() {
     </SidebarProvider>
   );
 }
+

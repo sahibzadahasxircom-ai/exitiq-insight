@@ -37,22 +37,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   async function loadProfile(userId: string) {
-    const { data: p } = await supabase
-      .from("profiles")
-      .select("id, full_name, email, company_id")
-      .eq("id", userId)
-      .maybeSingle();
-    setProfile(p ?? null);
-    if (p?.company_id) {
-      const [{ data: c }, { data: r }] = await Promise.all([
-        supabase.from("companies").select("id, company_name").eq("id", p.company_id).maybeSingle(),
-        supabase.from("user_roles").select("role").eq("user_id", userId).eq("company_id", p.company_id).maybeSingle(),
-      ]);
-      setCompany(c ?? null);
-      setRole((r?.role as Role | undefined) ?? null);
-    } else {
-      setCompany(null);
-      setRole(null);
+    try {
+      const { data: p, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, company_id")
+        .eq("id", userId)
+        .maybeSingle();
+      
+      if (profileError) {
+        console.error("Profile load error:", profileError);
+      }
+      
+      setProfile(p ?? null);
+      
+      if (p?.company_id) {
+        const [{ data: c, error: companyError }, { data: r, error: roleError }] = await Promise.all([
+          supabase.from("companies").select("id, company_name").eq("id", p.company_id).maybeSingle(),
+          supabase.from("user_roles").select("role").eq("user_id", userId).eq("company_id", p.company_id).maybeSingle(),
+        ]);
+        
+        if (companyError) console.error("Company load error:", companyError);
+        if (roleError) console.error("Role load error:", roleError);
+        
+        setCompany(c ?? null);
+        setRole((r?.role as Role | undefined) ?? null);
+      } else {
+        setCompany(null);
+        setRole(null);
+      }
+    } catch (error) {
+      console.error("loadProfile error:", error);
     }
   }
 
@@ -62,15 +76,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!mounted) return;
       setSession(data.session);
-      if (data.session?.user) await loadProfile(data.session.user.id);
+      if (data.session?.user) {
+        await loadProfile(data.session.user.id);
+      }
       setLoading(false);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       if (s?.user) {
-        // defer to avoid deadlock
-        setTimeout(() => loadProfile(s.user.id), 0);
+        // Only load profile if session actually changed, not just token refresh
+        if (_event !== 'TOKEN_REFRESHED') {
+          loadProfile(s.user.id);
+        }
       } else {
         setProfile(null);
         setCompany(null);
@@ -111,3 +129,4 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
 }
+

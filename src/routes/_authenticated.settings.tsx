@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plug } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — ExitIQ" },
-      { name: "description", content: "Manage your ExitIQ workspace, integrations, and notifications." },
+      { title: "Settings — leaveesy" },
+      { name: "description", content: "Manage your leaveesy workspace, integrations, and notifications." },
     ],
   }),
   component: Settings,
@@ -26,6 +27,7 @@ function Settings() {
   const [saving, setSaving] = useState(false);
   const [notify, setNotify] = useState(true);
   const [weekly, setWeekly] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => { setCompanyName(company?.company_name ?? ""); }, [company?.company_name]);
 
@@ -39,47 +41,110 @@ function Settings() {
     toast.success("Company updated");
   }
 
+  const handleRestartOnboarding = async () => {
+    if (!company?.id) return;
+    
+    if (!confirm("This will reset your onboarding progress. You'll need to go through the setup wizard again. Continue?")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("companies")
+        .update({ onboarding_completed: false })
+        .eq("id", company.id);
+
+      if (error) {
+        // If column doesn't exist, show message
+        if (error.message.includes('column') || error.message.includes('does not exist')) {
+          toast.error("Onboarding feature not yet available. Please contact support.");
+        } else {
+          toast.error("Failed to restart onboarding: " + error.message);
+        }
+      } else {
+        setShowOnboarding(true);
+      }
+    } catch (error) {
+      toast.error("Failed to restart onboarding");
+    }
+  };
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    refresh();
+  };
+
+  const handleOnboardingSkip = () => {
+    setShowOnboarding(false);
+    refresh();
+  };
+
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-6 py-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Workspace, integrations, and notifications.</p>
-      </div>
-
-      <Section title="Company" description="How your workspace appears across ExitIQ.">
-        <div className="grid gap-2">
-          <Label htmlFor="company">Company name</Label>
-          <Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isOwner} />
-          {!isOwner && <p className="text-xs text-muted-foreground">Only owners can change company settings.</p>}
+    <>
+      {showOnboarding && company?.id && (
+        <OnboardingWizard
+          companyId={company.id}
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingSkip}
+        />
+      )}
+      
+      <div className="mx-auto max-w-3xl space-y-8 px-6 py-8">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Workspace, integrations, and notifications.</p>
         </div>
-        {isOwner && (
-          <div className="flex justify-end">
-            <Button size="sm" onClick={saveCompany} disabled={saving || !companyName.trim()}>
-              {saving ? "Saving…" : "Save changes"}
-            </Button>
+
+        <Section title="Company" description="How your workspace appears across leaveesy.">
+          <div className="grid gap-2">
+            <Label htmlFor="company">Company name</Label>
+            <Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!isOwner} />
+            {!isOwner && <p className="text-xs text-muted-foreground">Only owners can change company settings.</p>}
           </div>
+          {isOwner && (
+            <div className="flex justify-end">
+              <Button size="sm" onClick={saveCompany} disabled={saving || !companyName.trim()}>
+                {saving ? "Saving…" : "Save changes"}
+              </Button>
+            </div>
+          )}
+        </Section>
+
+        <Section title="Notifications" description="Control when leaveesy emails you.">
+          <ToggleRow
+            label="New interview completed"
+            desc="Get an email each time a customer finishes an exit interview."
+            checked={notify} onChange={setNotify}
+          />
+          <ToggleRow
+            label="Weekly insights digest"
+            desc="A Monday-morning summary of churn reasons and recommended actions."
+            checked={weekly} onChange={setWeekly}
+          />
+        </Section>
+
+        {isOwner && (
+          <Section title="Onboarding" description="Reset your workspace setup wizard.">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Restart Onboarding</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Go through the setup wizard again to reconfigure your workspace.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRestartOnboarding}
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Restart
+              </Button>
+            </div>
+          </Section>
         )}
-      </Section>
-
-      <Section title="Integrations" description="Connect ExitIQ to your billing and CRM tools.">
-        <Integration name="Stripe" desc="Pull churn events and revenue context." />
-        <Integration name="HubSpot" desc="Sync customer profiles and lifecycle stages." />
-        <Integration name="Intercom" desc="Trigger interviews from cancellation conversations." />
-      </Section>
-
-      <Section title="Notifications" description="Control when ExitIQ emails you.">
-        <ToggleRow
-          label="New interview completed"
-          desc="Get an email each time a customer finishes an exit interview."
-          checked={notify} onChange={setNotify}
-        />
-        <ToggleRow
-          label="Weekly insights digest"
-          desc="A Monday-morning summary of churn reasons and recommended actions."
-          checked={weekly} onChange={setWeekly}
-        />
-      </Section>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -95,23 +160,6 @@ function Section({ title, description, children }: { title: string; description:
   );
 }
 
-function Integration({ name, desc }: { name: string; desc: string }) {
-  return (
-    <div className="flex items-center justify-between rounded-lg border border-border bg-background p-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted text-muted-foreground">
-          <Plug className="h-4 w-4" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold">{name}</p>
-          <p className="text-xs text-muted-foreground">{desc}</p>
-        </div>
-      </div>
-      <Button size="sm" variant="outline">Connect</Button>
-    </div>
-  );
-}
-
 function ToggleRow({ label, desc, checked, onChange }: { label: string; desc: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-start justify-between gap-6 rounded-lg border border-border bg-background p-4">
@@ -123,3 +171,4 @@ function ToggleRow({ label, desc, checked, onChange }: { label: string; desc: st
     </div>
   );
 }
+

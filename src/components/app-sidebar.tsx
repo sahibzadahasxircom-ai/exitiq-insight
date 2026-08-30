@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Code2, Users, Settings } from "lucide-react";
+import { LayoutDashboard, Inbox, Users, Settings, Palette, Plug, BookOpen } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -12,20 +12,63 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const intelligence = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
   { title: "Cancellations", url: "/interviews", icon: Inbox },
 ];
 
+const productKnowledge = [
+  { title: "Product Knowledge", url: "/product-knowledge", icon: BookOpen },
+];
+
+const integrations = [
+  { title: "Integrations", url: "/integrations", icon: Plug },
+];
+
 const workspace = [
-  { title: "Install", url: "/install", icon: Code2 },
+  { title: "Workspace", url: "/workspace", icon: Palette },
   { title: "Team", url: "/team", icon: Users },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [integrationData, setIntegrationData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadIntegrations();
+  }, []);
+
+  const loadIntegrations = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!profile) return;
+
+      const { data: integrationsData } = await (supabase as any)
+        .from("integrations")
+        .select("*")
+        .eq("company_id", profile.company_id);
+
+      setIntegrationData(integrationsData || []);
+    } catch (error) {
+      console.error("Failed to load integrations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderItems = (items: typeof intelligence) =>
     items.map((item) => {
@@ -44,21 +87,28 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/" className="flex items-center gap-2 px-2 py-1.5">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-soft">
-            <span className="text-[11px] font-bold">EQ</span>
-          </div>
-          <span className="text-sm font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
-            ExitIQ
-          </span>
+      <SidebarHeader className="border-b border-sidebar-border pb-0 -mt-8">
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/leaveesy.png" alt="leaveesy" className="h-32 w-auto object-contain" />
         </Link>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="-mt-6">
         <SidebarGroup>
           <SidebarGroupLabel>Intelligence</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>{renderItems(intelligence)}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Product Knowledge</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>{renderItems(productKnowledge)}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Integrations</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>{renderItems(integrations)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
@@ -77,3 +127,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+

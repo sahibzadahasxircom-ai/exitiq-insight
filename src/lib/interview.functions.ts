@@ -26,6 +26,8 @@ export const publicCreateTestSession = createServerFn({ method: "POST" })
         company_id: company.id,
         customer_name: "Test Customer",
         customer_email: "test@example.com",
+        interview_status: "active",
+        interview_progress: "started",
       })
       .select("id")
       .single();
@@ -180,7 +182,7 @@ export const publicStartInterview = createServerFn({ method: "POST" })
 
     const { data: session } = await supabaseAdmin
       .from("interview_sessions")
-      .select("id, interview_status")
+      .select("id, company_id, interview_status")
       .eq("id", data.sessionId)
       .maybeSingle();
     if (!session) throw new Error("Interview not found");
@@ -192,7 +194,7 @@ export const publicStartInterview = createServerFn({ method: "POST" })
       .eq("session_id", data.sessionId);
     if ((count ?? 0) > 0) return { ok: true, skipped: true };
 
-    const { text } = await generateInterviewerReply({ history: [] });
+    const { text } = await generateInterviewerReply({ history: [], companyId: session.company_id });
     await supabaseAdmin
       .from("interview_messages")
       .insert({ session_id: data.sessionId, role: "assistant", message_content: text });
@@ -227,7 +229,7 @@ export const publicSendMessage = createServerFn({ method: "POST" })
       .order("created_at", { ascending: true });
 
     const fullHistory = (history ?? []) as { role: "assistant" | "user"; message_content: string }[];
-    const { text, complete } = await generateInterviewerReply({ history: fullHistory });
+    const { text, complete } = await generateInterviewerReply({ history: fullHistory, companyId: session.company_id });
 
     await supabaseAdmin
       .from("interview_messages")

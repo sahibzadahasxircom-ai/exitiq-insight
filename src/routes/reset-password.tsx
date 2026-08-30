@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Set new password — ExitIQ" }] }),
+  head: () => ({ meta: [{ title: "Set new password — leaveesy" }] }),
   component: ResetPassword,
 });
 
@@ -44,3 +44,4 @@ function ResetPassword() {
     </div>
   );
 }
+

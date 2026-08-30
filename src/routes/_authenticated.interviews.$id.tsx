@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { getMockInterview, formatMoney, type MockInterview } from "@/lib/mock-intelligence";
 
 export const Route = createFileRoute("/_authenticated/interviews/$id")({
-  head: ({ params }) => ({ meta: [{ title: `Interview ${params.id} — ExitIQ` }] }),
+  head: ({ params }) => ({ meta: [{ title: `Interview ${params.id} — leaveesy` }] }),
   loader: ({ params }) => {
     const interview = getMockInterview(params.id);
     if (!interview) throw notFound();
@@ -54,7 +54,7 @@ function highlight(text: string, phrases: string[]) {
   const parts = text.split(pattern);
   return parts.map((part, idx) =>
     idx % 2 === 1 ? (
-      <mark key={idx} className="rounded-[3px] bg-yellow-200/70 px-0.5 py-0 text-slate-900">
+      <mark key={idx} className="rounded-[3px] bg-blue-200/70 px-0.5 py-0 text-slate-900">
         {part}
       </mark>
     ) : (
@@ -235,3 +235,4 @@ function Stat({ label, value, capitalize = false }: { label: string; value: stri
     </div>
   );
 }
+

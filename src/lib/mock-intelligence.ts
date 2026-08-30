@@ -1,4 +1,4 @@
-// Mock intelligence data for ExitIQ founder dashboard.
+// Mock intelligence data for Leaveesy founder dashboard.
 // Replace with live AI-generated data later; keep the shape identical.
 
 export type Sentiment = "positive" | "neutral" | "frustrated" | "angry";
@@ -602,18 +602,18 @@ export const CATEGORY_DISTRIBUTION = Object.entries(
 
 // 12-month churn trend (mocked but shaped)
 export const CHURN_TREND = [
-  { month: "Jul", churned: 8, revenue: 5988, sentiment: 62 },
-  { month: "Aug", churned: 12, revenue: 8988, sentiment: 58 },
-  { month: "Sep", churned: 10, revenue: 7488, sentiment: 61 },
-  { month: "Oct", churned: 14, revenue: 12588, sentiment: 55 },
-  { month: "Nov", churned: 18, revenue: 15988, sentiment: 51 },
-  { month: "Dec", churned: 16, revenue: 14200, sentiment: 54 },
-  { month: "Jan", churned: 21, revenue: 21588, sentiment: 49 },
-  { month: "Feb", churned: 19, revenue: 18800, sentiment: 52 },
-  { month: "Mar", churned: 24, revenue: 26988, sentiment: 47 },
-  { month: "Apr", churned: 22, revenue: 22400, sentiment: 51 },
-  { month: "May", churned: 27, revenue: 31988, sentiment: 46 },
-  { month: "Jun", churned: 31, revenue: 38400, sentiment: 44 },
+  { month: "Jul", churned: 8, revenue: 5988, sentiment: 62, pricing: 1800, ux: 2200, features: 1988 },
+  { month: "Aug", churned: 12, revenue: 8988, sentiment: 58, pricing: 2800, ux: 3200, features: 2988 },
+  { month: "Sep", churned: 10, revenue: 7488, sentiment: 61, pricing: 2200, ux: 2700, features: 2588 },
+  { month: "Oct", churned: 14, revenue: 12588, sentiment: 55, pricing: 4200, ux: 4600, features: 3788 },
+  { month: "Nov", churned: 18, revenue: 15988, sentiment: 51, pricing: 5500, ux: 5800, features: 4688 },
+  { month: "Dec", churned: 16, revenue: 14200, sentiment: 54, pricing: 4800, ux: 5200, features: 4200 },
+  { month: "Jan", churned: 21, revenue: 21588, sentiment: 49, pricing: 7500, ux: 7800, features: 6288 },
+  { month: "Feb", churned: 19, revenue: 18800, sentiment: 52, pricing: 6500, ux: 7000, features: 5300 },
+  { month: "Mar", churned: 24, revenue: 26988, sentiment: 47, pricing: 9500, ux: 9800, features: 7688 },
+  { month: "Apr", churned: 22, revenue: 22400, sentiment: 51, pricing: 8200, ux: 8600, features: 5600 },
+  { month: "May", churned: 27, revenue: 31988, sentiment: 46, pricing: 12000, ux: 12500, features: 7488 },
+  { month: "Jun", churned: 31, revenue: 38400, sentiment: 44, pricing: 14500, ux: 15000, features: 8900 },
 ];
 
 export const INTERVIEW_VOLUME = CHURN_TREND.map((m) => ({

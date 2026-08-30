@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/team")({
-  head: () => ({ meta: [{ title: "Team — ExitIQ" }] }),
+  head: () => ({ meta: [{ title: "Team — leaveesy" }] }),
   component: TeamPage,
 });
 
@@ -157,3 +157,4 @@ function TeamPage() {
     </div>
   );
 }
+

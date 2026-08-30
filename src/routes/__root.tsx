@@ -81,9 +81,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ExitIQ — Understand why customers leave" },
+      { title: "leaveesy — Understand why customers leave" },
       { name: "description", content: "AI-powered customer exit interviews and churn intelligence for modern SaaS teams." },
-      { property: "og:title", content: "ExitIQ — Churn intelligence for SaaS" },
+      { property: "og:title", content: "leaveesy — Churn intelligence for SaaS" },
       { property: "og:description", content: "Run AI-driven exit interviews and surface the real reasons customers leave." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -128,3 +128,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+

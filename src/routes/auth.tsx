@@ -16,32 +16,54 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Sign in — ExitIQ" },
-      { name: "description", content: "Sign in to your ExitIQ workspace." },
+      { title: "Sign in — leaveesy" },
+      { name: "description", content: "Sign in to your leaveesy workspace." },
     ],
   }),
   component: AuthPage,
 });
 
 function AuthPage() {
-  const { session, loading } = useAuth();
+  const { session, loading, profile } = useAuth();
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
+  const [checkingCompany, setCheckingCompany] = useState(true);
 
-  useEffect(() => {
-    if (!loading && session) {
-      navigate({ to: search.redirect ?? "/dashboard", replace: true });
-    }
-  }, [loading, session, navigate, search.redirect]);
+ useEffect(() => {
+    const checkCompanyDetails = async () => {
+      if (!loading && session && profile?.company_id) {
+        try {
+          const { data: company } = await supabase
+            .from("companies")
+            .select("company_name, company_url, company_size")
+            .eq("id", profile.company_id)
+            .maybeSingle();
+
+          // If company has basic details filled, go to dashboard, otherwise go to company-details
+          if (company && company.company_name) {
+            navigate({ to: search.redirect ?? "/dashboard", replace: true });
+          } else {
+            navigate({ to: "/company-details", replace: true });
+          }
+        } catch (error) {
+          console.error("Error checking company details:", error);
+          navigate({ to: "/company-details", replace: true });
+        }
+      } else if (!loading && session) {
+        // No company_id, go to company-details
+        navigate({ to: "/company-details", replace: true });
+      }
+      setCheckingCompany(false);
+    };
+
+    checkCompanyDetails();
+  }, [loading, session, profile, navigate, search.redirect]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-soft">
-            <span className="text-xs font-bold">EQ</span>
-          </div>
-          <span className="text-base font-semibold tracking-tight">ExitIQ</span>
+        <Link to="/" className="mb-4 flex items-center justify-center gap-2">
+          <img src="/leaveesy.png" alt="leaveesy" className="h-32 w-auto object-contain" />
         </Link>
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-soft">
@@ -73,10 +95,15 @@ function GoogleButton() {
       disabled={busy}
       onClick={async () => {
         setBusy(true);
-        const result = await lovable.auth.signInWithOAuth("google", {
-          redirect_uri: window.location.origin + "/dashboard",
-        });
-        if (result.error) {
+        try {
+          const result = await lovable.auth.signInWithOAuth("google", {
+            redirect_uri: window.location.origin + "/company-details",
+          });
+          if (result.error) {
+            toast.error("Google sign-in failed");
+            setBusy(false);
+          }
+        } catch (error) {
           toast.error("Google sign-in failed");
           setBusy(false);
         }
@@ -106,7 +133,19 @@ function SignInForm() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      // Handle specific errors with better messages
+      if (error.message.includes("Email not confirmed")) {
+        toast.error("Please check your email to confirm your account, or try signing up again.");
+      } else if (error.message.includes("Invalid login credentials")) {
+        toast.error("Invalid email or password. Please try again.");
+      } else if (error.message.includes("too many")) {
+        toast.error("Too many attempts. Please wait a moment and try again.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
     toast.success("Welcome back");
     navigate({ to: "/dashboard", replace: true });
   }
@@ -135,8 +174,10 @@ function SignInForm() {
 
 function SignUpForm() {
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [company, setCompany] = useState("");
+  const [companyUrl, setCompanyUrl] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -144,18 +185,37 @@ function SignUpForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin + "/dashboard",
-        data: { full_name: fullName, company_name: company },
+        emailRedirectTo: window.location.origin + "/company-details",
+        data: { first_name: firstName, last_name: lastName, company_name: company, company_url: companyUrl },
       },
     });
+    
+    if (authError) {
+      setBusy(false);
+      if (authError.message.includes("already registered")) {
+        toast.error("An account with this email already exists. Please sign in instead.");
+      } else {
+        toast.error(authError.message);
+      }
+      return;
+    }
+    
     setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success(`Workspace "${company}" created`);
-    navigate({ to: "/dashboard", replace: true });
+    
+    // Check if email confirmation is required
+    if (!authData.session) {
+      toast.success("Account created! Please check your email to confirm your account.");
+      return;
+    }
+    
+    // If session exists (auto-confirmed), proceed to company details
+    toast.success(`Account created for "${company}"`);
+    navigate({ to: "/company-details", replace: true });
   }
 
   return (
@@ -163,12 +223,21 @@ function SignUpForm() {
       <GoogleButton />
       <Divider />
       <div className="grid gap-1.5">
-        <Label htmlFor="su-name">Full name</Label>
-        <Input id="su-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Jane Cooper" />
+        <Label htmlFor="su-firstname">First name</Label>
+        <Input id="su-firstname" required value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="su-lastname">Last name</Label>
+        <Input id="su-lastname" required value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Cooper" />
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="su-company">Company name</Label>
         <Input id="su-company" required value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme, Inc." />
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="su-company-url">Company website</Label>
+        <Input id="su-company-url" type="url" required value={companyUrl} onChange={(e) => setCompanyUrl(e.target.value)} placeholder="https://acme.com" />
+        <p className="text-xs text-muted-foreground">We'll learn about your product to provide better insights.</p>
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="su-email">Work email</Label>
@@ -185,3 +254,4 @@ function SignUpForm() {
     </form>
   );
 }
+

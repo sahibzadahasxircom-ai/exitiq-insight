@@ -9,7 +9,7 @@ import { publicGetInterview, publicSendMessage, publicStartInterview } from "@/l
 export const Route = createFileRoute("/interview/$sessionId")({
   head: () => ({
     meta: [
-      { title: "Exit Interview — ExitIQ" },
+      { title: "Exit Interview — leaveesy" },
       { name: "description", content: "A short AI-guided exit interview." },
     ],
   }),
@@ -69,10 +69,7 @@ function CustomerInterview() {
       <header className="border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
-              <span className="text-[11px] font-bold">EQ</span>
-            </div>
-            <span className="text-sm font-semibold tracking-tight">ExitIQ</span>
+            <img src="/leaveesy.png" alt="leaveesy" className="h-32 w-auto object-contain" />
           </Link>
           <span className="text-[11px] text-muted-foreground">Confidential conversation</span>
         </div>
@@ -196,3 +193,4 @@ function CenterMessage({ text }: { text: string }) {
     </div>
   );
 }
+

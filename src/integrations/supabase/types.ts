@@ -34,82 +34,79 @@ export type Database = {
       }
       interview_insights: {
         Row: {
-          category: string | null
-          churn_reason: string | null
+          category: Database["public"]["Enums"]["churn_category"]
+          churn_reason: string
           company_id: string
+          confidence_score: number
           competitor_mentioned: string | null
-          confidence_score: number | null
           created_at: string
-          executive_summary: string | null
+          executive_summary: string
           id: string
-          journey_failure_point: string | null
+          journey_failure_point: Database["public"]["Enums"]["journey_failure_point"]
           missing_features: string[]
           onboarding_issue: boolean
           pricing_issue: boolean
-          quote: string | null
-          recommended_actions: string[] | null
-          retention_opportunity: string | null
-          revenue_impact: number | null
-          root_cause: string | null
-          secondary_reasons: string[] | null
-          sentiment: string | null
+          quote: string
+          recommended_actions: string[]
+          retention_opportunity: string
+          secondary_reasons: string[]
+          sentiment: Database["public"]["Enums"]["sentiment"]
           session_id: string
-          suggestions: string[] | null
-          summary: string | null
-          support_issue: boolean | null
-          tags: string[] | null
+          support_issue: boolean
+          summary: string
+          suggestions: string[]
+          tags: string[]
+          root_cause: string
         }
         Insert: {
-          category?: string | null
-          churn_reason?: string | null
+          category?: Database["public"]["Enums"]["churn_category"]
+          churn_reason?: string
           company_id: string
+          confidence_score?: number
           competitor_mentioned?: string | null
-          confidence_score?: number | null
           created_at?: string
-          executive_summary?: string | null
+          executive_summary?: string
           id?: string
-          journey_failure_point?: string | null
+          journey_failure_point?: Database["public"]["Enums"]["journey_failure_point"]
           missing_features?: string[]
           onboarding_issue?: boolean
           pricing_issue?: boolean
-          quote?: string | null
-          recommended_actions?: string[] | null
-          retention_opportunity?: string | null
-          revenue_impact?: number | null
-          root_cause?: string | null
-          secondary_reasons?: string[] | null
-          sentiment?: string | null
+          quote?: string
+          recommended_actions?: string[]
+          retention_opportunity?: string
+          secondary_reasons?: string[]
+          sentiment?: Database["public"]["Enums"]["sentiment"]
           session_id: string
-          suggestions?: string[] | null
-          summary?: string | null
-          support_issue?: boolean | null
-          tags?: string[] | null
+          support_issue?: boolean
+          summary?: string
+          suggestions?: string[]
+          tags?: string[]
+          root_cause?: string
         }
         Update: {
-          category?: string | null
-          churn_reason?: string | null
+          category?: Database["public"]["Enums"]["churn_category"]
+          churn_reason?: string
           company_id?: string
+          confidence_score?: number
           competitor_mentioned?: string | null
-          confidence_score?: number | null
           created_at?: string
-          executive_summary?: string | null
+          executive_summary?: string
           id?: string
-          journey_failure_point?: string | null
+          journey_failure_point?: Database["public"]["Enums"]["journey_failure_point"]
           missing_features?: string[]
           onboarding_issue?: boolean
           pricing_issue?: boolean
-          quote?: string | null
-          recommended_actions?: string[] | null
-          retention_opportunity?: string | null
-          revenue_impact?: number | null
-          root_cause?: string | null
-          secondary_reasons?: string[] | null
-          sentiment?: string | null
+          quote?: string
+          recommended_actions?: string[]
+          retention_opportunity?: string
+          secondary_reasons?: string[]
+          sentiment?: Database["public"]["Enums"]["sentiment"]
           session_id?: string
-          suggestions?: string[] | null
-          summary?: string | null
-          support_issue?: boolean | null
-          tags?: string[] | null
+          support_issue?: boolean
+          summary?: string
+          suggestions?: string[]
+          tags?: string[]
+          root_cause?: string
         }
         Relationships: [
           {
@@ -119,11 +116,92 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      company_features: {
+        Row: {
+          id: string
+          company_id: string
+          feature_name: string
+          feature_description: string | null
+          feature_category: string
+          status: string
+          launch_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          feature_name: string
+          feature_description?: string | null
+          feature_category?: string
+          status?: string
+          launch_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          feature_name?: string
+          feature_description?: string | null
+          feature_category?: string
+          status?: string
+          launch_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "interview_insights_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: true
-            referencedRelation: "interview_sessions"
+            foreignKeyName: "company_features_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_updates: {
+        Row: {
+          id: string
+          company_id: string
+          update_type: string
+          title: string
+          description: string
+          impact_level: string
+          published_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          update_type: string
+          title: string
+          description: string
+          impact_level?: string
+          published_date: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          update_type?: string
+          title?: string
+          description?: string
+          impact_level?: string
+          published_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_updates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]

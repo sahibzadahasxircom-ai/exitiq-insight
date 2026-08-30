@@ -16,14 +16,25 @@ import { Route as ExitInterviewRouteImport } from './routes/exit-interview'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingWelcomeRouteImport } from './routes/onboarding.welcome'
+import { Route as OnboardingRecommendationsRouteImport } from './routes/onboarding.recommendations'
+import { Route as OnboardingProductIntelligenceRouteImport } from './routes/onboarding.product-intelligence'
+import { Route as OnboardingIntegrationWizardRouteImport } from './routes/onboarding.integration-wizard'
+import { Route as OnboardingInstallRouteImport } from './routes/onboarding.install'
+import { Route as OnboardingCompleteRouteImport } from './routes/onboarding.complete'
 import { Route as InterviewSessionIdRouteImport } from './routes/interview.$sessionId'
+import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated.workspace'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated.team'
+import { Route as AuthenticatedSetupWizardRouteImport } from './routes/_authenticated.setup-wizard'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as AuthenticatedProductKnowledgeRouteImport } from './routes/_authenticated.product-knowledge'
 import { Route as AuthenticatedInterviewsRouteImport } from './routes/_authenticated.interviews'
+import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated.integrations'
 import { Route as AuthenticatedInstallRouteImport } from './routes/_authenticated.install'
 import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated.insights'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedCompetitorsRouteImport } from './routes/_authenticated.competitors'
+import { Route as AuthenticatedCompanyDetailsRouteImport } from './routes/_authenticated.company-details'
 import { Route as AuthenticatedInterviewsIdRouteImport } from './routes/_authenticated.interviews.$id'
 
 const TestInterviewRoute = TestInterviewRouteImport.update({
@@ -60,26 +71,82 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingWelcomeRoute = OnboardingWelcomeRouteImport.update({
+  id: '/onboarding/welcome',
+  path: '/onboarding/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRecommendationsRoute =
+  OnboardingRecommendationsRouteImport.update({
+    id: '/onboarding/recommendations',
+    path: '/onboarding/recommendations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OnboardingProductIntelligenceRoute =
+  OnboardingProductIntelligenceRouteImport.update({
+    id: '/onboarding/product-intelligence',
+    path: '/onboarding/product-intelligence',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OnboardingIntegrationWizardRoute =
+  OnboardingIntegrationWizardRouteImport.update({
+    id: '/onboarding/integration-wizard',
+    path: '/onboarding/integration-wizard',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OnboardingInstallRoute = OnboardingInstallRouteImport.update({
+  id: '/onboarding/install',
+  path: '/onboarding/install',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingCompleteRoute = OnboardingCompleteRouteImport.update({
+  id: '/onboarding/complete',
+  path: '/onboarding/complete',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InterviewSessionIdRoute = InterviewSessionIdRouteImport.update({
   id: '/interview/$sessionId',
   path: '/interview/$sessionId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
+  id: '/workspace',
+  path: '/workspace',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
   path: '/team',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSetupWizardRoute =
+  AuthenticatedSetupWizardRouteImport.update({
+    id: '/setup-wizard',
+    path: '/setup-wizard',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedProductKnowledgeRoute =
+  AuthenticatedProductKnowledgeRouteImport.update({
+    id: '/product-knowledge',
+    path: '/product-knowledge',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedInterviewsRoute = AuthenticatedInterviewsRouteImport.update({
   id: '/interviews',
   path: '/interviews',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedIntegrationsRoute =
+  AuthenticatedIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedInstallRoute = AuthenticatedInstallRouteImport.update({
   id: '/install',
   path: '/install',
@@ -101,6 +168,12 @@ const AuthenticatedCompetitorsRoute =
     path: '/competitors',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedCompanyDetailsRoute =
+  AuthenticatedCompanyDetailsRouteImport.update({
+    id: '/company-details',
+    path: '/company-details',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedInterviewsIdRoute =
   AuthenticatedInterviewsIdRouteImport.update({
     id: '/$id',
@@ -115,14 +188,25 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/test-interview': typeof TestInterviewRoute
+  '/company-details': typeof AuthenticatedCompanyDetailsRoute
   '/competitors': typeof AuthenticatedCompetitorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/install': typeof AuthenticatedInstallRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/interviews': typeof AuthenticatedInterviewsRouteWithChildren
+  '/product-knowledge': typeof AuthenticatedProductKnowledgeRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/setup-wizard': typeof AuthenticatedSetupWizardRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
+  '/onboarding/complete': typeof OnboardingCompleteRoute
+  '/onboarding/install': typeof OnboardingInstallRoute
+  '/onboarding/integration-wizard': typeof OnboardingIntegrationWizardRoute
+  '/onboarding/product-intelligence': typeof OnboardingProductIntelligenceRoute
+  '/onboarding/recommendations': typeof OnboardingRecommendationsRoute
+  '/onboarding/welcome': typeof OnboardingWelcomeRoute
   '/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRoutesByTo {
@@ -132,14 +216,25 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/test-interview': typeof TestInterviewRoute
+  '/company-details': typeof AuthenticatedCompanyDetailsRoute
   '/competitors': typeof AuthenticatedCompetitorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/install': typeof AuthenticatedInstallRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/interviews': typeof AuthenticatedInterviewsRouteWithChildren
+  '/product-knowledge': typeof AuthenticatedProductKnowledgeRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/setup-wizard': typeof AuthenticatedSetupWizardRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
+  '/onboarding/complete': typeof OnboardingCompleteRoute
+  '/onboarding/install': typeof OnboardingInstallRoute
+  '/onboarding/integration-wizard': typeof OnboardingIntegrationWizardRoute
+  '/onboarding/product-intelligence': typeof OnboardingProductIntelligenceRoute
+  '/onboarding/recommendations': typeof OnboardingRecommendationsRoute
+  '/onboarding/welcome': typeof OnboardingWelcomeRoute
   '/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRoutesById {
@@ -151,14 +246,25 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/test-interview': typeof TestInterviewRoute
+  '/_authenticated/company-details': typeof AuthenticatedCompanyDetailsRoute
   '/_authenticated/competitors': typeof AuthenticatedCompetitorsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/install': typeof AuthenticatedInstallRoute
+  '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/interviews': typeof AuthenticatedInterviewsRouteWithChildren
+  '/_authenticated/product-knowledge': typeof AuthenticatedProductKnowledgeRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/setup-wizard': typeof AuthenticatedSetupWizardRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
+  '/onboarding/complete': typeof OnboardingCompleteRoute
+  '/onboarding/install': typeof OnboardingInstallRoute
+  '/onboarding/integration-wizard': typeof OnboardingIntegrationWizardRoute
+  '/onboarding/product-intelligence': typeof OnboardingProductIntelligenceRoute
+  '/onboarding/recommendations': typeof OnboardingRecommendationsRoute
+  '/onboarding/welcome': typeof OnboardingWelcomeRoute
   '/_authenticated/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRouteTypes {
@@ -170,14 +276,25 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/test-interview'
+    | '/company-details'
     | '/competitors'
     | '/dashboard'
     | '/insights'
     | '/install'
+    | '/integrations'
     | '/interviews'
+    | '/product-knowledge'
     | '/settings'
+    | '/setup-wizard'
     | '/team'
+    | '/workspace'
     | '/interview/$sessionId'
+    | '/onboarding/complete'
+    | '/onboarding/install'
+    | '/onboarding/integration-wizard'
+    | '/onboarding/product-intelligence'
+    | '/onboarding/recommendations'
+    | '/onboarding/welcome'
     | '/interviews/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,14 +304,25 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/test-interview'
+    | '/company-details'
     | '/competitors'
     | '/dashboard'
     | '/insights'
     | '/install'
+    | '/integrations'
     | '/interviews'
+    | '/product-knowledge'
     | '/settings'
+    | '/setup-wizard'
     | '/team'
+    | '/workspace'
     | '/interview/$sessionId'
+    | '/onboarding/complete'
+    | '/onboarding/install'
+    | '/onboarding/integration-wizard'
+    | '/onboarding/product-intelligence'
+    | '/onboarding/recommendations'
+    | '/onboarding/welcome'
     | '/interviews/$id'
   id:
     | '__root__'
@@ -205,14 +333,25 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/test-interview'
+    | '/_authenticated/company-details'
     | '/_authenticated/competitors'
     | '/_authenticated/dashboard'
     | '/_authenticated/insights'
     | '/_authenticated/install'
+    | '/_authenticated/integrations'
     | '/_authenticated/interviews'
+    | '/_authenticated/product-knowledge'
     | '/_authenticated/settings'
+    | '/_authenticated/setup-wizard'
     | '/_authenticated/team'
+    | '/_authenticated/workspace'
     | '/interview/$sessionId'
+    | '/onboarding/complete'
+    | '/onboarding/install'
+    | '/onboarding/integration-wizard'
+    | '/onboarding/product-intelligence'
+    | '/onboarding/recommendations'
+    | '/onboarding/welcome'
     | '/_authenticated/interviews/$id'
   fileRoutesById: FileRoutesById
 }
@@ -225,6 +364,12 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   TestInterviewRoute: typeof TestInterviewRoute
   InterviewSessionIdRoute: typeof InterviewSessionIdRoute
+  OnboardingCompleteRoute: typeof OnboardingCompleteRoute
+  OnboardingInstallRoute: typeof OnboardingInstallRoute
+  OnboardingIntegrationWizardRoute: typeof OnboardingIntegrationWizardRoute
+  OnboardingProductIntelligenceRoute: typeof OnboardingProductIntelligenceRoute
+  OnboardingRecommendationsRoute: typeof OnboardingRecommendationsRoute
+  OnboardingWelcomeRoute: typeof OnboardingWelcomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -278,6 +423,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding/welcome': {
+      id: '/onboarding/welcome'
+      path: '/onboarding/welcome'
+      fullPath: '/onboarding/welcome'
+      preLoaderRoute: typeof OnboardingWelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/recommendations': {
+      id: '/onboarding/recommendations'
+      path: '/onboarding/recommendations'
+      fullPath: '/onboarding/recommendations'
+      preLoaderRoute: typeof OnboardingRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/product-intelligence': {
+      id: '/onboarding/product-intelligence'
+      path: '/onboarding/product-intelligence'
+      fullPath: '/onboarding/product-intelligence'
+      preLoaderRoute: typeof OnboardingProductIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/integration-wizard': {
+      id: '/onboarding/integration-wizard'
+      path: '/onboarding/integration-wizard'
+      fullPath: '/onboarding/integration-wizard'
+      preLoaderRoute: typeof OnboardingIntegrationWizardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/install': {
+      id: '/onboarding/install'
+      path: '/onboarding/install'
+      fullPath: '/onboarding/install'
+      preLoaderRoute: typeof OnboardingInstallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/complete': {
+      id: '/onboarding/complete'
+      path: '/onboarding/complete'
+      fullPath: '/onboarding/complete'
+      preLoaderRoute: typeof OnboardingCompleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/interview/$sessionId': {
       id: '/interview/$sessionId'
       path: '/interview/$sessionId'
@@ -285,11 +472,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InterviewSessionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/workspace': {
+      id: '/_authenticated/workspace'
+      path: '/workspace'
+      fullPath: '/workspace'
+      preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/team': {
       id: '/_authenticated/team'
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof AuthenticatedTeamRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/setup-wizard': {
+      id: '/_authenticated/setup-wizard'
+      path: '/setup-wizard'
+      fullPath: '/setup-wizard'
+      preLoaderRoute: typeof AuthenticatedSetupWizardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/settings': {
@@ -299,11 +500,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/product-knowledge': {
+      id: '/_authenticated/product-knowledge'
+      path: '/product-knowledge'
+      fullPath: '/product-knowledge'
+      preLoaderRoute: typeof AuthenticatedProductKnowledgeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/interviews': {
       id: '/_authenticated/interviews'
       path: '/interviews'
       fullPath: '/interviews'
       preLoaderRoute: typeof AuthenticatedInterviewsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/integrations': {
+      id: '/_authenticated/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/install': {
@@ -334,6 +549,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompetitorsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/company-details': {
+      id: '/_authenticated/company-details'
+      path: '/company-details'
+      fullPath: '/company-details'
+      preLoaderRoute: typeof AuthenticatedCompanyDetailsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/interviews/$id': {
       id: '/_authenticated/interviews/$id'
       path: '/$id'
@@ -359,23 +581,33 @@ const AuthenticatedInterviewsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedCompanyDetailsRoute: typeof AuthenticatedCompanyDetailsRoute
   AuthenticatedCompetitorsRoute: typeof AuthenticatedCompetitorsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
   AuthenticatedInstallRoute: typeof AuthenticatedInstallRoute
+  AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedInterviewsRoute: typeof AuthenticatedInterviewsRouteWithChildren
+  AuthenticatedProductKnowledgeRoute: typeof AuthenticatedProductKnowledgeRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSetupWizardRoute: typeof AuthenticatedSetupWizardRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCompanyDetailsRoute: AuthenticatedCompanyDetailsRoute,
   AuthenticatedCompetitorsRoute: AuthenticatedCompetitorsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
   AuthenticatedInstallRoute: AuthenticatedInstallRoute,
+  AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedInterviewsRoute: AuthenticatedInterviewsRouteWithChildren,
+  AuthenticatedProductKnowledgeRoute: AuthenticatedProductKnowledgeRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSetupWizardRoute: AuthenticatedSetupWizardRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -391,7 +623,23 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   TestInterviewRoute: TestInterviewRoute,
   InterviewSessionIdRoute: InterviewSessionIdRoute,
+  OnboardingCompleteRoute: OnboardingCompleteRoute,
+  OnboardingInstallRoute: OnboardingInstallRoute,
+  OnboardingIntegrationWizardRoute: OnboardingIntegrationWizardRoute,
+  OnboardingProductIntelligenceRoute: OnboardingProductIntelligenceRoute,
+  OnboardingRecommendationsRoute: OnboardingRecommendationsRoute,
+  OnboardingWelcomeRoute: OnboardingWelcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
