@@ -29,7 +29,7 @@ function AuthPage() {
   const search = useSearch({ from: "/auth" });
   const [checkingCompany, setCheckingCompany] = useState(true);
 
- useEffect(() => {
+  useEffect(() => {
     const checkCompanyDetails = async () => {
       if (!loading && session && profile?.company_id) {
         try {
@@ -39,9 +39,9 @@ function AuthPage() {
             .eq("id", profile.company_id)
             .maybeSingle();
 
-          // If company has basic details filled, go to dashboard, otherwise go to company-details
+          // If company has basic details filled, go to setup-wizard, otherwise go to company-details
           if (company && company.company_name) {
-            navigate({ to: search.redirect ?? "/dashboard", replace: true });
+            navigate({ to: search.redirect ?? "/setup-wizard", replace: true });
           } else {
             navigate({ to: "/company-details", replace: true });
           }

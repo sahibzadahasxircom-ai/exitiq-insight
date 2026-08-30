@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -27,7 +25,6 @@ function Settings() {
   const [saving, setSaving] = useState(false);
   const [notify, setNotify] = useState(true);
   const [weekly, setWeekly] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => { setCompanyName(company?.company_name ?? ""); }, [company?.company_name]);
 
@@ -41,55 +38,8 @@ function Settings() {
     toast.success("Company updated");
   }
 
-  const handleRestartOnboarding = async () => {
-    if (!company?.id) return;
-    
-    if (!confirm("This will reset your onboarding progress. You'll need to go through the setup wizard again. Continue?")) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("companies")
-        .update({ onboarding_completed: false })
-        .eq("id", company.id);
-
-      if (error) {
-        // If column doesn't exist, show message
-        if (error.message.includes('column') || error.message.includes('does not exist')) {
-          toast.error("Onboarding feature not yet available. Please contact support.");
-        } else {
-          toast.error("Failed to restart onboarding: " + error.message);
-        }
-      } else {
-        setShowOnboarding(true);
-      }
-    } catch (error) {
-      toast.error("Failed to restart onboarding");
-    }
-  };
-
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    refresh();
-  };
-
-  const handleOnboardingSkip = () => {
-    setShowOnboarding(false);
-    refresh();
-  };
-
   return (
-    <>
-      {showOnboarding && company?.id && (
-        <OnboardingWizard
-          companyId={company.id}
-          onComplete={handleOnboardingComplete}
-          onSkip={handleOnboardingSkip}
-        />
-      )}
-      
-      <div className="mx-auto max-w-3xl space-y-8 px-6 py-8">
+    <div className="mx-auto max-w-3xl space-y-8 px-6 py-8">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
           <p className="mt-1 text-sm text-muted-foreground">Workspace, integrations, and notifications.</p>
@@ -122,30 +72,8 @@ function Settings() {
             checked={weekly} onChange={setWeekly}
           />
         </Section>
-
-        {isOwner && (
-          <Section title="Onboarding" description="Reset your workspace setup wizard.">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Restart Onboarding</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Go through the setup wizard again to reconfigure your workspace.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleRestartOnboarding}
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Restart
-              </Button>
-            </div>
-          </Section>
-        )}
       </div>
-    </>
-  );
+    );
 }
 
 function Section({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {

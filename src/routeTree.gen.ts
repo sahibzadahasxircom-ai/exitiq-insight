@@ -16,12 +16,6 @@ import { Route as ExitInterviewRouteImport } from './routes/exit-interview'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as OnboardingWelcomeRouteImport } from './routes/onboarding.welcome'
-import { Route as OnboardingRecommendationsRouteImport } from './routes/onboarding.recommendations'
-import { Route as OnboardingProductIntelligenceRouteImport } from './routes/onboarding.product-intelligence'
-import { Route as OnboardingIntegrationWizardRouteImport } from './routes/onboarding.integration-wizard'
-import { Route as OnboardingInstallRouteImport } from './routes/onboarding.install'
-import { Route as OnboardingCompleteRouteImport } from './routes/onboarding.complete'
 import { Route as InterviewSessionIdRouteImport } from './routes/interview.$sessionId'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated.workspace'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated.team'
@@ -69,39 +63,6 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingWelcomeRoute = OnboardingWelcomeRouteImport.update({
-  id: '/onboarding/welcome',
-  path: '/onboarding/welcome',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRecommendationsRoute =
-  OnboardingRecommendationsRouteImport.update({
-    id: '/onboarding/recommendations',
-    path: '/onboarding/recommendations',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OnboardingProductIntelligenceRoute =
-  OnboardingProductIntelligenceRouteImport.update({
-    id: '/onboarding/product-intelligence',
-    path: '/onboarding/product-intelligence',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OnboardingIntegrationWizardRoute =
-  OnboardingIntegrationWizardRouteImport.update({
-    id: '/onboarding/integration-wizard',
-    path: '/onboarding/integration-wizard',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OnboardingInstallRoute = OnboardingInstallRouteImport.update({
-  id: '/onboarding/install',
-  path: '/onboarding/install',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingCompleteRoute = OnboardingCompleteRouteImport.update({
-  id: '/onboarding/complete',
-  path: '/onboarding/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InterviewSessionIdRoute = InterviewSessionIdRouteImport.update({
@@ -201,12 +162,6 @@ export interface FileRoutesByFullPath {
   '/team': typeof AuthenticatedTeamRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
-  '/onboarding/complete': typeof OnboardingCompleteRoute
-  '/onboarding/install': typeof OnboardingInstallRoute
-  '/onboarding/integration-wizard': typeof OnboardingIntegrationWizardRoute
-  '/onboarding/product-intelligence': typeof OnboardingProductIntelligenceRoute
-  '/onboarding/recommendations': typeof OnboardingRecommendationsRoute
-  '/onboarding/welcome': typeof OnboardingWelcomeRoute
   '/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRoutesByTo {
@@ -229,12 +184,6 @@ export interface FileRoutesByTo {
   '/team': typeof AuthenticatedTeamRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
-  '/onboarding/complete': typeof OnboardingCompleteRoute
-  '/onboarding/install': typeof OnboardingInstallRoute
-  '/onboarding/integration-wizard': typeof OnboardingIntegrationWizardRoute
-  '/onboarding/product-intelligence': typeof OnboardingProductIntelligenceRoute
-  '/onboarding/recommendations': typeof OnboardingRecommendationsRoute
-  '/onboarding/welcome': typeof OnboardingWelcomeRoute
   '/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRoutesById {
@@ -259,12 +208,6 @@ export interface FileRoutesById {
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
-  '/onboarding/complete': typeof OnboardingCompleteRoute
-  '/onboarding/install': typeof OnboardingInstallRoute
-  '/onboarding/integration-wizard': typeof OnboardingIntegrationWizardRoute
-  '/onboarding/product-intelligence': typeof OnboardingProductIntelligenceRoute
-  '/onboarding/recommendations': typeof OnboardingRecommendationsRoute
-  '/onboarding/welcome': typeof OnboardingWelcomeRoute
   '/_authenticated/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRouteTypes {
@@ -289,12 +232,6 @@ export interface FileRouteTypes {
     | '/team'
     | '/workspace'
     | '/interview/$sessionId'
-    | '/onboarding/complete'
-    | '/onboarding/install'
-    | '/onboarding/integration-wizard'
-    | '/onboarding/product-intelligence'
-    | '/onboarding/recommendations'
-    | '/onboarding/welcome'
     | '/interviews/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -317,12 +254,6 @@ export interface FileRouteTypes {
     | '/team'
     | '/workspace'
     | '/interview/$sessionId'
-    | '/onboarding/complete'
-    | '/onboarding/install'
-    | '/onboarding/integration-wizard'
-    | '/onboarding/product-intelligence'
-    | '/onboarding/recommendations'
-    | '/onboarding/welcome'
     | '/interviews/$id'
   id:
     | '__root__'
@@ -346,12 +277,6 @@ export interface FileRouteTypes {
     | '/_authenticated/team'
     | '/_authenticated/workspace'
     | '/interview/$sessionId'
-    | '/onboarding/complete'
-    | '/onboarding/install'
-    | '/onboarding/integration-wizard'
-    | '/onboarding/product-intelligence'
-    | '/onboarding/recommendations'
-    | '/onboarding/welcome'
     | '/_authenticated/interviews/$id'
   fileRoutesById: FileRoutesById
 }
@@ -364,12 +289,6 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   TestInterviewRoute: typeof TestInterviewRoute
   InterviewSessionIdRoute: typeof InterviewSessionIdRoute
-  OnboardingCompleteRoute: typeof OnboardingCompleteRoute
-  OnboardingInstallRoute: typeof OnboardingInstallRoute
-  OnboardingIntegrationWizardRoute: typeof OnboardingIntegrationWizardRoute
-  OnboardingProductIntelligenceRoute: typeof OnboardingProductIntelligenceRoute
-  OnboardingRecommendationsRoute: typeof OnboardingRecommendationsRoute
-  OnboardingWelcomeRoute: typeof OnboardingWelcomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -421,48 +340,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/welcome': {
-      id: '/onboarding/welcome'
-      path: '/onboarding/welcome'
-      fullPath: '/onboarding/welcome'
-      preLoaderRoute: typeof OnboardingWelcomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/recommendations': {
-      id: '/onboarding/recommendations'
-      path: '/onboarding/recommendations'
-      fullPath: '/onboarding/recommendations'
-      preLoaderRoute: typeof OnboardingRecommendationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/product-intelligence': {
-      id: '/onboarding/product-intelligence'
-      path: '/onboarding/product-intelligence'
-      fullPath: '/onboarding/product-intelligence'
-      preLoaderRoute: typeof OnboardingProductIntelligenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/integration-wizard': {
-      id: '/onboarding/integration-wizard'
-      path: '/onboarding/integration-wizard'
-      fullPath: '/onboarding/integration-wizard'
-      preLoaderRoute: typeof OnboardingIntegrationWizardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/install': {
-      id: '/onboarding/install'
-      path: '/onboarding/install'
-      fullPath: '/onboarding/install'
-      preLoaderRoute: typeof OnboardingInstallRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/complete': {
-      id: '/onboarding/complete'
-      path: '/onboarding/complete'
-      fullPath: '/onboarding/complete'
-      preLoaderRoute: typeof OnboardingCompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/interview/$sessionId': {
@@ -623,12 +500,6 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   TestInterviewRoute: TestInterviewRoute,
   InterviewSessionIdRoute: InterviewSessionIdRoute,
-  OnboardingCompleteRoute: OnboardingCompleteRoute,
-  OnboardingInstallRoute: OnboardingInstallRoute,
-  OnboardingIntegrationWizardRoute: OnboardingIntegrationWizardRoute,
-  OnboardingProductIntelligenceRoute: OnboardingProductIntelligenceRoute,
-  OnboardingRecommendationsRoute: OnboardingRecommendationsRoute,
-  OnboardingWelcomeRoute: OnboardingWelcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

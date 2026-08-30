@@ -112,18 +112,6 @@ function CompanyDetails() {
         }
       }
 
-      // Mark onboarding as completed in profiles table
-      const { error: onboardingError } = await supabase
-        .from("profiles")
-        .update({ onboarding_completed: true })
-        .eq("id", profile?.id);
-
-      if (onboardingError) {
-        console.error("Error updating onboarding status:", onboardingError);
-        console.error("Error details:", JSON.stringify(onboardingError, null, 2));
-        // Don't throw on onboarding error, company is saved
-      }
-
       toast.success("Company details saved");
 
       // Navigate to setup wizard immediately
