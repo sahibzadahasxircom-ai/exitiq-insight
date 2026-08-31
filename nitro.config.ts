@@ -1,4 +1,6 @@
 export default {
+  preset: 'node-server',
+  port: process.env.PORT || 8080,
   routeRules: {
     '/widget.js': {
       headers: {
