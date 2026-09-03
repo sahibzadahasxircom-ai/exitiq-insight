@@ -32,6 +32,20 @@ function CompanyDetails() {
     company_industry: company?.company_industry || "",
   });
 
+  // Pre-fill form from auth metadata if company doesn't exist
+  useEffect(() => {
+    if (!company && profile?.user_metadata) {
+      const metadata = profile.user_metadata as any;
+      if (metadata.company_name && !formData.company_name) {
+        setFormData(prev => ({
+          ...prev,
+          company_name: metadata.company_name,
+          company_url: metadata.company_url || "",
+        }));
+      }
+    }
+  }, [company, profile, formData.company_name]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
