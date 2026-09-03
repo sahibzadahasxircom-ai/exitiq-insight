@@ -16,15 +16,35 @@ function InstallPage() {
   const workspaceKey = company?.id ? `wk_${company.id.slice(0, 18)}` : "wk_••••••••••••••••";
   const webhookUrl = getWebhookUrl(company?.id ?? "your-workspace");
 
-  const snippet = `<!-- leaveesy widget — install once, runs automatically on every cancel -->
-<script src="${getWidgetScriptUrl(company?.id ?? "your-company-id")}" defer></script>
+  const snippet = `<!-- leaveesy Global Tracking Script Tag -->
+<script src="${getWidgetScriptUrl(company?.id ?? "your-company-id")}"></script>
 <script>
-  window.leaveesy = window.leaveesy || [];
-  leaveesy.init({
-    workspaceKey: "${workspaceKey}",
-    trigger: "[data-cancel-subscription]", // any element that starts cancellation
-    user: { id: currentUser.id, email: currentUser.email, name: currentUser.name },
+  // Wait for leaveesy to be ready before attaching event listeners
+  window.addEventListener('leaveesyReady', function() {
+    console.log('leaveesy is ready');
+
+    const signoutBtn = document.querySelector('[data-leaveesy="signout"]') || document.getElementById('signout-btn');
+    if (signoutBtn) {
+      signoutBtn.addEventListener('click', function(e) {
+        if (window.leaveesy) {
+          console.log('Tracking SignOut event');
+          window.leaveesy.track("SignOut", { action: "process_started" });
+        }
+      });
+    }
   });
+
+  // Fallback: if leaveesy is already loaded, attach listeners immediately
+  if (window.leaveesy) {
+    console.log('leaveesy already loaded');
+    const signoutBtn = document.querySelector('[data-leaveesy="signout"]') || document.getElementById('signout-btn');
+    if (signoutBtn) {
+      signoutBtn.addEventListener('click', function(e) {
+        console.log('Tracking SignOut event');
+        window.leaveesy.track("SignOut", { action: "process_started" });
+      });
+    }
+  }
 </script>`;
 
   return (
