@@ -1,20 +1,39 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
+const searchSchema = { access_token: "", refresh_token: "", type: "" };
+
 export const Route = createFileRoute("/reset-password")({
+  validateSearch: searchSchema,
   head: () => ({ meta: [{ title: "Set new password — leaveesy" }] }),
   component: ResetPassword,
 });
 
 function ResetPassword() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/reset-password" });
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Exchange the access token from the URL for a session
+    if (search.access_token) {
+      supabase.auth.setSession({
+        access_token: search.access_token,
+        refresh_token: search.refresh_token || "",
+      }).then(() => {
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
+    }
+  }, [search.access_token, search.refresh_token]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,6 +43,14 @@ function ResetPassword() {
     if (error) return toast.error(error.message);
     toast.success("Password updated");
     navigate({ to: "/dashboard", replace: true });
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
+        <div className="text-sm text-muted-foreground">Loading...</div>
+      </div>
+    );
   }
 
   return (
