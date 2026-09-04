@@ -55,7 +55,6 @@
         user_agent: navigator.userAgent
       };
       
-      // Use navigator.sendBeacon for reliable delivery
       // Determine API URL from widget script source (cross-origin support)
       var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
       var apiUrl;
@@ -66,21 +65,21 @@
         apiUrl = (window.location.origin || 'http://localhost:8080') + '/api/widget/events';
       }
       
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(apiUrl, JSON.stringify(payload));
-      } else {
-        // Fallback to fetch
-        fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-          keepalive: true
-        }).catch(function(error) {
-          console.error('Leaveesy Widget: Failed to send event', error);
-        });
-      }
+      // Use fetch with proper headers for JSON content type
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).then(function(response) {
+        if (!response.ok) {
+          console.error('Leaveesy Widget: Failed to send event, status:', response.status);
+        }
+      }).catch(function(error) {
+        console.error('Leaveesy Widget: Failed to send event', error);
+      });
       
       console.log('Leaveesy Widget: Tracked event', eventName, payload);
     }
