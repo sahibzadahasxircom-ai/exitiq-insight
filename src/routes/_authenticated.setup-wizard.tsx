@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { ArrowRight, CheckCircle2, Loader2, Copy, Check } from "lucide-react";
 import { getWidgetScriptUrl, getWebhookUrl } from "@/lib/config";
+import { createCompanyFn, linkUserToCompanyFn } from "@/lib/company.server";
 
 export const Route = createFileRoute("/_authenticated/setup-wizard")({
   head: () => ({
@@ -41,7 +42,41 @@ function SetupWizard() {
     const ensureCompanyExists = async () => {
       if (!profile?.company_id && profile?.id) {
         try {
-          // Try to find an existing company for this user
+          console.log("No company_id found, checking for company metadata");
+          
+          // Check if user has company metadata from sign-up
+          const metadata = profile.user_metadata as any;
+          console.log("User metadata:", metadata);
+          
+          if (metadata?.company_name) {
+            console.log("Company metadata found, creating company from metadata");
+            
+            // Create company using server function with metadata
+            const newCompany = await createCompanyFn({
+              data: {
+                company_name: metadata.company_name,
+                company_url: metadata.company_url || undefined,
+                company_size: metadata.company_size || undefined,
+              },
+            });
+
+            console.log("Company created from metadata with ID:", newCompany.id);
+
+            // Link user to company using server function
+            await linkUserToCompanyFn({
+              data: {
+                userId: profile.id,
+                companyId: newCompany.id,
+              },
+            });
+
+            console.log("User linked to company successfully");
+            setFallbackCompanyId(newCompany.id);
+            toast.success("Company created from your sign-up information");
+            return;
+          }
+          
+          // Fallback: Try to find an existing company for this user
           const { data: companies } = await supabase
             .from("companies")
             .select("id, company_name")
@@ -98,7 +133,7 @@ function SetupWizard() {
     };
 
     ensureCompanyExists();
-  }, [profile?.company_id, profile?.id, profile?.full_name]);
+  }, [profile?.company_id, profile?.id]);
 
   // Handle Stripe OAuth callback
   useEffect(() => {

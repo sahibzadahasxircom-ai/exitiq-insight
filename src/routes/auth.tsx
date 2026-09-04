@@ -210,6 +210,7 @@ function SignUpForm() {
     // Check if email confirmation is required
     if (!authData.session) {
       console.log("Email confirmation required - session not returned");
+      console.log("Company data stored in metadata for post-confirmation creation");
       toast.success("Account created! Please check your email to confirm your account.");
       return;
     }
