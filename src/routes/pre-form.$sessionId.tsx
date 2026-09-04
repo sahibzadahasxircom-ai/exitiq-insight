@@ -7,6 +7,8 @@ import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { updateInterviewSession } from "@/lib/interview.functions";
+import { useQuery } from "@tanstack/react-query";
+import { createClient } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/pre-form/$sessionId")({
   head: () => ({
@@ -24,6 +26,37 @@ function PreForm() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateFn = useServerFn(updateInterviewSession);
+
+  // Fetch company customization
+  const { data: company, isLoading: isLoadingCompany } = useQuery({
+    queryKey: ["company", sessionId],
+    queryFn: async () => {
+      const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+      const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      const { data: session } = await supabase
+        .from("interview_sessions")
+        .select("company_id")
+        .eq("id", sessionId)
+        .single();
+
+      if (!session?.company_id) return null;
+
+      const { data: companyData } = await supabase
+        .from("companies")
+        .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields")
+        .eq("id", session.company_id)
+        .single();
+
+      return companyData;
+    },
+  });
+
+  // Default values if company customization not set
+  const formStyle = company?.pre_form_style || "professional";
+  const formTitle = company?.pre_form_title || "We're sorry to see you go";
+  const formDescription = company?.pre_form_description || "Help us improve by sharing your feedback";
 
   const handleContinue = async () => {
     setIsSubmitting(true);
@@ -45,6 +78,14 @@ function PreForm() {
     }
   };
 
+  if (isLoadingCompany) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -63,13 +104,24 @@ function PreForm() {
 
       {/* Main Content */}
       <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-6 py-12">
-        <Card className="w-full max-w-md shadow-soft">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold tracking-tight">
-              We're sorry to see you go
+        <Card 
+          className={`w-full max-w-md shadow-soft ${
+            formStyle === "casual" ? "rounded-2xl border-2" : 
+            formStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
+          }`}
+        >
+          <CardHeader className={`space-y-1 ${formStyle === "minimal" ? "text-center" : ""}`}>
+            <CardTitle className={`${
+              formStyle === "casual" ? "text-3xl font-semibold" :
+              formStyle === "minimal" ? "text-xl font-medium" : "text-2xl font-bold"
+            } tracking-tight`}>
+              {formTitle}
             </CardTitle>
-            <CardDescription className="text-base">
-              Help us improve by sharing your feedback
+            <CardDescription className={`${
+              formStyle === "casual" ? "text-lg" :
+              formStyle === "minimal" ? "text-sm" : "text-base"
+            }`}>
+              {formDescription}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -80,6 +132,7 @@ function PreForm() {
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                className={formStyle === "minimal" ? "border-b rounded-none px-0" : ""}
               />
             </div>
             <div className="space-y-2">
@@ -90,11 +143,15 @@ function PreForm() {
                 placeholder="john@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className={formStyle === "minimal" ? "border-b rounded-none px-0" : ""}
               />
             </div>
             <Button 
               onClick={handleContinue}
-              className="w-full gap-2"
+              className={`w-full gap-2 ${
+                formStyle === "casual" ? "rounded-full text-lg py-6" :
+                formStyle === "minimal" ? "border-2 bg-transparent hover:bg-muted" : ""
+              }`}
               size="lg"
               disabled={isSubmitting}
             >
@@ -110,7 +167,9 @@ function PreForm() {
                 </>
               )}
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
+            <p className={`text-center text-xs text-muted-foreground ${
+              formStyle === "minimal" ? "hidden" : ""
+            }`}>
               Your responses will help us improve our service
             </p>
           </CardContent>
