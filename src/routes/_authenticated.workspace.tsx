@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Monitor, Tablet, Smartphone, Palette, Type, Image, Layout, Save, Eye, Upload, MessageSquare } from "lucide-react";
+import { Monitor, Tablet, Smartphone, Layout, Save, Upload, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/workspace")({
   head: () => ({
@@ -31,25 +31,34 @@ function Workspace() {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Customer Experience Builder State
-  const [selectedTemplate, setSelectedTemplate] = useState("minimal");
+  // Pre-Form Customization State
+  const [preFormStyle, setPreFormStyle] = useState("professional");
+  const [preFormTitle, setPreFormTitle] = useState("We're sorry to see you go");
+  const [preFormDescription, setPreFormDescription] = useState("Help us improve by sharing your feedback");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [experienceConfig, setExperienceConfig] = useState({
-    headline: "Your subscription has been cancelled",
-    description: "We're sorry to see you go. Before you leave, could you help us understand why? This takes about 2 minutes and helps us improve our product for everyone.",
-    ctaText: "Let's Continue",
-    skipText: "Skip Interview",
-    backgroundColor: "#ffffff",
-    textColor: "#0f172a",
-    buttonColor: "#2563eb",
-    buttonTextColor: "#ffffff",
-    fontFamily: "Inter",
-    showLogo: true,
-    showIllustration: true,
-    gradientEnabled: false,
-    gradientFrom: "#2563eb",
-    gradientTo: "#7c3aed",
-  });
+
+  // Load existing company pre-form settings
+  useEffect(() => {
+    if (company?.id) {
+      const loadCompanySettings = async () => {
+        const { data } = await supabase
+          .from("companies")
+          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name")
+          .eq("id", company.id)
+          .single();
+        
+        if (data) {
+          if (data.pre_form_style) setPreFormStyle(data.pre_form_style);
+          if (data.pre_form_title) setPreFormTitle(data.pre_form_title);
+          if (data.pre_form_description) setPreFormDescription(data.pre_form_description);
+          if (data.brand_color) setBrandColor(data.brand_color);
+          if (data.company_logo) setLogo(data.company_logo);
+          if (data.company_name) setCompanyName(data.company_name);
+        }
+      };
+      loadCompanySettings();
+    }
+  }, [company?.id]);
 
   // Interview Page Design State
 
@@ -104,7 +113,7 @@ function Workspace() {
     }
   };
 
-  const handleSaveExperience = async () => {
+  const handleSavePreForm = async () => {
     if (!company?.id) return;
 
     setSaving(true);
@@ -112,81 +121,38 @@ function Workspace() {
       const { error } = await (supabase as any)
         .from("companies")
         .update({
-          customer_experience_config: experienceConfig,
+          pre_form_style: preFormStyle,
+          pre_form_title: preFormTitle,
+          pre_form_description: preFormDescription,
         })
         .eq("id", company.id);
 
       if (error) throw error;
     } catch (error) {
-      console.error("Failed to save experience config:", error);
+      console.error("Failed to save pre-form config:", error);
     } finally {
       setSaving(false);
     }
   };
 
-  const templates = [
-    {
-      id: "minimal",
-      name: "Minimal",
-      description: "Clean and simple design",
-      config: {
-        headline: "Your subscription has been cancelled",
-        description: "We're sorry to see you go. Before you leave, could you help us understand why? This takes about 2 minutes.",
-        ctaText: "Let's Continue",
-        skipText: "Skip Interview",
-        backgroundColor: "#ffffff",
-        textColor: "#0f172a",
-        buttonColor: "#2563eb",
-        buttonTextColor: "#ffffff",
-        fontFamily: "Inter",
-        showLogo: true,
-        showIllustration: false,
-        gradientEnabled: false,
-        gradientFrom: "#2563eb",
-        gradientTo: "#7c3aed",
-      },
-    },
-    {
-      id: "modern",
-      name: "Modern Gradient",
-      description: "Contemporary with vibrant gradients",
-      config: {
-        headline: "We'll miss you",
-        description: "Your feedback helps us build better products. Share your thoughts in a quick 2-minute interview.",
-        ctaText: "Start Interview",
-        skipText: "No thanks",
-        backgroundColor: "#f8fafc",
-        textColor: "#1e293b",
-        buttonColor: "#7c3aed",
-        buttonTextColor: "#ffffff",
-        fontFamily: "Inter",
-        showLogo: true,
-        showIllustration: true,
-        gradientEnabled: true,
-        gradientFrom: "#7c3aed",
-        gradientTo: "#2563eb",
-      },
-    },
+  const preFormTemplates = [
     {
       id: "professional",
       name: "Professional",
-      description: "Enterprise-focused design",
-      config: {
-        headline: "Cancellation Confirmation",
-        description: "Thank you for your business. Your feedback is valuable to us. Please take 2 minutes to share your experience.",
-        ctaText: "Provide Feedback",
-        skipText: "Continue to Exit",
-        backgroundColor: "#ffffff",
-        textColor: "#1e293b",
-        buttonColor: "#0f172a",
-        buttonTextColor: "#ffffff",
-        fontFamily: "system-ui",
-        showLogo: true,
-        showIllustration: false,
-        gradientEnabled: false,
-        gradientFrom: "#0f172a",
-        gradientTo: "#334155",
-      },
+      description: "Enterprise-grade design",
+      preview: "Clean, structured layout with standard spacing and typography",
+    },
+    {
+      id: "casual",
+      name: "Casual",
+      description: "Friendly and approachable",
+      preview: "Rounded corners, larger elements, softer feel",
+    },
+    {
+      id: "minimal",
+      name: "Minimal",
+      description: "Clean and distraction-free",
+      preview: "Minimal borders, centered content, essential elements only",
     },
   ];
 
@@ -332,340 +298,183 @@ function Workspace() {
         <TabsContent value="experience" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Customer Experience Builder</CardTitle>
+              <CardTitle>Pre-Form Customization</CardTitle>
               <CardDescription>
-                Customize the pre-interview page customers see after cancellation.
+                Customize the form customers see before starting their exit interview.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-8">
               {/* Template Selection */}
               <div>
-                <Label className="text-sm font-medium">Choose a Template</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-3">
-                  {templates.map((template) => (
+                <Label className="text-sm font-semibold mb-4 block">Form Style</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {preFormTemplates.map((template) => (
                     <button
                       key={template.id}
-                      onClick={() => {
-                        setSelectedTemplate(template.id);
-                        setExperienceConfig(template.config);
-                      }}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
-                        selectedTemplate === template.id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
+                      onClick={() => setPreFormStyle(template.id)}
+                      className={`p-6 rounded-xl border-2 text-left transition-all group ${
+                        preFormStyle === template.id
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50"
                       }`}
                     >
-                      <div className="font-medium text-sm">{template.name}</div>
-                      <div className="text-xs text-muted-foreground mt-1">{template.description}</div>
-                      <div className="mt-2 h-2 rounded-full" style={{
-                        background: template.config.gradientEnabled
-                          ? `linear-gradient(to right, ${template.config.gradientFrom}, ${template.config.gradientTo})`
-                          : template.config.buttonColor
-                      }} />
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                          preFormStyle === template.id ? "bg-primary text-primary-foreground" : "bg-muted"
+                        }`}>
+                          <Layout className="h-5 w-5" />
+                        </div>
+                        <div className="font-semibold">{template.name}</div>
+                      </div>
+                      <div className="text-sm text-muted-foreground">{template.description}</div>
+                      <div className="text-xs text-muted-foreground mt-2">{template.preview}</div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Live Preview with Device Switcher */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <Label className="text-sm font-medium">Live Preview</Label>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={`h-8 w-8 ${previewDevice === "desktop" ? "bg-blue-100 text-blue-700" : ""}`}
-                      onClick={() => setPreviewDevice("desktop")}
-                    >
-                      <Monitor className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={`h-8 w-8 ${previewDevice === "tablet" ? "bg-blue-100 text-blue-700" : ""}`}
-                      onClick={() => setPreviewDevice("tablet")}
-                    >
-                      <Tablet className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={`h-8 w-8 ${previewDevice === "mobile" ? "bg-blue-100 text-blue-700" : ""}`}
-                      onClick={() => setPreviewDevice("mobile")}
-                    >
-                      <Smartphone className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <div
-                  className={`mx-auto border rounded-lg overflow-hidden ${
-                    previewDevice === "desktop"
-                      ? "max-w-3xl"
-                      : previewDevice === "tablet"
-                      ? "max-w-md"
-                      : "max-w-xs"
-                  }`}
-                  style={{
-                    background: experienceConfig.gradientEnabled
-                      ? `linear-gradient(135deg, ${experienceConfig.gradientFrom}, ${experienceConfig.gradientTo})`
-                      : experienceConfig.backgroundColor
-                  }}
-                >
-                  <div className="p-6 space-y-4" style={{ fontFamily: experienceConfig.fontFamily }}>
-                    {experienceConfig.showLogo && (
-                      <div className="flex items-center gap-2">
-                        {(logoPreview || logo) ? (
-                          <img
-                            src={logoPreview || logo}
-                            alt="Company Logo"
-                            className="h-8 w-8 object-contain"
-                          />
-                        ) : (
-                          <div
-                            className="h-8 w-8 rounded flex items-center justify-center text-white font-bold text-xs"
-                            style={{ backgroundColor: experienceConfig.buttonColor }}
-                          >
-                            {companyName?.charAt(0).toUpperCase() || "E"}
-                          </div>
-                        )}
-                        <span className="font-semibold text-sm" style={{ color: experienceConfig.textColor }}>
-                          {companyName || "Your Company"}
-                        </span>
-                      </div>
-                    )}
-                    {experienceConfig.showIllustration && (
-                      <div className="flex justify-center py-4">
-                        <div className="h-24 w-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <MessageSquare className="h-12 w-12 text-white" />
-                        </div>
-                      </div>
-                    )}
-                    <h2
-                      className="text-xl font-semibold"
-                      style={{ color: experienceConfig.textColor }}
-                    >
-                      {experienceConfig.headline}
-                    </h2>
-                    <p className="text-sm leading-relaxed" style={{ color: experienceConfig.textColor }}>
-                      {experienceConfig.description}
+              {/* Content Customization */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div>
+                    <Label htmlFor="pre-form-title" className="text-sm font-semibold mb-2 block">
+                      Form Title
+                    </Label>
+                    <Input
+                      id="pre-form-title"
+                      value={preFormTitle}
+                      onChange={(e) => setPreFormTitle(e.target.value)}
+                      placeholder="We're sorry to see you go"
+                      className="text-base"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      The main heading displayed on the pre-form page.
                     </p>
-                    <div className="flex gap-3 pt-4">
+                  </div>
+                  <div>
+                    <Label htmlFor="pre-form-description" className="text-sm font-semibold mb-2 block">
+                      Form Description
+                    </Label>
+                    <Textarea
+                      id="pre-form-description"
+                      value={preFormDescription}
+                      onChange={(e) => setPreFormDescription(e.target.value)}
+                      placeholder="Help us improve by sharing your feedback"
+                      rows={4}
+                      className="text-base resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      The subtitle text explaining the purpose of the form.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Live Preview */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold">Live Preview</Label>
+                    <div className="flex gap-1">
                       <Button
-                        style={{
-                          background: experienceConfig.gradientEnabled
-                            ? `linear-gradient(to right, ${experienceConfig.gradientFrom}, ${experienceConfig.gradientTo})`
-                            : experienceConfig.buttonColor,
-                          color: experienceConfig.buttonTextColor,
-                        }}
-                        className="flex-1"
+                        variant="outline"
+                        size="icon"
+                        className={`h-8 w-8 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
+                        onClick={() => setPreviewDevice("desktop")}
                       >
-                        {experienceConfig.ctaText}
+                        <Monitor className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" className="flex-1" style={{ borderColor: experienceConfig.textColor, color: experienceConfig.textColor }}>
-                        {experienceConfig.skipText}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`h-8 w-8 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
+                        onClick={() => setPreviewDevice("tablet")}
+                      >
+                        <Tablet className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`h-8 w-8 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
+                        onClick={() => setPreviewDevice("mobile")}
+                      >
+                        <Smartphone className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Customization Controls */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Type className="h-4 w-4 text-muted-foreground" />
-                    <Label className="text-sm font-medium">Content</Label>
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="headline" className="text-xs">Headline</Label>
-                      <Input
-                        id="headline"
-                        value={experienceConfig.headline}
-                        onChange={(e) =>
-                          setExperienceConfig({ ...experienceConfig, headline: e.target.value })
-                        }
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description" className="text-xs">Description</Label>
-                      <Textarea
-                        id="description"
-                        value={experienceConfig.description}
-                        onChange={(e) =>
-                          setExperienceConfig({ ...experienceConfig, description: e.target.value })
-                        }
-                        className="mt-1"
-                        rows={3}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label htmlFor="cta" className="text-xs">CTA Button</Label>
-                        <Input
-                          id="cta"
-                          value={experienceConfig.ctaText}
-                          onChange={(e) =>
-                            setExperienceConfig({ ...experienceConfig, ctaText: e.target.value })
-                          }
-                          className="mt-1"
-                        />
+                  <div
+                    className={`mx-auto border rounded-xl overflow-hidden bg-background ${
+                      previewDevice === "desktop"
+                        ? "max-w-lg"
+                        : previewDevice === "tablet"
+                        ? "max-w-sm"
+                        : "max-w-[280px]"
+                    } ${
+                      preFormStyle === "casual" ? "rounded-2xl border-2" : 
+                      preFormStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
+                    }`}
+                  >
+                    <div className={`p-6 space-y-4 ${
+                      preFormStyle === "minimal" ? "text-center" : ""
+                    }`}>
+                      <div className={`space-y-1 ${
+                        preFormStyle === "minimal" ? "text-center" : ""
+                      }`}>
+                        <h3 className={`${
+                          preFormStyle === "casual" ? "text-2xl font-semibold" :
+                          preFormStyle === "minimal" ? "text-xl font-medium" : "text-xl font-bold"
+                        } tracking-tight`}>
+                          {preFormTitle}
+                        </h3>
+                        <p className={`${
+                          preFormStyle === "casual" ? "text-base" :
+                          preFormStyle === "minimal" ? "text-sm" : "text-sm"
+                        } text-muted-foreground`}>
+                          {preFormDescription}
+                        </p>
                       </div>
-                      <div>
-                        <Label htmlFor="skip" className="text-xs">Skip Button</Label>
-                        <Input
-                          id="skip"
-                          value={experienceConfig.skipText}
-                          onChange={(e) =>
-                            setExperienceConfig({ ...experienceConfig, skipText: e.target.value })
-                          }
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Palette className="h-4 w-4 text-muted-foreground" />
-                    <Label className="text-sm font-medium">Colors</Label>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="gradient-enabled"
-                        checked={experienceConfig.gradientEnabled}
-                        onChange={(e) =>
-                          setExperienceConfig({ ...experienceConfig, gradientEnabled: e.target.checked })
-                        }
-                        className="rounded"
-                      />
-                      <Label htmlFor="gradient-enabled" className="text-xs">Enable Gradient</Label>
-                    </div>
-                    {experienceConfig.gradientEnabled ? (
-                      <>
-                        <div>
-                          <Label htmlFor="gradient-from" className="text-xs">Gradient From</Label>
-                          <div className="flex gap-2 mt-1">
-                            <Input
-                              id="gradient-from"
-                              type="color"
-                              value={experienceConfig.gradientFrom}
-                              onChange={(e) =>
-                                setExperienceConfig({ ...experienceConfig, gradientFrom: e.target.value })
-                              }
-                              className="w-12 h-9 p-1"
-                            />
-                            <Input
-                              value={experienceConfig.gradientFrom}
-                              onChange={(e) =>
-                                setExperienceConfig({ ...experienceConfig, gradientFrom: e.target.value })
-                              }
-                              className="flex-1"
-                            />
-                          </div>
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Label className="text-xs">Your name (optional)</Label>
+                          <Input 
+                            placeholder="John Doe"
+                            disabled
+                            className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                          />
                         </div>
-                        <div>
-                          <Label htmlFor="gradient-to" className="text-xs">Gradient To</Label>
-                          <div className="flex gap-2 mt-1">
-                            <Input
-                              id="gradient-to"
-                              type="color"
-                              value={experienceConfig.gradientTo}
-                              onChange={(e) =>
-                                setExperienceConfig({ ...experienceConfig, gradientTo: e.target.value })
-                              }
-                              className="w-12 h-9 p-1"
-                            />
-                            <Input
-                              value={experienceConfig.gradientTo}
-                              onChange={(e) =>
-                                setExperienceConfig({ ...experienceConfig, gradientTo: e.target.value })
-                              }
-                              className="flex-1"
-                            />
-                          </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs">Your email (optional)</Label>
+                          <Input 
+                            type="email"
+                            placeholder="john@example.com"
+                            disabled
+                            className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                          />
                         </div>
-                      </>
-                    ) : (
-                      <>
-                        <div>
-                          <Label htmlFor="bg-color" className="text-xs">Background</Label>
-                          <div className="flex gap-2 mt-1">
-                            <Input
-                              id="bg-color"
-                              type="color"
-                              value={experienceConfig.backgroundColor}
-                              onChange={(e) =>
-                                setExperienceConfig({ ...experienceConfig, backgroundColor: e.target.value })
-                              }
-                              className="w-12 h-9 p-1"
-                            />
-                            <Input
-                              value={experienceConfig.backgroundColor}
-                              onChange={(e) =>
-                                setExperienceConfig({ ...experienceConfig, backgroundColor: e.target.value })
-                              }
-                              className="flex-1"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="btn-color" className="text-xs">Button</Label>
-                          <div className="flex gap-2 mt-1">
-                            <Input
-                              id="btn-color"
-                              type="color"
-                              value={experienceConfig.buttonColor}
-                              onChange={(e) =>
-                                setExperienceConfig({ ...experienceConfig, buttonColor: e.target.value })
-                              }
-                              className="w-12 h-9 p-1"
-                            />
-                            <Input
-                              value={experienceConfig.buttonColor}
-                              onChange={(e) =>
-                                setExperienceConfig({ ...experienceConfig, buttonColor: e.target.value })
-                              }
-                              className="flex-1"
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
-                    <div>
-                      <Label htmlFor="text-color" className="text-xs">Text</Label>
-                      <div className="flex gap-2 mt-1">
-                        <Input
-                          id="text-color"
-                          type="color"
-                          value={experienceConfig.textColor}
-                          onChange={(e) =>
-                            setExperienceConfig({ ...experienceConfig, textColor: e.target.value })
-                          }
-                          className="w-12 h-9 p-1"
-                        />
-                        <Input
-                          value={experienceConfig.textColor}
-                          onChange={(e) =>
-                            setExperienceConfig({ ...experienceConfig, textColor: e.target.value })
-                          }
-                          className="flex-1"
-                        />
+                        <Button 
+                          className={`w-full gap-2 ${
+                            preFormStyle === "casual" ? "rounded-full text-lg py-6" :
+                            preFormStyle === "minimal" ? "border-2 bg-transparent hover:bg-muted" : ""
+                          }`}
+                          size="lg"
+                          disabled
+                        >
+                          Continue to Interview
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4 border-t">
-                <Button onClick={handleSaveExperience} disabled={saving}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {saving ? "Saving..." : "Save Experience"}
+              <div className="flex justify-end pt-6 border-t">
+                <Button 
+                  onClick={handleSavePreForm} 
+                  disabled={saving}
+                  size="lg"
+                  className="gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {saving ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </CardContent>
