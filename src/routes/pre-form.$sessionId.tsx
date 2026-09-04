@@ -30,9 +30,12 @@ function PreForm() {
   const updateFn = useServerFn(updateInterviewSession);
 
   // Fetch company customization
+  console.log("Pre-form: About to call useQuery");
+  
   const { data: company, isLoading: isLoadingCompany } = useQuery({
     queryKey: ["company", sessionId],
     queryFn: async () => {
+      console.log("Pre-form: Query function executing");
       const supabaseUrl = process.env.VITE_SUPABASE_URL!;
       const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -63,6 +66,8 @@ function PreForm() {
       return companyData;
     },
   });
+  
+  console.log("Pre-form: useQuery called, isLoading:", isLoadingCompany, "company data:", company);
 
   // Default values if company customization not set
   const formStyle = company?.pre_form_style || "professional";
