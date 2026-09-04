@@ -78,49 +78,58 @@
       
       // Use fetch with proper headers for JSON content type
       console.log('Leaveesy Widget: Sending event to API:', apiUrl);
+      console.log('Leaveesy Widget: Request payload:', payload);
       fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-        keepalive: true
+        keepalive: false
       }).then(function(response) {
         console.log('Leaveesy Widget: Response received, status:', response.status);
+        console.log('Leaveesy Widget: Response headers:', response.headers);
+        
         if (!response.ok) {
           console.error('Leaveesy Widget: Failed to send event, status:', response.status);
           return;
         }
         
         // Parse response to get interview session ID
-        response.json().then(function(data) {
-          console.log('Leaveesy Widget: Event sent successfully, data:', data);
-          console.log('Leaveesy Widget: Event name:', eventName);
-          console.log('Leaveesy Widget: Has interviewSessionId:', !!data.interviewSessionId);
-          
-          // If this is a SignOut event and we got an interview session ID, redirect to pre-form
-          if (eventName === 'SignOut' && data.interviewSessionId) {
-            console.log('Leaveesy Widget: Redirecting to pre-form:', data.interviewSessionId);
+        return response.text().then(function(text) {
+          console.log('Leaveesy Widget: Raw response text:', text);
+          try {
+            var data = JSON.parse(text);
+            console.log('Leaveesy Widget: Parsed response data:', data);
+            console.log('Leaveesy Widget: Event name:', eventName);
+            console.log('Leaveesy Widget: Has interviewSessionId:', !!data.interviewSessionId);
+            console.log('Leaveesy Widget: interviewSessionId value:', data.interviewSessionId);
             
-            // Get the leaveesy URL from the script source
-            var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
-            var leaveesyUrl;
-            if (script && script.src) {
-              var scriptUrl = new URL(script.src);
-              leaveesyUrl = scriptUrl.origin + '/pre-form/' + data.interviewSessionId;
+            // If this is a SignOut event and we got an interview session ID, redirect to pre-form
+            if (eventName === 'SignOut' && data.interviewSessionId) {
+              console.log('Leaveesy Widget: Redirecting to pre-form:', data.interviewSessionId);
+              
+              // Get the leaveesy URL from the script source
+              var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
+              var leaveesyUrl;
+              if (script && script.src) {
+                var scriptUrl = new URL(script.src);
+                leaveesyUrl = scriptUrl.origin + '/pre-form/' + data.interviewSessionId;
+              } else {
+                leaveesyUrl = 'https://leaveesy.vercel.app/pre-form/' + data.interviewSessionId;
+              }
+              
+              console.log('Leaveesy Widget: Redirecting to URL:', leaveesyUrl);
+              
+              // Redirect to the pre-form
+              window.location.href = leaveesyUrl;
             } else {
-              leaveesyUrl = 'https://leaveesy.vercel.app/pre-form/' + data.interviewSessionId;
+              console.log('Leaveesy Widget: Not redirecting - conditions not met');
+              console.log('Leaveesy Widget: eventName:', eventName, 'interviewSessionId:', data.interviewSessionId);
             }
-            
-            console.log('Leaveesy Widget: Redirecting to URL:', leaveesyUrl);
-            
-            // Redirect to the pre-form
-            window.location.href = leaveesyUrl;
-          } else {
-            console.log('Leaveesy Widget: Not redirecting - conditions not met');
+          } catch (parseError) {
+            console.error('Leaveesy Widget: Failed to parse JSON response:', parseError);
           }
-        }).catch(function(jsonError) {
-          console.error('Leaveesy Widget: Failed to parse response', jsonError);
         });
       }).catch(function(error) {
         console.error('Leaveesy Widget: Failed to send event', error);
