@@ -35,19 +35,28 @@ function PreForm() {
       const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+      console.log("Pre-form: Fetching company data for session:", sessionId);
+
       const { data: session } = await supabase
         .from("interview_sessions")
         .select("company_id")
         .eq("id", sessionId)
         .single();
 
-      if (!session?.company_id) return null;
+      console.log("Pre-form: Session data:", session);
+
+      if (!session?.company_id) {
+        console.log("Pre-form: No company_id in session");
+        return null;
+      }
 
       const { data: companyData } = await supabase
         .from("companies")
         .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color")
         .eq("id", session.company_id)
         .single();
+
+      console.log("Pre-form: Company data:", companyData);
 
       return companyData;
     },

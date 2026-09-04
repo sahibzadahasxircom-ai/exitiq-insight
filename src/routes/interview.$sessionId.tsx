@@ -32,19 +32,28 @@ function CustomerInterview() {
       const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+      console.log("Conversation: Fetching company data for session:", sessionId);
+
       const { data: session } = await supabase
         .from("interview_sessions")
         .select("company_id")
         .eq("id", sessionId)
         .single();
 
-      if (!session?.company_id) return null;
+      console.log("Conversation: Session data:", session);
+
+      if (!session?.company_id) {
+        console.log("Conversation: No company_id in session");
+        return null;
+      }
 
       const { data: companyData } = await supabase
         .from("companies")
         .select("company_name, company_logo, brand_color")
         .eq("id", session.company_id)
         .single();
+
+      console.log("Conversation: Company data:", companyData);
 
       return companyData;
     },
