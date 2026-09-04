@@ -77,6 +77,7 @@
       }
       
       // Use fetch with proper headers for JSON content type
+      console.log('Leaveesy Widget: Sending event to API:', apiUrl);
       fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -85,6 +86,7 @@
         body: JSON.stringify(payload),
         keepalive: true
       }).then(function(response) {
+        console.log('Leaveesy Widget: Response received, status:', response.status);
         if (!response.ok) {
           console.error('Leaveesy Widget: Failed to send event, status:', response.status);
           return;
@@ -92,7 +94,9 @@
         
         // Parse response to get interview session ID
         response.json().then(function(data) {
-          console.log('Leaveesy Widget: Event sent successfully', data);
+          console.log('Leaveesy Widget: Event sent successfully, data:', data);
+          console.log('Leaveesy Widget: Event name:', eventName);
+          console.log('Leaveesy Widget: Has interviewSessionId:', !!data.interviewSessionId);
           
           // If this is a SignOut event and we got an interview session ID, redirect to interview
           if (eventName === 'SignOut' && data.interviewSessionId) {
@@ -108,8 +112,12 @@
               leaveesyUrl = 'https://leaveesy.vercel.app/interview/' + data.interviewSessionId;
             }
             
+            console.log('Leaveesy Widget: Redirecting to URL:', leaveesyUrl);
+            
             // Redirect to the interview form
             window.location.href = leaveesyUrl;
+          } else {
+            console.log('Leaveesy Widget: Not redirecting - conditions not met');
           }
         }).catch(function(jsonError) {
           console.error('Leaveesy Widget: Failed to parse response', jsonError);
