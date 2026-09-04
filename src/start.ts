@@ -72,6 +72,23 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
           url: body.url,
         });
         
+        // Store the event in the database
+        const { error: insertError } = await supabase
+          .from("widget_events")
+          .insert({
+            company_id: body.company_id,
+            event_name: body.event_name,
+            event_data: body.event_data || {},
+            timestamp: body.timestamp || new Date().toISOString(),
+            url: body.url,
+            user_agent: body.user_agent,
+          });
+        
+        if (insertError) {
+          console.error("Failed to store widget event:", insertError);
+          // Still return success to not break the widget, but log the error
+        }
+        
         return new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: {
