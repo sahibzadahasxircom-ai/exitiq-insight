@@ -98,23 +98,23 @@
           console.log('Leaveesy Widget: Event name:', eventName);
           console.log('Leaveesy Widget: Has interviewSessionId:', !!data.interviewSessionId);
           
-          // If this is a SignOut event and we got an interview session ID, redirect to interview
+          // If this is a SignOut event and we got an interview session ID, redirect to pre-form
           if (eventName === 'SignOut' && data.interviewSessionId) {
-            console.log('Leaveesy Widget: Redirecting to interview:', data.interviewSessionId);
+            console.log('Leaveesy Widget: Redirecting to pre-form:', data.interviewSessionId);
             
             // Get the leaveesy URL from the script source
             var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
             var leaveesyUrl;
             if (script && script.src) {
               var scriptUrl = new URL(script.src);
-              leaveesyUrl = scriptUrl.origin + '/interview/' + data.interviewSessionId;
+              leaveesyUrl = scriptUrl.origin + '/pre-form/' + data.interviewSessionId;
             } else {
-              leaveesyUrl = 'https://leaveesy.vercel.app/interview/' + data.interviewSessionId;
+              leaveesyUrl = 'https://leaveesy.vercel.app/pre-form/' + data.interviewSessionId;
             }
             
             console.log('Leaveesy Widget: Redirecting to URL:', leaveesyUrl);
             
-            // Redirect to the interview form
+            // Redirect to the pre-form
             window.location.href = leaveesyUrl;
           } else {
             console.log('Leaveesy Widget: Not redirecting - conditions not met');

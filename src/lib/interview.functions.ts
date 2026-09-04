@@ -174,6 +174,29 @@ export const publicGetInterview = createServerFn({ method: "GET" })
     return { session, messages: messages ?? [] };
   });
 
+export const updateInterviewSession = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => 
+    z.object({ 
+      sessionId: z.string().uuid(),
+      customer_name: z.string().trim().optional(),
+      customer_email: z.string().trim().email().optional(),
+    }).parse(d)
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
+    const { error } = await supabaseAdmin
+      .from("interview_sessions")
+      .update({
+        customer_name: data.customer_name || "Anonymous",
+        customer_email: data.customer_email || null,
+      })
+      .eq("id", data.sessionId);
+    
+    if (error) throw error;
+    return { success: true };
+  });
+
 export const publicStartInterview = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ sessionId: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
