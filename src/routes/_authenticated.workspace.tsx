@@ -165,18 +165,17 @@ function Workspace() {
         </p>
       </div>
 
-      <Tabs defaultValue="branding" className="space-y-6">
+      <Tabs defaultValue="pre-form" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="branding">Branding</TabsTrigger>
-          <TabsTrigger value="experience">Customer Experience</TabsTrigger>
+          <TabsTrigger value="pre-form">Pre-Form Customization</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="branding" className="space-y-6">
+        <TabsContent value="pre-form" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Brand Identity</CardTitle>
               <CardDescription>
-                Customize how your workspace looks to your customers.
+                Customize your company logo, name, and brand color.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -248,7 +247,7 @@ function Workspace() {
 
               <div className="pt-4">
                 <Button onClick={handleSave} disabled={saving}>
-                  {saving ? "Saving..." : "Save Changes"}
+                  {saving ? "Saving..." : "Save Branding"}
                 </Button>
               </div>
             </CardContent>
@@ -256,78 +255,28 @@ function Workspace() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Live Preview</CardTitle>
+              <CardTitle>Form Style & Content</CardTitle>
               <CardDescription>
-                See how your branding looks in real-time.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="rounded-lg border p-6 space-y-4"
-                style={{ borderColor: brandColor }}
-              >
-                <div className="flex items-center gap-3">
-                  {logo ? (
-                    <img src={logo} alt="Logo" className="h-8 w-8 rounded" />
-                  ) : (
-                    <div 
-                      className="h-8 w-8 rounded flex items-center justify-center text-white font-bold text-sm"
-                      style={{ backgroundColor: brandColor }}
-                    >
-                      {companyName?.charAt(0).toUpperCase() || "E"}
-                    </div>
-                  )}
-                  <span className="font-semibold">{companyName || "Your Company"}</span>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    This is how your branding will appear to customers during the interview process.
-                  </p>
-                  <Button 
-                    style={{ backgroundColor: brandColor }}
-                    className="text-white hover:opacity-90"
-                  >
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="experience" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pre-Form Customization</CardTitle>
-              <CardDescription>
-                Customize the form customers see before starting their exit interview.
+                Customize the form customers see before starting their conversation.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               {/* Template Selection */}
               <div>
-                <Label className="text-sm font-semibold mb-4 block">Form Style</Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Label className="text-sm font-semibold mb-3 block">Form Style</Label>
+                <div className="grid grid-cols-3 gap-3">
                   {preFormTemplates.map((template) => (
                     <button
                       key={template.id}
                       onClick={() => setPreFormStyle(template.id)}
-                      className={`p-6 rounded-xl border-2 text-left transition-all group ${
+                      className={`p-3 rounded-lg border text-left transition-all group ${
                         preFormStyle === template.id
                           ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                           : "border-border hover:border-primary/50 hover:bg-muted/50"
                       }`}
                     >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                          preFormStyle === template.id ? "bg-primary text-primary-foreground" : "bg-muted"
-                        }`}>
-                          <Layout className="h-5 w-5" />
-                        </div>
-                        <div className="font-semibold">{template.name}</div>
-                      </div>
-                      <div className="text-sm text-muted-foreground">{template.description}</div>
-                      <div className="text-xs text-muted-foreground mt-2">{template.preview}</div>
+                      <div className="font-semibold text-sm mb-1">{template.name}</div>
+                      <div className="text-xs text-muted-foreground">{template.description}</div>
                     </button>
                   ))}
                 </div>
@@ -366,6 +315,49 @@ function Workspace() {
                     <p className="text-xs text-muted-foreground mt-2">
                       The subtitle text explaining the purpose of the form.
                     </p>
+                  </div>
+                  
+                  {/* Copy Examples */}
+                  <div className="pt-4 border-t">
+                    <Label className="text-sm font-semibold mb-3 block">Copy Examples</Label>
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => {
+                          setPreFormTitle("One last thing before you go.");
+                          setPreFormDescription("We'd genuinely like to understand what made you leave. No long survey — just a quick conversation.");
+                        }}
+                        className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                      >
+                        <div className="font-medium text-sm mb-1">More Emotional</div>
+                        <div className="text-xs text-muted-foreground">
+                          "One last thing before you go. We'd genuinely like to understand what made you leave. No long survey — just a quick conversation."
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setPreFormTitle("Before you leave, can we ask why?");
+                          setPreFormDescription("This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters.");
+                        }}
+                        className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                      >
+                        <div className="font-medium text-sm mb-1">Curiosity-Driven</div>
+                        <div className="text-xs text-muted-foreground">
+                          "Before you leave, can we ask why? This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters."
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setPreFormTitle("Before you go — one quick conversation?");
+                          setPreFormDescription("We'd love to understand what happened. It takes less than 60 seconds.");
+                        }}
+                        className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                      >
+                        <div className="font-medium text-sm mb-1">Tight & Direct</div>
+                        <div className="text-xs text-muted-foreground">
+                          "Before you go — one quick conversation? We'd love to understand what happened. It takes less than 60 seconds."
+                        </div>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -457,7 +449,7 @@ function Workspace() {
                           size="lg"
                           disabled
                         >
-                          Continue to Interview
+                          Start Conversation
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </div>

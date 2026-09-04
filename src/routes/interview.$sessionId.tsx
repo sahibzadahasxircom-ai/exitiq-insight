@@ -5,12 +5,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { Send, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { publicGetInterview, publicSendMessage, publicStartInterview } from "@/lib/interview.functions";
+import { createClient } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/interview/$sessionId")({
   head: () => ({
     meta: [
-      { title: "Exit Interview — leaveesy" },
-      { name: "description", content: "A short AI-guided exit interview." },
+      { title: "Conversation — leaveesy" },
+      { name: "description", content: "A short AI-guided conversation." },
     ],
   }),
   component: CustomerInterview,
@@ -22,6 +23,32 @@ function CustomerInterview() {
   const startFn = useServerFn(publicStartInterview);
   const sendFn = useServerFn(publicSendMessage);
   const qc = useQueryClient();
+
+  // Fetch company branding
+  const { data: company } = useQuery({
+    queryKey: ["company-branding", sessionId],
+    queryFn: async () => {
+      const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+      const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      const { data: session } = await supabase
+        .from("interview_sessions")
+        .select("company_id")
+        .eq("id", sessionId)
+        .single();
+
+      if (!session?.company_id) return null;
+
+      const { data: companyData } = await supabase
+        .from("companies")
+        .select("company_name, company_logo, brand_color")
+        .eq("id", session.company_id)
+        .single();
+
+      return companyData;
+    },
+  });
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["public-interview", sessionId],
@@ -50,12 +77,16 @@ function CustomerInterview() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [data?.messages.length, send.isPending]);
 
-  if (isLoading) return <CenterMessage text="Loading interview…" />;
-  if (error || !data) return <CenterMessage text="This interview link is invalid or has been removed." />;
+  if (isLoading) return <CenterMessage text="Loading conversation…" />;
+  if (error || !data) return <CenterMessage text="This conversation link is invalid or has been removed." />;
 
   const { session, messages } = data;
   const status = session.interview_status;
   const done = status === "completed" || status === "abandoned";
+  
+  const brandColor = company?.brand_color || "#2563eb";
+  const companyName = company?.company_name || "Your Company";
+  const companyLogo = company?.company_logo;
 
   function handleSend() {
     const v = input.trim();
@@ -65,12 +96,30 @@ function CustomerInterview() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-border bg-background/90 backdrop-blur">
+    <div className="flex min-h-screen flex-col bg-background relative overflow-hidden">
+      {/* Background gradient effect using brand color */}
+      <div 
+        className="absolute inset-0 opacity-5 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+        }}
+      />
+      
+      <header className="border-b border-border bg-background/90 backdrop-blur relative z-10">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/leaveesy.png" alt="leaveesy" className="h-32 w-auto object-contain" />
-          </Link>
+          <div className="flex items-center gap-3">
+            {companyLogo ? (
+              <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain" />
+            ) : (
+              <div 
+                className="h-8 w-8 rounded flex items-center justify-center text-white font-bold text-sm"
+                style={{ backgroundColor: brandColor }}
+              >
+                {companyName?.charAt(0).toUpperCase() || "E"}
+              </div>
+            )}
+            <span className="font-semibold">{companyName}</span>
+          </div>
           <span className="text-[11px] text-muted-foreground">Confidential conversation</span>
         </div>
       </header>
@@ -81,11 +130,11 @@ function CustomerInterview() {
             <EndState />
           ) : (
             <div className="space-y-6">
-              {messages.length === 0 && <Typing />}
+              {messages.length === 0 && <Typing companyName={companyName} />}
               {messages.map((m) => (
-                <Bubble key={m.id} role={m.role as "assistant" | "user"} text={m.message_content} />
+                <Bubble key={m.id} role={m.role as "assistant" | "user"} text={m.message_content} companyName={companyName} />
               ))}
-              {send.isPending && <Typing />}
+              {send.isPending && <Typing companyName={companyName} />}
             </div>
           )}
         </div>
@@ -129,11 +178,11 @@ function CustomerInterview() {
   );
 }
 
-function Bubble({ role, text }: { role: "assistant" | "user"; text: string }) {
+function Bubble({ role, text, companyName }: { role: "assistant" | "user"; text: string; companyName?: string }) {
   if (role === "assistant") {
     return (
       <div className="animate-fade-in">
-        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Interviewer</p>
+        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{companyName || "Team"}</p>
         <p className="mt-1.5 max-w-2xl whitespace-pre-wrap text-base leading-relaxed text-foreground">{text}</p>
       </div>
     );
@@ -147,10 +196,10 @@ function Bubble({ role, text }: { role: "assistant" | "user"; text: string }) {
   );
 }
 
-function Typing() {
+function Typing({ companyName }: { companyName?: string }) {
   return (
     <div className="animate-fade-in">
-      <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Interviewer</p>
+      <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{companyName || "Team"}</p>
       <div className="mt-2 flex items-center gap-1.5">
         <Dot delay="0ms" /><Dot delay="150ms" /><Dot delay="300ms" />
       </div>

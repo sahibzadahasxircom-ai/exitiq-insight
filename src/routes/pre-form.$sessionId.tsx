@@ -45,7 +45,7 @@ function PreForm() {
 
       const { data: companyData } = await supabase
         .from("companies")
-        .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields")
+        .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color")
         .eq("id", session.company_id)
         .single();
 
@@ -57,6 +57,9 @@ function PreForm() {
   const formStyle = company?.pre_form_style || "professional";
   const formTitle = company?.pre_form_title || "We're sorry to see you go";
   const formDescription = company?.pre_form_description || "Help us improve by sharing your feedback";
+  const brandColor = company?.brand_color || "#2563eb";
+  const companyName = company?.company_name || "Your Company";
+  const companyLogo = company?.company_logo;
 
   const handleContinue = async () => {
     setIsSubmitting(true);
@@ -87,13 +90,31 @@ function PreForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/90 backdrop-blur">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background gradient effect using brand color */}
+      <div 
+        className="absolute inset-0 opacity-5"
+        style={{
+          background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+        }}
+      />
+      
+      {/* Header with company branding */}
+      <header className="border-b border-border bg-background/90 backdrop-blur relative z-10">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/leaveesy.png" alt="leaveesy" className="h-8 w-auto object-contain" />
-          </Link>
+          <div className="flex items-center gap-3">
+            {companyLogo ? (
+              <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain" />
+            ) : (
+              <div 
+                className="h-8 w-8 rounded flex items-center justify-center text-white font-bold text-sm"
+                style={{ backgroundColor: brandColor }}
+              >
+                {companyName?.charAt(0).toUpperCase() || "E"}
+              </div>
+            )}
+            <span className="font-semibold">{companyName}</span>
+          </div>
           <Link to="/">
             <Button variant="ghost" size="sm" className="gap-1.5">
               <ArrowLeft className="h-3.5 w-3.5" /> Back
@@ -103,7 +124,7 @@ function PreForm() {
       </header>
 
       {/* Main Content */}
-      <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-6 py-12">
+      <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-6 py-12 relative z-10">
         <Card 
           className={`w-full max-w-md shadow-soft ${
             formStyle === "casual" ? "rounded-2xl border-2" : 
@@ -158,11 +179,11 @@ function PreForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Starting Interview...
+                  Starting Conversation...
                 </>
               ) : (
                 <>
-                  Continue to Interview
+                  Start Conversation
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
