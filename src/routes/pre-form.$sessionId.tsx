@@ -6,9 +6,8 @@ import { Label } from "@/components/ui/label";
 import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { updateInterviewSession } from "@/lib/interview.functions";
+import { updateInterviewSession, getCompanyBySessionId } from "@/lib/interview.functions";
 import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/pre-form/$sessionId")({
   head: () => ({
@@ -28,50 +27,14 @@ function PreForm() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateFn = useServerFn(updateInterviewSession);
+  const getCompanyFn = useServerFn(getCompanyBySessionId);
 
-  // Fetch company customization
+  // Fetch company customization using server function
   console.log("Pre-form: About to call useQuery");
   
   const { data: company, isLoading: isLoadingCompany } = useQuery({
     queryKey: ["company", sessionId],
-    queryFn: async () => {
-      try {
-        console.log("Pre-form: Query function executing");
-        const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-        const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
-        const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-        console.log("Pre-form: Fetching company data for session:", sessionId);
-
-        const { data: session, error: sessionError } = await supabase
-          .from("interview_sessions")
-          .select("company_id")
-          .eq("id", sessionId)
-          .single();
-
-        console.log("Pre-form: Session data:", session);
-        console.log("Pre-form: Session error:", sessionError);
-
-        if (!session?.company_id) {
-          console.log("Pre-form: No company_id in session");
-          return null;
-        }
-
-        const { data: companyData, error: companyError } = await supabase
-          .from("companies")
-          .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color")
-          .eq("id", session.company_id)
-          .single();
-
-        console.log("Pre-form: Company data:", companyData);
-        console.log("Pre-form: Company error:", companyError);
-
-        return companyData;
-      } catch (error) {
-        console.error("Pre-form: Query function error:", error);
-        throw error;
-      }
-    },
+    queryFn: () => getCompanyFn({ data: { sessionId } }),
   });
   
   console.log("Pre-form: useQuery called, isLoading:", isLoadingCompany, "company data:", company);

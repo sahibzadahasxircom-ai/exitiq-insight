@@ -4,8 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Send, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { publicGetInterview, publicSendMessage, publicStartInterview } from "@/lib/interview.functions";
-import { createClient } from "@supabase/supabase-js";
+import { publicGetInterview, publicSendMessage, publicStartInterview, getCompanyBrandingBySessionId } from "@/lib/interview.functions";
 
 export const Route = createFileRoute("/interview/$sessionId")({
   head: () => ({
@@ -24,41 +23,13 @@ function CustomerInterview() {
   const getFn = useServerFn(publicGetInterview);
   const startFn = useServerFn(publicStartInterview);
   const sendFn = useServerFn(publicSendMessage);
+  const getCompanyFn = useServerFn(getCompanyBrandingBySessionId);
   const qc = useQueryClient();
 
-  // Fetch company branding
+  // Fetch company branding using server function
   const { data: company } = useQuery({
     queryKey: ["company-branding", sessionId],
-    queryFn: async () => {
-      const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-      const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-      console.log("Conversation: Fetching company data for session:", sessionId);
-
-      const { data: session } = await supabase
-        .from("interview_sessions")
-        .select("company_id")
-        .eq("id", sessionId)
-        .single();
-
-      console.log("Conversation: Session data:", session);
-
-      if (!session?.company_id) {
-        console.log("Conversation: No company_id in session");
-        return null;
-      }
-
-      const { data: companyData } = await supabase
-        .from("companies")
-        .select("company_name, company_logo, brand_color")
-        .eq("id", session.company_id)
-        .single();
-
-      console.log("Conversation: Company data:", companyData);
-
-      return companyData;
-    },
+    queryFn: () => getCompanyFn({ data: { sessionId } }),
   });
 
   const { data, isLoading, error } = useQuery({

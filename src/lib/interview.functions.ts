@@ -2,6 +2,52 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// ---------- Public functions (no auth required) ----------
+
+export const getCompanyBySessionId = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => z.object({ sessionId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
+    const { data: session } = await supabaseAdmin
+      .from("interview_sessions")
+      .select("company_id")
+      .eq("id", data.sessionId)
+      .single();
+
+    if (!session?.company_id) return null;
+
+    const { data: company } = await supabaseAdmin
+      .from("companies")
+      .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color")
+      .eq("id", session.company_id)
+      .single();
+
+    return company;
+  });
+
+export const getCompanyBrandingBySessionId = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => z.object({ sessionId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
+    const { data: session } = await supabaseAdmin
+      .from("interview_sessions")
+      .select("company_id")
+      .eq("id", data.sessionId)
+      .single();
+
+    if (!session?.company_id) return null;
+
+    const { data: company } = await supabaseAdmin
+      .from("companies")
+      .select("company_name, company_logo, brand_color")
+      .eq("id", session.company_id)
+      .single();
+
+    return company;
+  });
+
 // ---------- TEMPORARY: test route helper (remove when done) ----------
 export const publicCreateTestSession = createServerFn({ method: "POST" })
   .handler(async () => {
