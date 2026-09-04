@@ -22,6 +22,8 @@ export const Route = createFileRoute("/pre-form/$sessionId")({
 
 function PreForm() {
   const { sessionId } = Route.useParams();
+  console.log("PreForm component mounted with sessionId:", sessionId);
+  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

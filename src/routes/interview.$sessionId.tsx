@@ -19,6 +19,8 @@ export const Route = createFileRoute("/interview/$sessionId")({
 
 function CustomerInterview() {
   const { sessionId } = Route.useParams();
+  console.log("CustomerInterview component mounted with sessionId:", sessionId);
+  
   const getFn = useServerFn(publicGetInterview);
   const startFn = useServerFn(publicStartInterview);
   const sendFn = useServerFn(publicSendMessage);
