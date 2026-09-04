@@ -87,7 +87,33 @@
       }).then(function(response) {
         if (!response.ok) {
           console.error('Leaveesy Widget: Failed to send event, status:', response.status);
+          return;
         }
+        
+        // Parse response to get interview session ID
+        response.json().then(function(data) {
+          console.log('Leaveesy Widget: Event sent successfully', data);
+          
+          // If this is a SignOut event and we got an interview session ID, redirect to interview
+          if (eventName === 'SignOut' && data.interviewSessionId) {
+            console.log('Leaveesy Widget: Redirecting to interview:', data.interviewSessionId);
+            
+            // Get the leaveesy URL from the script source
+            var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
+            var leaveesyUrl;
+            if (script && script.src) {
+              var scriptUrl = new URL(script.src);
+              leaveesyUrl = scriptUrl.origin + '/interview/' + data.interviewSessionId;
+            } else {
+              leaveesyUrl = 'https://leaveesy.vercel.app/interview/' + data.interviewSessionId;
+            }
+            
+            // Redirect to the interview form
+            window.location.href = leaveesyUrl;
+          }
+        }).catch(function(jsonError) {
+          console.error('Leaveesy Widget: Failed to parse response', jsonError);
+        });
       }).catch(function(error) {
         console.error('Leaveesy Widget: Failed to send event', error);
       });
