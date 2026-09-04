@@ -7,12 +7,23 @@
 (function() {
   'use strict';
 
-  // Get company ID from script tag
+  // Get company ID from script tag (attribute or query param)
   var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
-  var companyId = script ? script.getAttribute('data-company-id') : null;
+  var companyId = null;
+  
+  if (script) {
+    // Try attribute first
+    companyId = script.getAttribute('data-company-id');
+    
+    // If not found, try URL query parameter
+    if (!companyId && script.src) {
+      var scriptUrl = new URL(script.src);
+      companyId = scriptUrl.searchParams.get('data-company-id');
+    }
+  }
 
   if (!companyId) {
-    console.error('Leaveesy Widget: data-company-id attribute is required');
+    console.error('Leaveesy Widget: data-company-id attribute or query parameter is required');
     return;
   }
 
