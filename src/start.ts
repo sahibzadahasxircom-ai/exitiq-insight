@@ -92,48 +92,29 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
         // If this is a SignOut event, create an interview session
         let interviewSessionId = null;
         if (body.event_name === "SignOut") {
-          console.log("SignOut event detected, creating interview session");
+          console.log("SignOut event detected, creating new interview session");
           
-          // Check if there's already an active interview session for this company from the same URL
-          const { data: existingSession, error: existingError } = await supabase
+          // Always create a new interview session for each SignOut event
+          console.log("Creating new interview session for company:", body.company_id);
+          const { data: newSession, error: sessionError } = await supabase
             .from("interview_sessions")
+            .insert({
+              company_id: body.company_id,
+              customer_name: "Widget User",
+              customer_email: "widget@example.com",
+              interview_status: "active",
+              interview_progress: "started",
+              source_url: body.url,
+            })
             .select("id")
-            .eq("company_id", body.company_id)
-            .eq("interview_status", "active")
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+            .single();
           
-          if (existingError) {
-            console.error("Error checking existing session:", existingError);
-          }
-          
-          if (existingSession) {
-            interviewSessionId = existingSession.id;
-            console.log("Using existing active interview session:", interviewSessionId);
+          if (sessionError) {
+            console.error("Failed to create interview session:", sessionError);
           } else {
-            // Create a new interview session
-            console.log("Creating new interview session for company:", body.company_id);
-            const { data: newSession, error: sessionError } = await supabase
-              .from("interview_sessions")
-              .insert({
-                company_id: body.company_id,
-                customer_name: "Widget User",
-                customer_email: "widget@example.com",
-                interview_status: "active",
-                interview_progress: "started",
-                source_url: body.url,
-              })
-              .select("id")
-              .single();
-            
-            if (sessionError) {
-              console.error("Failed to create interview session:", sessionError);
-            } else {
-              interviewSessionId = newSession.id;
-              console.log("Created new interview session:", interviewSessionId);
-              console.log("Full session data:", newSession);
-            }
+            interviewSessionId = newSession.id;
+            console.log("Created new interview session:", interviewSessionId);
+            console.log("Full session data:", newSession);
           }
         }
         
