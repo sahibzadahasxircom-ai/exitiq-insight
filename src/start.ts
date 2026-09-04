@@ -95,7 +95,7 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
           console.log("SignOut event detected, creating interview session");
           
           // Check if there's already an active interview session for this company from the same URL
-          const { data: existingSession } = await supabase
+          const { data: existingSession, error: existingError } = await supabase
             .from("interview_sessions")
             .select("id")
             .eq("company_id", body.company_id)
@@ -104,11 +104,16 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
             .limit(1)
             .maybeSingle();
           
+          if (existingError) {
+            console.error("Error checking existing session:", existingError);
+          }
+          
           if (existingSession) {
             interviewSessionId = existingSession.id;
             console.log("Using existing active interview session:", interviewSessionId);
           } else {
             // Create a new interview session
+            console.log("Creating new interview session for company:", body.company_id);
             const { data: newSession, error: sessionError } = await supabase
               .from("interview_sessions")
               .insert({
@@ -127,10 +132,12 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
             } else {
               interviewSessionId = newSession.id;
               console.log("Created new interview session:", interviewSessionId);
+              console.log("Full session data:", newSession);
             }
           }
         }
         
+        console.log("Returning response with interviewSessionId:", interviewSessionId);
         return new Response(JSON.stringify({ 
           success: true, 
           interviewSessionId: interviewSessionId 
