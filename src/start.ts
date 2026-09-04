@@ -89,7 +89,52 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
           // Still return success to not break the widget, but log the error
         }
         
-        return new Response(JSON.stringify({ success: true }), {
+        // If this is a SignOut event, create an interview session
+        let interviewSessionId = null;
+        if (body.event_name === "SignOut") {
+          console.log("SignOut event detected, creating interview session");
+          
+          // Check if there's already an active interview session for this company from the same URL
+          const { data: existingSession } = await supabase
+            .from("interview_sessions")
+            .select("id")
+            .eq("company_id", body.company_id)
+            .eq("interview_status", "active")
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (existingSession) {
+            interviewSessionId = existingSession.id;
+            console.log("Using existing active interview session:", interviewSessionId);
+          } else {
+            // Create a new interview session
+            const { data: newSession, error: sessionError } = await supabase
+              .from("interview_sessions")
+              .insert({
+                company_id: body.company_id,
+                customer_name: "Widget User",
+                customer_email: "widget@example.com",
+                interview_status: "active",
+                interview_progress: "started",
+                source_url: body.url,
+              })
+              .select("id")
+              .single();
+            
+            if (sessionError) {
+              console.error("Failed to create interview session:", sessionError);
+            } else {
+              interviewSessionId = newSession.id;
+              console.log("Created new interview session:", interviewSessionId);
+            }
+          }
+        }
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          interviewSessionId: interviewSessionId 
+        }), {
           status: 200,
           headers: {
             'Content-Type': 'application/json',
