@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
+import { createCompanyFn, linkUserToCompanyFn } from "@/lib/company.server";
 
 const searchSchema = z.object({ redirect: z.string().optional() });
 
@@ -32,26 +33,11 @@ function AuthPage() {
   useEffect(() => {
     const checkCompanyDetails = async () => {
       if (!loading && session && profile?.company_id) {
-        try {
-          const { data: company } = await supabase
-            .from("companies")
-            .select("company_name, company_url, company_size")
-            .eq("id", profile.company_id)
-            .maybeSingle();
-
-          // If company has basic details filled, go to setup-wizard, otherwise go to company-details
-          if (company && company.company_name) {
-            navigate({ to: search.redirect ?? "/setup-wizard", replace: true });
-          } else {
-            navigate({ to: "/company-details", replace: true });
-          }
-        } catch (error) {
-          console.error("Error checking company details:", error);
-          navigate({ to: "/company-details", replace: true });
-        }
+        // User has company, go to setup-wizard
+        navigate({ to: search.redirect ?? "/setup-wizard", replace: true });
       } else if (!loading && session) {
-        // No company_id, go to company-details
-        navigate({ to: "/company-details", replace: true });
+        // No company_id, go to setup-wizard (company should be created during sign-up)
+        navigate({ to: "/setup-wizard", replace: true });
       }
       setCheckingCompany(false);
     };
@@ -97,7 +83,7 @@ function GoogleButton() {
         setBusy(true);
         try {
           const result = await lovable.auth.signInWithOAuth("google", {
-            redirect_uri: window.location.origin + "/company-details",
+            redirect_uri: window.location.origin + "/setup-wizard",
           });
           if (result.error) {
             toast.error("Google sign-in failed");
@@ -178,6 +164,8 @@ function SignUpForm() {
   const [lastName, setLastName] = useState("");
   const [company, setCompany] = useState("");
   const [companyUrl, setCompanyUrl] = useState("");
+  const [companySize, setCompanySize] = useState("");
+  const [companyIndustry, setCompanyIndustry] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -186,14 +174,21 @@ function SignUpForm() {
     e.preventDefault();
     setBusy(true);
     
-    console.log("Sign-up attempt:", { email, firstName, lastName, company, companyUrl });
+    console.log("Sign-up attempt:", { email, firstName, lastName, company, companyUrl, companySize, companyIndustry });
     
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin + "/company-details",
-        data: { first_name: firstName, last_name: lastName, company_name: company, company_url: companyUrl },
+        emailRedirectTo: window.location.origin + "/setup-wizard",
+        data: { 
+          first_name: firstName, 
+          last_name: lastName, 
+          company_name: company, 
+          company_url: companyUrl,
+          company_size: companySize,
+          company_industry: companyIndustry,
+        },
       },
     });
     
@@ -219,10 +214,46 @@ function SignUpForm() {
       return;
     }
     
-    // If session exists (auto-confirmed), proceed to company details
-    console.log("Auto-confirmed - session exists, navigating to company-details");
-    toast.success(`Account created for "${company}"`);
-    navigate({ to: "/company-details", replace: true });
+    // If session exists (auto-confirmed), create company and proceed to setup wizard
+    console.log("Auto-confirmed - session exists, creating company");
+    
+    try {
+      // Create company using server function
+      const newCompany = await createCompanyFn({
+        data: {
+          company_name: company,
+          company_url: companyUrl || undefined,
+          company_size: companySize || undefined,
+        },
+      });
+
+      console.log("Company created with ID:", newCompany.id);
+
+      // Get the user ID from auth
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not found after sign-up");
+      }
+
+      // Link user to company using server function
+      await linkUserToCompanyFn({
+        data: {
+          userId: user.id,
+          companyId: newCompany.id,
+        },
+      });
+
+      console.log("User linked to company successfully");
+      toast.success(`Account created for "${company}"`);
+      
+      // Navigate to setup wizard
+      navigate({ to: "/setup-wizard", replace: true });
+    } catch (error) {
+      console.error("Error creating company during sign-up:", error);
+      toast.error("Account created but failed to create company. Please try again.");
+      // Still navigate to setup wizard, they can try again later
+      navigate({ to: "/setup-wizard", replace: true });
+    }
   }
 
   return (
@@ -245,6 +276,26 @@ function SignUpForm() {
         <Label htmlFor="su-company-url">Company website</Label>
         <Input id="su-company-url" type="url" required value={companyUrl} onChange={(e) => setCompanyUrl(e.target.value)} placeholder="https://acme.com" />
         <p className="text-xs text-muted-foreground">We'll learn about your product to provide better insights.</p>
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="su-company-size">Company size</Label>
+        <select
+          id="su-company-size"
+          value={companySize}
+          onChange={(e) => setCompanySize(e.target.value)}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="">Select size</option>
+          <option value="1-10">1-10 employees</option>
+          <option value="11-50">11-50 employees</option>
+          <option value="51-200">51-200 employees</option>
+          <option value="201-500">201-500 employees</option>
+          <option value="500+">500+ employees</option>
+        </select>
+      </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="su-company-industry">Industry</Label>
+        <Input id="su-company-industry" value={companyIndustry} onChange={(e) => setCompanyIndustry(e.target.value)} placeholder="SaaS, E-commerce, etc." />
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="su-email">Work email</Label>
