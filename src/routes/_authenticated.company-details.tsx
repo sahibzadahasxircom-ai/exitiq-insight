@@ -50,9 +50,12 @@ function CompanyDetails() {
     e.preventDefault();
     setSaving(true);
     try {
-      console.log("Saving company details for profile:", profile?.id);
-      console.log("Form data:", formData);
+      console.log("=== Company Details Submission ===");
+      console.log("Profile ID:", profile?.id);
       console.log("Profile company_id:", profile?.company_id);
+      console.log("Company exists:", !!company);
+      console.log("Form data:", formData);
+      console.log("Profile user_metadata:", profile?.user_metadata);
 
       let companyId = profile?.company_id;
 
@@ -69,8 +72,11 @@ function CompanyDetails() {
           .select()
           .single();
 
+        console.log("Company insert result:", { newCompany, createError });
+
         if (createError) {
           console.error("Error creating company:", createError);
+          console.error("Error details:", JSON.stringify(createError, null, 2));
           toast.error(`Failed to create company: ${createError.message}`);
           throw new Error(createError.message);
         }
@@ -83,6 +89,8 @@ function CompanyDetails() {
           .from("profiles")
           .update({ company_id: companyId })
           .eq("id", profile?.id);
+
+        console.log("Profile update result:", { profileError });
 
         if (profileError) {
           console.error("Error updating profile:", profileError);
@@ -99,12 +107,15 @@ function CompanyDetails() {
             role: "owner",
           });
 
+        console.log("User role creation result:", { roleError });
+
         if (roleError) {
           console.error("Error creating user role:", roleError);
           toast.error(`Failed to create user role: ${roleError.message}`);
           throw new Error(roleError.message);
         }
 
+        console.log("Company creation complete, reloading page...");
         // Refresh the auth context to get the updated company_id
         window.location.reload();
       } else {
@@ -118,6 +129,8 @@ function CompanyDetails() {
             company_size: formData.company_size,
           })
           .eq("id", companyId);
+
+        console.log("Company update result:", { updateError });
 
         if (updateError) {
           console.error("Error updating company:", updateError);

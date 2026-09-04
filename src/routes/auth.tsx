@@ -186,6 +186,8 @@ function SignUpForm() {
     e.preventDefault();
     setBusy(true);
     
+    console.log("Sign-up attempt:", { email, firstName, lastName, company, companyUrl });
+    
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -195,7 +197,10 @@ function SignUpForm() {
       },
     });
     
+    console.log("Sign-up response:", { authData, authError });
+    
     if (authError) {
+      console.error("Sign-up error:", authError);
       setBusy(false);
       if (authError.message.includes("already registered")) {
         toast.error("An account with this email already exists. Please sign in instead.");
@@ -209,11 +214,13 @@ function SignUpForm() {
     
     // Check if email confirmation is required
     if (!authData.session) {
+      console.log("Email confirmation required - session not returned");
       toast.success("Account created! Please check your email to confirm your account.");
       return;
     }
     
     // If session exists (auto-confirmed), proceed to company details
+    console.log("Auto-confirmed - session exists, navigating to company-details");
     toast.success(`Account created for "${company}"`);
     navigate({ to: "/company-details", replace: true });
   }
