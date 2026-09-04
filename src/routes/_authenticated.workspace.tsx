@@ -102,6 +102,7 @@ function Workspace() {
         .update({
           brand_color: brandColor,
           company_logo: logoUrl,
+          company_name: companyName,
         })
         .eq("id", company.id);
 
