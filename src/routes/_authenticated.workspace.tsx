@@ -79,24 +79,37 @@ function Workspace() {
 
     setSaving(true);
     try {
+      console.log("Saving branding for company:", company.id);
+      console.log("Company name:", companyName);
+      console.log("Brand color:", brandColor);
+      console.log("Logo file:", logoFile);
+      console.log("Current logo URL:", logo);
+
       let logoUrl = logo;
 
       if (logoFile) {
         const fileExt = logoFile.name.split('.').pop();
         const fileName = `${company.id}-${Date.now()}.${fileExt}`;
+        console.log("Uploading logo:", fileName);
+        
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('company-logos')
           .upload(fileName, logoFile);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Logo upload error:", uploadError);
+          throw uploadError;
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from('company-logos')
           .getPublicUrl(fileName);
 
         logoUrl = publicUrl;
+        console.log("Logo uploaded successfully:", logoUrl);
       }
 
+      console.log("Updating company record...");
       const { error } = await (supabase as any)
         .from("companies")
         .update({
@@ -106,9 +119,15 @@ function Workspace() {
         })
         .eq("id", company.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database update error:", error);
+        throw error;
+      }
+
+      console.log("Branding saved successfully");
     } catch (error) {
       console.error("Failed to save branding:", error);
+      alert("Failed to save branding. Check console for details.");
     } finally {
       setSaving(false);
     }
