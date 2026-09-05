@@ -57,6 +57,7 @@ function SetupWizard() {
                 company_name: metadata.company_name,
                 company_url: metadata.company_url || undefined,
                 company_size: metadata.company_size || undefined,
+                company_industry: metadata.company_industry || undefined,
               },
             });
 

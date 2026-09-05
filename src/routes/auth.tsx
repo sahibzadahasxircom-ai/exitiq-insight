@@ -225,6 +225,7 @@ function SignUpForm() {
           company_name: company,
           company_url: companyUrl || undefined,
           company_size: companySize || undefined,
+          company_industry: companyIndustry || undefined,
         },
       });
 

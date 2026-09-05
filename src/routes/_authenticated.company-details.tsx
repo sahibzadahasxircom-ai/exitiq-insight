@@ -69,6 +69,7 @@ function CompanyDetails() {
             company_name: formData.company_name,
             company_url: formData.company_url || undefined,
             company_size: formData.company_size || undefined,
+            company_industry: formData.company_industry || undefined,
           },
         });
 
@@ -97,6 +98,7 @@ function CompanyDetails() {
               company_name: formData.company_name,
               company_url: formData.company_url || undefined,
               company_size: formData.company_size || undefined,
+              company_industry: formData.company_industry || undefined,
             },
           },
         });

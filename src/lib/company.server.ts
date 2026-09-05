@@ -43,6 +43,7 @@ export const createCompanyFn = createServerFn({ method: "POST" })
         company_name: data.company_name,
         company_url: data.company_url,
         company_size: data.company_size,
+        company_industry: data.company_industry,
       })
       .select()
       .single();
@@ -76,6 +77,7 @@ export const updateCompanyFn = createServerFn({ method: "POST" })
         company_name: data.data.company_name,
         company_url: data.data.company_url,
         company_size: data.data.company_size,
+        company_industry: data.data.company_industry,
       })
       .eq("id", data.companyId);
 
