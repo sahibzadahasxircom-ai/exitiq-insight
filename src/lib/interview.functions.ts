@@ -19,7 +19,7 @@ export const getCompanyBySessionId = createServerFn({ method: "GET" })
 
     const { data: company } = await supabaseAdmin
       .from("companies")
-      .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color, background_style, button_color")
+      .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color, background_style, button_color, button_text_color, text_color, solid_background_color")
       .eq("id", session.company_id)
       .single();
 

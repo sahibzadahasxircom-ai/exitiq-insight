@@ -40,6 +40,9 @@ function Workspace() {
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [backgroundStyle, setBackgroundStyle] = useState("gradient");
   const [buttonColor, setButtonColor] = useState(brandColor);
+  const [buttonTextColor, setButtonTextColor] = useState("#ffffff");
+  const [textColor, setTextColor] = useState("#000000");
+  const [solidBackgroundColor, setSolidBackgroundColor] = useState("");
   
   console.log("Background style state:", backgroundStyle);
 
@@ -49,7 +52,7 @@ function Workspace() {
       const loadCompanySettings = async () => {
         const { data } = await supabase
           .from("companies")
-          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name, background_style, button_color")
+          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name, background_style, button_color, button_text_color, text_color, solid_background_color")
           .eq("id", company.id)
           .single();
         
@@ -62,6 +65,9 @@ function Workspace() {
           if (data.company_name) setCompanyName(data.company_name);
           if (data.background_style) setBackgroundStyle(data.background_style);
           if (data.button_color) setButtonColor(data.button_color);
+          if (data.button_text_color) setButtonTextColor(data.button_text_color);
+          if (data.text_color) setTextColor(data.text_color);
+          if (data.solid_background_color) setSolidBackgroundColor(data.solid_background_color);
         }
       };
       loadCompanySettings();
@@ -155,6 +161,9 @@ function Workspace() {
           pre_form_description: preFormDescription,
           background_style: backgroundStyle,
           button_color: buttonColor,
+          button_text_color: buttonTextColor,
+          text_color: textColor,
+          solid_background_color: solidBackgroundColor,
         })
         .eq("id", company.id);
 
@@ -364,6 +373,72 @@ function Workspace() {
                 </p>
               </div>
 
+              {/* Button Text Color */}
+              <div>
+                <Label className="text-sm font-semibold mb-3 block">Button Text Color</Label>
+                <div className="flex gap-3">
+                  <Input
+                    type="color"
+                    value={buttonTextColor}
+                    onChange={(e) => setButtonTextColor(e.target.value)}
+                    className="w-20 h-10 p-1"
+                  />
+                  <Input
+                    value={buttonTextColor}
+                    onChange={(e) => setButtonTextColor(e.target.value)}
+                    placeholder="#ffffff"
+                    className="flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Color of the text inside the button
+                </p>
+              </div>
+
+              {/* Text Color */}
+              <div>
+                <Label className="text-sm font-semibold mb-3 block">Pre-Form Text Color</Label>
+                <div className="flex gap-3">
+                  <Input
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="w-20 h-10 p-1"
+                  />
+                  <Input
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    placeholder="#000000"
+                    className="flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Color of the title and description text
+                </p>
+              </div>
+
+              {/* Solid Background Color */}
+              <div>
+                <Label className="text-sm font-semibold mb-3 block">Solid Background Color</Label>
+                <div className="flex gap-3">
+                  <Input
+                    type="color"
+                    value={solidBackgroundColor}
+                    onChange={(e) => setSolidBackgroundColor(e.target.value)}
+                    className="w-20 h-10 p-1"
+                  />
+                  <Input
+                    value={solidBackgroundColor}
+                    onChange={(e) => setSolidBackgroundColor(e.target.value)}
+                    placeholder="#000000"
+                    className="flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Solid background color for the pre-form card (leave empty for gradient effects)
+                </p>
+              </div>
+
               {/* Content Customization */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -485,86 +560,90 @@ function Workspace() {
                       preFormStyle === "casual" ? "rounded-2xl border-2" : 
                       preFormStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
                     }`}
-                    style={{ backgroundColor: backgroundStyle === "none" ? "transparent" : "white" }}
+                    style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
                   >
-                    {/* Background effect for the card */}
-                    {backgroundStyle === "mesh" && (
-                      <div 
-                        className="absolute inset-0 opacity-40 pointer-events-none"
-                        style={{
-                          background: `
-                            radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
-                          `
-                        }}
-                      />
-                    )}
-                    {backgroundStyle === "aurora" && (
-                      <div 
-                        className="absolute inset-0 opacity-30 pointer-events-none"
-                        style={{
-                          background: `
-                            linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
-                            linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
-                            linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
-                          `
-                        }}
-                      />
-                    )}
-                    {backgroundStyle === "dots" && (
-                      <div 
-                        className="absolute inset-0 opacity-25 pointer-events-none"
-                        style={{
-                          backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
-                          backgroundSize: '30px 30px'
-                        }}
-                      />
-                    )}
-                    {backgroundStyle === "layers" && (
+                    {/* Background effect for the card - only show if no solid background */}
+                    {!solidBackgroundColor && (
                       <>
-                        <div 
-                          className="absolute inset-0 opacity-25 pointer-events-none"
-                          style={{
-                            background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
-                          }}
-                        />
-                        <div 
-                          className="absolute inset-0 opacity-15 pointer-events-none"
-                          style={{
-                            background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
-                          }}
-                        />
+                        {backgroundStyle === "mesh" && (
+                          <div 
+                            className="absolute inset-0 opacity-40 pointer-events-none"
+                            style={{
+                              background: `
+                                radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
+                                radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
+                                radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
+                                radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
+                                radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
+                                radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
+                              `
+                            }}
+                          />
+                        )}
+                        {backgroundStyle === "aurora" && (
+                          <div 
+                            className="absolute inset-0 opacity-30 pointer-events-none"
+                            style={{
+                              background: `
+                                linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
+                                linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
+                                linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
+                              `
+                            }}
+                          />
+                        )}
+                        {backgroundStyle === "dots" && (
+                          <div 
+                            className="absolute inset-0 opacity-25 pointer-events-none"
+                            style={{
+                              backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
+                              backgroundSize: '30px 30px'
+                            }}
+                          />
+                        )}
+                        {backgroundStyle === "layers" && (
+                          <>
+                            <div 
+                              className="absolute inset-0 opacity-25 pointer-events-none"
+                              style={{
+                                background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+                              }}
+                            />
+                            <div 
+                              className="absolute inset-0 opacity-15 pointer-events-none"
+                              style={{
+                                background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
+                              }}
+                            />
+                          </>
+                        )}
+                        {backgroundStyle === "gradient" && (
+                          <div 
+                            className="absolute inset-0 opacity-30 pointer-events-none"
+                            style={{
+                              background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+                            }}
+                          />
+                        )}
                       </>
-                    )}
-                    {backgroundStyle === "gradient" && (
-                      <div 
-                        className="absolute inset-0 opacity-30 pointer-events-none"
-                        style={{
-                          background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
-                        }}
-                      />
                     )}
                     
                     <div className={`p-6 space-y-4 relative z-10 ${
                       preFormStyle === "minimal" ? "text-center" : ""
-                    }`}>
+                    }`} style={{ color: textColor }}>
                       <div className={`space-y-1 ${
                         preFormStyle === "minimal" ? "text-center" : ""
                       }`}>
                         <h3 className={`${
                           preFormStyle === "casual" ? "text-2xl font-semibold" :
                           preFormStyle === "minimal" ? "text-xl font-medium" : "text-xl font-bold"
-                        } tracking-tight`}>
+                        } tracking-tight`} style={{ color: textColor }}>
                           {preFormTitle}
                         </h3>
                         <p className={`${
                           preFormStyle === "casual" ? "text-base" :
                           preFormStyle === "minimal" ? "text-sm" : "text-sm"
-                        } text-muted-foreground`}>
+                        }`} style={{ color: textColor, opacity: 0.8 }}>
                           {preFormDescription}
                         </p>
                       </div>
@@ -593,7 +672,7 @@ function Workspace() {
                           }`}
                           size="lg"
                           disabled
-                          style={{ backgroundColor: buttonColor }}
+                          style={{ backgroundColor: buttonColor, color: buttonTextColor }}
                         >
                           Start Conversation
                           <ArrowRight className="h-4 w-4" />
