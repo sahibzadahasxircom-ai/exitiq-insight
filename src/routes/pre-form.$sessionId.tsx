@@ -149,9 +149,6 @@ function PreForm() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background effect based on selected style */}
-      {renderBackground()}
-      
       {/* Header with company branding */}
       <header className="border-b border-border bg-background/90 backdrop-blur relative z-10">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
@@ -179,11 +176,75 @@ function PreForm() {
       {/* Main Content */}
       <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-6 py-12 relative z-10">
         <Card 
-          className={`w-full max-w-md shadow-soft ${
+          className={`w-full max-w-md shadow-soft relative overflow-hidden ${
             formStyle === "casual" ? "rounded-2xl border-2" : 
             formStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
           }`}
+          style={{ backgroundColor: backgroundStyle === "none" ? "transparent" : "white" }}
         >
+          {/* Background effect for the card */}
+          {backgroundStyle === "mesh" && (
+            <div 
+              className="absolute inset-0 opacity-20 pointer-events-none"
+              style={{
+                background: `
+                  radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
+                `
+              }}
+            />
+          )}
+          {backgroundStyle === "aurora" && (
+            <div 
+              className="absolute inset-0 opacity-15 pointer-events-none"
+              style={{
+                background: `
+                  linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
+                  linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
+                  linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
+                `
+              }}
+            />
+          )}
+          {backgroundStyle === "dots" && (
+            <div 
+              className="absolute inset-0 opacity-10 pointer-events-none"
+              style={{
+                backgroundImage: `radial-gradient(circle, ${brandColor} 1px, transparent 1px)`,
+                backgroundSize: '20px 20px'
+              }}
+            />
+          )}
+          {backgroundStyle === "layers" && (
+            <>
+              <div 
+                className="absolute inset-0 opacity-10 pointer-events-none"
+                style={{
+                  background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+                }}
+              />
+              <div 
+                className="absolute inset-0 opacity-5 pointer-events-none"
+                style={{
+                  background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
+                }}
+              />
+            </>
+          )}
+          {backgroundStyle === "gradient" && (
+            <div 
+              className="absolute inset-0 opacity-15 pointer-events-none"
+              style={{
+                background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+              }}
+            />
+          )}
+          
+          <div className="relative z-10">
           <CardHeader className={`space-y-1 ${formStyle === "minimal" ? "text-center" : ""}`}>
             <CardTitle className={`${
               formStyle === "casual" ? "text-3xl font-semibold" :
@@ -247,6 +308,7 @@ function PreForm() {
               Your responses will help us improve our service
             </p>
           </CardContent>
+          </div>
         </Card>
       </div>
     </div>

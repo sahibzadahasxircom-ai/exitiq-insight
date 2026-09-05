@@ -151,12 +151,19 @@ function Workspace() {
           pre_form_style: preFormStyle,
           pre_form_title: preFormTitle,
           pre_form_description: preFormDescription,
+          background_style: backgroundStyle,
         })
         .eq("id", company.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Failed to save pre-form settings:", error);
+        throw error;
+      }
+
+      console.log("Pre-form settings saved successfully");
     } catch (error) {
-      console.error("Failed to save pre-form config:", error);
+      console.error("Failed to save pre-form settings:", error);
+      alert("Failed to save pre-form settings. Check console for details.");
     } finally {
       setSaving(false);
     }
@@ -272,28 +279,6 @@ function Workspace() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="background-style">Background Style</Label>
-                <Select value={backgroundStyle} onValueChange={(value) => {
-                  console.log("Background style changed to:", value);
-                  setBackgroundStyle(value);
-                }}>
-                  <SelectTrigger id="background-style">
-                    <SelectValue placeholder="Select background style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="gradient">Gradient</SelectItem>
-                    <SelectItem value="mesh">Mesh Gradient</SelectItem>
-                    <SelectItem value="aurora">Aurora</SelectItem>
-                    <SelectItem value="dots">Dots Pattern</SelectItem>
-                    <SelectItem value="layers">Layers</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  Choose the background effect style for the pre-form page
-                </p>
-              </div>
-
               <div className="pt-4">
                 <Button onClick={handleSave} disabled={saving}>
                   {saving ? "Saving..." : "Save Branding"}
@@ -329,6 +314,29 @@ function Workspace() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Background Effect */}
+              <div>
+                <Label className="text-sm font-semibold mb-3 block">Form Background Effect</Label>
+                <Select value={backgroundStyle} onValueChange={(value) => {
+                  console.log("Background style changed to:", value);
+                  setBackgroundStyle(value);
+                }}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select background effect" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gradient">Gradient</SelectItem>
+                    <SelectItem value="mesh">Mesh Gradient</SelectItem>
+                    <SelectItem value="aurora">Aurora</SelectItem>
+                    <SelectItem value="dots">Dots Pattern</SelectItem>
+                    <SelectItem value="layers">Layers</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Choose the background effect for the pre-form card using your brand color
+                </p>
               </div>
 
               {/* Content Customization */}
@@ -442,7 +450,7 @@ function Workspace() {
                     </div>
                   </div>
                   <div
-                    className={`mx-auto border rounded-xl overflow-hidden bg-background ${
+                    className={`mx-auto border rounded-xl overflow-hidden relative ${
                       previewDevice === "desktop"
                         ? "max-w-lg"
                         : previewDevice === "tablet"
@@ -452,8 +460,71 @@ function Workspace() {
                       preFormStyle === "casual" ? "rounded-2xl border-2" : 
                       preFormStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
                     }`}
+                    style={{ backgroundColor: backgroundStyle === "none" ? "transparent" : "white" }}
                   >
-                    <div className={`p-6 space-y-4 ${
+                    {/* Background effect for the card */}
+                    {backgroundStyle === "mesh" && (
+                      <div 
+                        className="absolute inset-0 opacity-20 pointer-events-none"
+                        style={{
+                          background: `
+                            radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
+                            radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
+                            radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
+                            radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
+                            radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
+                            radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
+                          `
+                        }}
+                      />
+                    )}
+                    {backgroundStyle === "aurora" && (
+                      <div 
+                        className="absolute inset-0 opacity-15 pointer-events-none"
+                        style={{
+                          background: `
+                            linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
+                            linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
+                            linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
+                          `
+                        }}
+                      />
+                    )}
+                    {backgroundStyle === "dots" && (
+                      <div 
+                        className="absolute inset-0 opacity-10 pointer-events-none"
+                        style={{
+                          backgroundImage: `radial-gradient(circle, ${brandColor} 1px, transparent 1px)`,
+                          backgroundSize: '20px 20px'
+                        }}
+                      />
+                    )}
+                    {backgroundStyle === "layers" && (
+                      <>
+                        <div 
+                          className="absolute inset-0 opacity-10 pointer-events-none"
+                          style={{
+                            background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+                          }}
+                        />
+                        <div 
+                          className="absolute inset-0 opacity-5 pointer-events-none"
+                          style={{
+                            background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
+                          }}
+                        />
+                      </>
+                    )}
+                    {backgroundStyle === "gradient" && (
+                      <div 
+                        className="absolute inset-0 opacity-15 pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+                        }}
+                      />
+                    )}
+                    
+                    <div className={`p-6 space-y-4 relative z-10 ${
                       preFormStyle === "minimal" ? "text-center" : ""
                     }`}>
                       <div className={`space-y-1 ${
