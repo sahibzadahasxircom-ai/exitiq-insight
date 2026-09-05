@@ -186,70 +186,66 @@ function PreForm() {
           }`}
           style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
         >
-          {/* Background effect for the card - only show if no solid background */}
-          {!solidBackgroundColor && (
+          {/* Background effect for the card - overlays on solid background if set */}
+          {backgroundStyle === "mesh" && (
+            <div 
+              className="absolute inset-0 opacity-40 pointer-events-none"
+              style={{
+                background: `
+                  radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
+                  radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
+                `
+              }}
+            />
+          )}
+          {backgroundStyle === "aurora" && (
+            <div 
+              className="absolute inset-0 opacity-30 pointer-events-none"
+              style={{
+                background: `
+                  linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
+                  linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
+                  linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
+                `
+              }}
+            />
+          )}
+          {backgroundStyle === "dots" && (
+            <div 
+              className="absolute inset-0 opacity-25 pointer-events-none"
+              style={{
+                backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
+                backgroundSize: '30px 30px'
+              }}
+            />
+          )}
+          {backgroundStyle === "layers" && (
             <>
-              {backgroundStyle === "mesh" && (
-                <div 
-                  className="absolute inset-0 opacity-40 pointer-events-none"
-                  style={{
-                    background: `
-                      radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
-                    `
-                  }}
-                />
-              )}
-              {backgroundStyle === "aurora" && (
-                <div 
-                  className="absolute inset-0 opacity-30 pointer-events-none"
-                  style={{
-                    background: `
-                      linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
-                      linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
-                      linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
-                    `
-                  }}
-                />
-              )}
-              {backgroundStyle === "dots" && (
-                <div 
-                  className="absolute inset-0 opacity-25 pointer-events-none"
-                  style={{
-                    backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
-                    backgroundSize: '30px 30px'
-                  }}
-                />
-              )}
-              {backgroundStyle === "layers" && (
-                <>
-                  <div 
-                    className="absolute inset-0 opacity-25 pointer-events-none"
-                    style={{
-                      background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
-                    }}
-                  />
-                  <div 
-                    className="absolute inset-0 opacity-15 pointer-events-none"
-                    style={{
-                      background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
-                    }}
-                  />
-                </>
-              )}
-              {backgroundStyle === "gradient" && (
-                <div 
-                  className="absolute inset-0 opacity-30 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
-                  }}
-                />
-              )}
+              <div 
+                className="absolute inset-0 opacity-25 pointer-events-none"
+                style={{
+                  background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+                }}
+              />
+              <div 
+                className="absolute inset-0 opacity-15 pointer-events-none"
+                style={{
+                  background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
+                }}
+              />
             </>
+          )}
+          {backgroundStyle === "gradient" && (
+            <div 
+              className="absolute inset-0 opacity-30 pointer-events-none"
+              style={{
+                background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+              }}
+            />
           )}
           
           <div className="relative z-10" style={{ color: textColor }}>
