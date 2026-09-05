@@ -89,7 +89,7 @@ function ProductKnowledgePage() {
 
   // Create mutation for product details
   const createProductDetailsMutation = useMutation({
-    mutationFn: createProductKnowledge,
+    mutationFn: (data: { title: string; content: string }) => createProductKnowledge({ data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product-knowledge"] });
       toast.success("Product details added");
@@ -104,7 +104,7 @@ function ProductKnowledgePage() {
 
   // Create mutation for whats new
   const createWhatsNewMutation = useMutation({
-    mutationFn: createWhatsNew,
+    mutationFn: (data: { title: string; content: string; type: string }) => createWhatsNew({ data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["whats-new"] });
       toast.success("What's New added");
@@ -119,8 +119,8 @@ function ProductKnowledgePage() {
 
   // Update mutation for product details
   const updateProductDetailsMutation = useMutation({
-    mutationFn: (data: { id: string; title?: string; content?: string; type?: "feature" | "update" | "general" }) =>
-      updateProductKnowledge(data),
+    mutationFn: (data: { id: string; title?: string; content?: string }) =>
+      updateProductKnowledge({ data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product-knowledge"] });
       toast.success("Product details updated");
@@ -136,7 +136,7 @@ function ProductKnowledgePage() {
   // Update mutation for whats new
   const updateWhatsNewMutation = useMutation({
     mutationFn: (data: { id: string; title?: string; content?: string; type?: "feature" | "update" | "bugfix" | "improvement" }) =>
-      updateWhatsNew(data),
+      updateWhatsNew({ data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["whats-new"] });
       toast.success("What's New updated");
@@ -151,7 +151,7 @@ function ProductKnowledgePage() {
 
   // Delete mutation for product details
   const deleteProductDetailsMutation = useMutation({
-    mutationFn: deleteProductKnowledge,
+    mutationFn: (id: string) => deleteProductKnowledge({ data: { id } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product-knowledge"] });
       toast.success("Product details deleted");
@@ -163,7 +163,7 @@ function ProductKnowledgePage() {
 
   // Delete mutation for whats new
   const deleteWhatsNewMutation = useMutation({
-    mutationFn: deleteWhatsNew,
+    mutationFn: (id: string) => deleteWhatsNew({ data: { id } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["whats-new"] });
       toast.success("What's New deleted");
@@ -233,12 +233,10 @@ function ProductKnowledgePage() {
   };
 
   const handleDelete = (id: string, type: "product-details" | "whats-new") => {
-    if (confirm("Are you sure you want to delete this item?")) {
-      if (type === "product-details") {
-        deleteProductDetailsMutation.mutate({ id });
-      } else {
-        deleteWhatsNewMutation.mutate({ id });
-      }
+    if (type === "product-details") {
+      deleteProductDetailsMutation.mutate(id);
+    } else {
+      deleteWhatsNewMutation.mutate(id);
     }
   };
 
