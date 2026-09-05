@@ -39,6 +39,7 @@ function Workspace() {
   const [preFormDescription, setPreFormDescription] = useState("Help us improve by sharing your feedback");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [backgroundStyle, setBackgroundStyle] = useState("gradient");
+  const [buttonColor, setButtonColor] = useState(brandColor);
   
   console.log("Background style state:", backgroundStyle);
 
@@ -48,7 +49,7 @@ function Workspace() {
       const loadCompanySettings = async () => {
         const { data } = await supabase
           .from("companies")
-          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name, background_style")
+          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name, background_style, button_color")
           .eq("id", company.id)
           .single();
         
@@ -60,6 +61,7 @@ function Workspace() {
           if (data.company_logo) setLogo(data.company_logo);
           if (data.company_name) setCompanyName(data.company_name);
           if (data.background_style) setBackgroundStyle(data.background_style);
+          if (data.button_color) setButtonColor(data.button_color);
         }
       };
       loadCompanySettings();
@@ -152,6 +154,7 @@ function Workspace() {
           pre_form_title: preFormTitle,
           pre_form_description: preFormDescription,
           background_style: backgroundStyle,
+          button_color: buttonColor,
         })
         .eq("id", company.id);
 
@@ -339,6 +342,28 @@ function Workspace() {
                 </p>
               </div>
 
+              {/* Button Color */}
+              <div>
+                <Label className="text-sm font-semibold mb-3 block">Button Color</Label>
+                <div className="flex gap-3">
+                  <Input
+                    type="color"
+                    value={buttonColor}
+                    onChange={(e) => setButtonColor(e.target.value)}
+                    className="w-20 h-10 p-1"
+                  />
+                  <Input
+                    value={buttonColor}
+                    onChange={(e) => setButtonColor(e.target.value)}
+                    placeholder="#2563eb"
+                    className="flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Custom color for the "Start Conversation" button
+                </p>
+              </div>
+
               {/* Content Customization */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -465,7 +490,7 @@ function Workspace() {
                     {/* Background effect for the card */}
                     {backgroundStyle === "mesh" && (
                       <div 
-                        className="absolute inset-0 opacity-20 pointer-events-none"
+                        className="absolute inset-0 opacity-40 pointer-events-none"
                         style={{
                           background: `
                             radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
@@ -480,7 +505,7 @@ function Workspace() {
                     )}
                     {backgroundStyle === "aurora" && (
                       <div 
-                        className="absolute inset-0 opacity-15 pointer-events-none"
+                        className="absolute inset-0 opacity-30 pointer-events-none"
                         style={{
                           background: `
                             linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
@@ -492,23 +517,23 @@ function Workspace() {
                     )}
                     {backgroundStyle === "dots" && (
                       <div 
-                        className="absolute inset-0 opacity-10 pointer-events-none"
+                        className="absolute inset-0 opacity-25 pointer-events-none"
                         style={{
-                          backgroundImage: `radial-gradient(circle, ${brandColor} 1px, transparent 1px)`,
-                          backgroundSize: '20px 20px'
+                          backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
+                          backgroundSize: '30px 30px'
                         }}
                       />
                     )}
                     {backgroundStyle === "layers" && (
                       <>
                         <div 
-                          className="absolute inset-0 opacity-10 pointer-events-none"
+                          className="absolute inset-0 opacity-25 pointer-events-none"
                           style={{
                             background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
                           }}
                         />
                         <div 
-                          className="absolute inset-0 opacity-5 pointer-events-none"
+                          className="absolute inset-0 opacity-15 pointer-events-none"
                           style={{
                             background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
                           }}
@@ -517,7 +542,7 @@ function Workspace() {
                     )}
                     {backgroundStyle === "gradient" && (
                       <div 
-                        className="absolute inset-0 opacity-15 pointer-events-none"
+                        className="absolute inset-0 opacity-30 pointer-events-none"
                         style={{
                           background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
                         }}
@@ -568,6 +593,7 @@ function Workspace() {
                           }`}
                           size="lg"
                           disabled
+                          style={{ backgroundColor: buttonColor }}
                         >
                           Start Conversation
                           <ArrowRight className="h-4 w-4" />

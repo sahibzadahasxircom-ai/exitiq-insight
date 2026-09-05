@@ -47,6 +47,7 @@ function PreForm() {
   const companyName = company?.company_name || "Your Company";
   const companyLogo = company?.company_logo;
   const backgroundStyle = company?.background_style || "gradient";
+  const buttonColor = company?.button_color || brandColor;
 
   // Render background based on style
   const renderBackground = () => {
@@ -185,7 +186,7 @@ function PreForm() {
           {/* Background effect for the card */}
           {backgroundStyle === "mesh" && (
             <div 
-              className="absolute inset-0 opacity-20 pointer-events-none"
+              className="absolute inset-0 opacity-40 pointer-events-none"
               style={{
                 background: `
                   radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
@@ -200,7 +201,7 @@ function PreForm() {
           )}
           {backgroundStyle === "aurora" && (
             <div 
-              className="absolute inset-0 opacity-15 pointer-events-none"
+              className="absolute inset-0 opacity-30 pointer-events-none"
               style={{
                 background: `
                   linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
@@ -212,23 +213,23 @@ function PreForm() {
           )}
           {backgroundStyle === "dots" && (
             <div 
-              className="absolute inset-0 opacity-10 pointer-events-none"
+              className="absolute inset-0 opacity-25 pointer-events-none"
               style={{
-                backgroundImage: `radial-gradient(circle, ${brandColor} 1px, transparent 1px)`,
-                backgroundSize: '20px 20px'
+                backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
+                backgroundSize: '30px 30px'
               }}
             />
           )}
           {backgroundStyle === "layers" && (
             <>
               <div 
-                className="absolute inset-0 opacity-10 pointer-events-none"
+                className="absolute inset-0 opacity-25 pointer-events-none"
                 style={{
                   background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
                 }}
               />
               <div 
-                className="absolute inset-0 opacity-5 pointer-events-none"
+                className="absolute inset-0 opacity-15 pointer-events-none"
                 style={{
                   background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
                 }}
@@ -237,7 +238,7 @@ function PreForm() {
           )}
           {backgroundStyle === "gradient" && (
             <div 
-              className="absolute inset-0 opacity-15 pointer-events-none"
+              className="absolute inset-0 opacity-30 pointer-events-none"
               style={{
                 background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
               }}
@@ -289,6 +290,7 @@ function PreForm() {
               }`}
               size="lg"
               disabled={isSubmitting}
+              style={{ backgroundColor: buttonColor }}
             >
               {isSubmitting ? (
                 <>
