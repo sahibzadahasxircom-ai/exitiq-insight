@@ -81,7 +81,7 @@ function CustomerInterview() {
     <div className="flex min-h-screen flex-col bg-background relative overflow-hidden">
       {/* Background gradient effect using brand color */}
       <div 
-        className="absolute inset-0 opacity-5 pointer-events-none"
+        className="absolute inset-0 opacity-15 pointer-events-none"
         style={{
           background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
         }}
