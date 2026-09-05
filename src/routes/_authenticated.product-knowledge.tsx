@@ -59,7 +59,7 @@ function ProductKnowledgePage() {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    type: "feature" as "feature" | "update" | "general" | "bugfix" | "improvement",
+    type: "feature" as "feature" | "update" | "bugfix" | "improvement",
   });
 
   // Fetch product knowledge
@@ -184,7 +184,6 @@ function ProductKnowledgePage() {
           id: editingItem.id,
           title: formData.title,
           content: formData.content,
-          type: formData.type as "feature" | "update" | "general",
         });
       } else {
         updateWhatsNewMutation.mutate({
@@ -196,9 +195,16 @@ function ProductKnowledgePage() {
       }
     } else {
       if (dialogType === "product-details") {
-        createProductDetailsMutation.mutate(formData);
+        createProductDetailsMutation.mutate({
+          title: formData.title,
+          content: formData.content,
+        });
       } else {
-        createWhatsNewMutation.mutate(formData);
+        createWhatsNewMutation.mutate({
+          title: formData.title,
+          content: formData.content,
+          type: formData.type,
+        });
       }
     }
   };
@@ -328,12 +334,7 @@ function ProductKnowledgePage() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CardTitle className="text-lg">{item.title}</CardTitle>
-                        <Badge className={getTypeColor(item.type)} variant="outline">
-                          {item.type}
-                        </Badge>
-                      </div>
+                      <CardTitle className="text-lg mb-2">{item.title}</CardTitle>
                       <CardDescription className="flex items-center gap-1 text-xs">
                         <Calendar className="h-3 w-3" />
                         Added {formatDate(item.created_at)}
@@ -469,36 +470,28 @@ function ProductKnowledgePage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
-              <Select value={formData.type} onValueChange={(value: any) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {dialogType === "product-details" ? (
-                    <>
-                      <SelectItem value="feature">Feature</SelectItem>
-                      <SelectItem value="update">Update</SelectItem>
-                      <SelectItem value="general">General</SelectItem>
-                    </>
-                  ) : (
-                    <>
-                      <SelectItem value="feature">Feature</SelectItem>
-                      <SelectItem value="update">Update</SelectItem>
-                      <SelectItem value="bugfix">Bugfix</SelectItem>
-                      <SelectItem value="improvement">Improvement</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+            {dialogType === "whats-new" && (
+              <div className="space-y-2">
+                <Label htmlFor="type">Type</Label>
+                <Select value={formData.type} onValueChange={(value: any) => setFormData({ ...formData, type: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="feature">Feature</SelectItem>
+                    <SelectItem value="update">Update</SelectItem>
+                    <SelectItem value="bugfix">Bugfix</SelectItem>
+                    <SelectItem value="improvement">Improvement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="content">Content</Label>
               <Textarea
                 id="content"
                 placeholder={dialogType === "product-details"
-                  ? "Describe the feature or capability in detail. You can paste content from ChatGPT or other sources."
+                  ? "Describe your product features, capabilities, and current state. You can paste content from ChatGPT or other sources."
                   : "Describe the new feature or update. This will be tracked in conversations to measure performance."
                 }
                 value={formData.content}
@@ -508,7 +501,7 @@ function ProductKnowledgePage() {
               />
               <p className="text-xs text-muted-foreground">
                 {dialogType === "product-details"
-                  ? "Tip: Use ChatGPT or any AI to generate a quick summary of your product features, then paste it here."
+                  ? "Tip: Use ChatGPT or any AI to generate a comprehensive summary of your product features and workflow."
                   : "Tip: Be specific about what changed. This helps track how customers react to new features."}
               </p>
             </div>

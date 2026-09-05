@@ -12,7 +12,6 @@ export const createProductKnowledge = createServerFn({ method: "POST" })
     z.object({
       title: z.string().min(1),
       content: z.string().min(1),
-      type: z.enum(["feature", "update", "general"]).default("feature"),
     })
   )
   .handler(async ({ data }) => {
@@ -35,7 +34,6 @@ export const createProductKnowledge = createServerFn({ method: "POST" })
         company_id: profile.company_id,
         title: data.title,
         content: data.content,
-        type: data.type,
       })
       .select()
       .single();
@@ -105,7 +103,6 @@ export const updateProductKnowledge = createServerFn({ method: "POST" })
       id: z.string().uuid(),
       title: z.string().min(1).optional(),
       content: z.string().min(1).optional(),
-      type: z.enum(["feature", "update", "general"]).optional(),
     })
   )
   .handler(async ({ data }) => {
@@ -133,7 +130,6 @@ export const updateProductKnowledge = createServerFn({ method: "POST" })
       .update({
         ...(data.title && { title: data.title }),
         ...(data.content && { content: data.content }),
-        ...(data.type && { type: data.type }),
       })
       .eq("id", data.id)
       .select()
