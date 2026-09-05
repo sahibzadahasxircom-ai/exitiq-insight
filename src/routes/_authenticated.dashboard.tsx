@@ -6,7 +6,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, Legend,
 } from "recharts";
-import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Download, Calendar, Filter } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Download, Calendar, Filter, Zap, TrendingUp, TrendingDown } from "lucide-react";
 import { getDashboardData } from "@/lib/interview.functions";
 import {
   EXECUTIVE_BRIEFING, CUSTOMER_VOICE, CHURN_DRIVERS, RECOMMENDATIONS,
@@ -184,6 +184,7 @@ function Dashboard() {
       <ExecutiveBrief />
       <ChurnDrivers onSelectDriver={setSelectedChurnDriver} />
       <CustomerVoice />
+      <FeaturePerformance />
       <ActionPlan onSelectRecommendation={setSelectedRecommendation} />
       <LibraryPreview />
 
@@ -337,6 +338,140 @@ function CustomerVoice() {
             />
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- 5. Feature Performance ---------- */
+function FeaturePerformance() {
+  // Mock data for feature performance - will be replaced with real data from whats_new table
+  const features = [
+    {
+      id: "1",
+      title: "New Sidebar Design",
+      type: "feature",
+      mentions: 23,
+      positiveMentions: 8,
+      negativeMentions: 15,
+      churnImpact: "negative",
+      trend: "up",
+      addedDate: "2024-01-15"
+    },
+    {
+      id: "2",
+      title: "Dark Mode Update",
+      type: "update",
+      mentions: 18,
+      positiveMentions: 15,
+      negativeMentions: 3,
+      churnImpact: "positive",
+      trend: "down",
+      addedDate: "2024-01-10"
+    },
+    {
+      id: "3",
+      title: "Performance Improvements",
+      type: "improvement",
+      mentions: 12,
+      positiveMentions: 10,
+      negativeMentions: 2,
+      churnImpact: "positive",
+      trend: "stable",
+      addedDate: "2024-01-05"
+    }
+  ];
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case "feature": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "update": return "bg-green-100 text-green-700 border-green-200";
+      case "bugfix": return "bg-red-100 text-red-700 border-red-200";
+      case "improvement": return "bg-yellow-100 text-yellow-700 border-yellow-200";
+      default: return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
+      case "positive": return "text-green-600 bg-green-50";
+      case "negative": return "text-red-600 bg-red-50";
+      default: return "text-gray-600 bg-gray-50";
+    }
+  };
+
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case "up": return <TrendingUp className="h-4 w-4 text-red-500" />;
+      case "down": return <TrendingDown className="h-4 w-4 text-green-500" />;
+      default: return <Minus className="h-4 w-4 text-gray-400" />;
+    }
+  };
+
+  return (
+    <section>
+      <SectionHead
+        title="Feature performance"
+        subtitle="Track how new features and updates impact customer churn."
+      />
+      <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
+              <tr>
+                <th className="px-4 py-3 text-left md:px-5">Feature</th>
+                <th className="px-4 py-3 text-left md:px-5">Type</th>
+                <th className="px-4 py-3 text-center md:px-5">Mentions</th>
+                <th className="px-4 py-3 text-center md:px-5">Sentiment</th>
+                <th className="px-4 py-3 text-center md:px-5">Churn Impact</th>
+                <th className="px-4 py-3 text-center md:px-5">Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {features.map((feature) => (
+                <tr key={feature.id} className="border-t border-gray-100 hover:bg-gray-50">
+                  <td className="px-4 py-3 md:px-5">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-gray-400" />
+                      <p className="font-medium text-gray-900">{feature.title}</p>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Added {feature.addedDate}</p>
+                  </td>
+                  <td className="px-4 py-3 md:px-5">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${getTypeColor(feature.type)}`}>
+                      {feature.type}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center font-medium text-gray-900 md:px-5">
+                    {feature.mentions}
+                  </td>
+                  <td className="px-4 py-3 text-center md:px-5">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-green-600">{feature.positiveMentions}↑</span>
+                      <span className="text-red-600">{feature.negativeMentions}↓</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center md:px-5">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getImpactColor(feature.churnImpact)}`}>
+                      {feature.churnImpact === "positive" ? "Reducing Churn" : "Increasing Churn"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center md:px-5">
+                    <div className="flex items-center justify-center">
+                      {getTrendIcon(feature.trend)}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {features.length === 0 && (
+          <div className="p-8 text-center text-gray-500">
+            <Zap className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-sm">No features tracked yet. Add updates in "What's New" to track their performance.</p>
+          </div>
+        )}
       </div>
     </section>
   );
