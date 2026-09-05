@@ -115,7 +115,7 @@ export const linkUserToCompanyFn = createServerFn({ method: "POST" })
       throw new Error(`Failed to update profile: ${profileError.message}`);
     }
 
-    // Create owner role
+    // Create owner role (ignore if already exists)
     const { error: roleError } = await supabase
       .from("user_roles")
       .insert({
@@ -124,7 +124,8 @@ export const linkUserToCompanyFn = createServerFn({ method: "POST" })
         role: "owner",
       });
 
-    if (roleError) {
+    // Ignore duplicate key errors for user_roles
+    if (roleError && !roleError.message.includes("duplicate")) {
       console.error("Error creating user role:", roleError);
       throw new Error(`Failed to create user role: ${roleError.message}`);
     }

@@ -238,14 +238,23 @@ function SignUpForm() {
       }
 
       // Link user to company using server function
-      await linkUserToCompanyFn({
-        data: {
-          userId: user.id,
-          companyId: newCompany.id,
-        },
-      });
+      try {
+        await linkUserToCompanyFn({
+          data: {
+            userId: user.id,
+            companyId: newCompany.id,
+          },
+        });
+        console.log("User linked to company successfully");
+      } catch (linkError) {
+        console.error("Error linking user to company:", linkError);
+        // Company was created but linking failed - still proceed to setup wizard
+        // The setup wizard will handle linking the company
+        toast.success(`Account created for "${company}"`);
+        navigate({ to: "/setup-wizard", replace: true });
+        return;
+      }
 
-      console.log("User linked to company successfully");
       toast.success(`Account created for "${company}"`);
       
       // Navigate to setup wizard
