@@ -89,10 +89,7 @@ function ProductKnowledgePage() {
 
   // Create mutation for product details
   const createProductDetailsMutation = useMutation({
-    mutationFn: async (data: { title: string; content: string }) => {
-      const result = await createProductKnowledge(data);
-      return result;
-    },
+    mutationFn: createProductKnowledge,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product-knowledge"] });
       toast.success("Product details added");
@@ -115,6 +112,7 @@ function ProductKnowledgePage() {
       resetForm();
     },
     onError: (error: any) => {
+      console.error("Whats new error:", error);
       toast.error(error.message || "Failed to add What's New");
     },
   });
@@ -182,33 +180,43 @@ function ProductKnowledgePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting form:", { dialogType, formData, editingItem });
+    
     if (editingItem) {
       if (dialogType === "product-details") {
-        updateProductDetailsMutation.mutate({
+        const data = {
           id: editingItem.id,
           title: formData.title,
           content: formData.content,
-        });
+        };
+        console.log("Updating product details:", data);
+        updateProductDetailsMutation.mutate(data);
       } else {
-        updateWhatsNewMutation.mutate({
+        const data = {
           id: editingItem.id,
           title: formData.title,
           content: formData.content,
           type: formData.type,
-        });
+        };
+        console.log("Updating whats new:", data);
+        updateWhatsNewMutation.mutate(data);
       }
     } else {
       if (dialogType === "product-details") {
-        createProductDetailsMutation.mutate({
+        const data = {
           title: formData.title,
           content: formData.content,
-        });
+        };
+        console.log("Creating product details:", data);
+        createProductDetailsMutation.mutate(data);
       } else {
-        createWhatsNewMutation.mutate({
+        const data = {
           title: formData.title,
           content: formData.content,
           type: formData.type,
-        });
+        };
+        console.log("Creating whats new:", data);
+        createWhatsNewMutation.mutate(data);
       }
     }
   };
