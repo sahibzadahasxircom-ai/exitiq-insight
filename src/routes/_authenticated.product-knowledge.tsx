@@ -190,7 +190,7 @@ function ProductKnowledgePage() {
           id: editingItem.id,
           title: formData.title,
           content: formData.content,
-          type: formData.type as "feature" | "update" | "bugfix" | "improvement",
+          type: formData.type,
         });
       }
     } else {

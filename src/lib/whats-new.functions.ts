@@ -4,7 +4,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Create whats_new entry
 export const createWhatsNew = createServerFn({ method: "POST" })
-  .inputValidator(
+  .middleware([requireSupabaseAuth])
+  .validator(
     z.object({
       title: z.string().min(1),
       content: z.string().min(1),
@@ -13,8 +14,8 @@ export const createWhatsNew = createServerFn({ method: "POST" })
       file_name: z.string().optional(),
     })
   )
-  .handler(async ({ data }) => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
 
     // Get user's company_id
     const { data: profile, error: profileError } = await supabase
@@ -46,8 +47,9 @@ export const createWhatsNew = createServerFn({ method: "POST" })
 
 // List whats_new for company
 export const listWhatsNew = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { userId, supabase } = context;
 
     // Get user's company_id
     const { data: profile, error: profileError } = await supabase
@@ -72,9 +74,10 @@ export const listWhatsNew = createServerFn({ method: "GET" })
 
 // Get single whats_new entry
 export const getWhatsNew = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .middleware([requireSupabaseAuth])
+  .validator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
 
     const { data: whatsNew, error } = await supabase
       .from("whats_new")
@@ -100,7 +103,8 @@ export const getWhatsNew = createServerFn({ method: "GET" })
 
 // Update whats_new entry
 export const updateWhatsNew = createServerFn({ method: "POST" })
-  .inputValidator(
+  .middleware([requireSupabaseAuth])
+  .validator(
     z.object({
       id: z.string().uuid(),
       title: z.string().min(1).optional(),
@@ -110,8 +114,8 @@ export const updateWhatsNew = createServerFn({ method: "POST" })
       file_name: z.string().optional(),
     })
   )
-  .handler(async ({ data }) => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
 
     // Verify ownership
     const { data: existing } = await supabase
@@ -149,9 +153,10 @@ export const updateWhatsNew = createServerFn({ method: "POST" })
 
 // Delete whats_new entry
 export const deleteWhatsNew = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .middleware([requireSupabaseAuth])
+  .validator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
 
     // Verify ownership
     const { data: existing } = await supabase

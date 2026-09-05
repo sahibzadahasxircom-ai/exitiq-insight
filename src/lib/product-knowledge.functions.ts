@@ -8,14 +8,15 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Create product knowledge entry
 export const createProductKnowledge = createServerFn({ method: "POST" })
-  .inputValidator(
+  .middleware([requireSupabaseAuth])
+  .validator(
     z.object({
       title: z.string().min(1),
       content: z.string().min(1),
     })
   )
-  .handler(async ({ data }) => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
 
     // Get user's company_id
     const { data: profile, error: profileError } = await supabase
@@ -44,8 +45,9 @@ export const createProductKnowledge = createServerFn({ method: "POST" })
 
 // List product knowledge for company
 export const listProductKnowledge = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { userId, supabase } = context;
 
     // Get user's company_id
     const { data: profile, error: profileError } = await supabase
@@ -70,9 +72,10 @@ export const listProductKnowledge = createServerFn({ method: "GET" })
 
 // Get single product knowledge entry
 export const getProductKnowledge = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .middleware([requireSupabaseAuth])
+  .validator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
 
     const { data: knowledge, error } = await supabase
       .from("product_details")
@@ -98,15 +101,16 @@ export const getProductKnowledge = createServerFn({ method: "GET" })
 
 // Update product knowledge entry
 export const updateProductKnowledge = createServerFn({ method: "POST" })
-  .inputValidator(
+  .middleware([requireSupabaseAuth])
+  .validator(
     z.object({
       id: z.string().uuid(),
       title: z.string().min(1).optional(),
       content: z.string().min(1).optional(),
     })
   )
-  .handler(async ({ data }) => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
 
     // Verify ownership
     const { data: existing } = await supabase
@@ -141,9 +145,10 @@ export const updateProductKnowledge = createServerFn({ method: "POST" })
 
 // Delete product knowledge entry
 export const deleteProductKnowledge = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
-    const { userId, supabase } = await requireSupabaseAuth();
+  .middleware([requireSupabaseAuth])
+  .validator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
 
     // Verify ownership
     const { data: existing } = await supabase
