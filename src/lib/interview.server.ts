@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getGeminiModel } from "./ai-gateway.server";
 import { getProductKnowledgeForAI } from "./product-knowledge.functions";
+import { getWhatsNewForAI } from "./whats-new.functions";
 
 /**
  * Senior Customer Success interviewer.
@@ -92,13 +93,20 @@ export async function generateInterviewerReply(opts: {
 
   // Add product knowledge if companyId is provided
   let productKnowledgeContext = "";
+  let whatsNewContext = "";
   if (opts.companyId) {
     productKnowledgeContext = await getProductKnowledgeForAI(opts.companyId);
+    whatsNewContext = await getWhatsNewForAI(opts.companyId);
   }
 
   if (productKnowledgeContext) {
     prompt += `# Product Knowledge Context\nYou are interviewing a customer of this company. Here is information about their product, features, and recent updates that you should reference when relevant:\n\n${productKnowledgeContext}\n\n`;
     prompt += `When the customer mentions specific features, updates, or aspects of the product, reference this knowledge to provide more contextual and informed responses. For example, if they mention a "sidebar redesign" and you know about a recent sidebar update, acknowledge that context in your follow-up.\n\n`;
+  }
+
+  if (whatsNewContext) {
+    prompt += `# What's New - Recent Features & Updates\nHere are the latest features and updates from the company. Pay special attention to whether the customer mentions these:\n\n${whatsNewContext}\n\n`;
+    prompt += `When the customer mentions any of these new features or updates, note it for performance tracking. Ask follow-up questions to understand their experience with these specific changes.\n\n`;
   }
 
   // Bootstrap: no prior turns — open the conversation.
