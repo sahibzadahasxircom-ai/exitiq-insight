@@ -9,11 +9,11 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // Create product knowledge entry
 export const createProductKnowledge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(
+  .inputValidator((d: unknown) =>
     z.object({
       title: z.string().min(1),
       content: z.string().min(1),
-    })
+    }).parse(d)
   )
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
@@ -73,7 +73,7 @@ export const listProductKnowledge = createServerFn({ method: "GET" })
 // Get single product knowledge entry
 export const getProductKnowledge = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator(z.object({ id: z.string().uuid() }))
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
 
@@ -102,12 +102,12 @@ export const getProductKnowledge = createServerFn({ method: "GET" })
 // Update product knowledge entry
 export const updateProductKnowledge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(
+  .inputValidator((d: unknown) =>
     z.object({
       id: z.string().uuid(),
       title: z.string().min(1).optional(),
       content: z.string().min(1).optional(),
-    })
+    }).parse(d)
   )
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
@@ -146,7 +146,7 @@ export const updateProductKnowledge = createServerFn({ method: "POST" })
 // Delete product knowledge entry
 export const deleteProductKnowledge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(z.object({ id: z.string().uuid() }))
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
 

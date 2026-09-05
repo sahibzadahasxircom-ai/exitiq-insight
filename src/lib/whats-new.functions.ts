@@ -5,14 +5,14 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 // Create whats_new entry
 export const createWhatsNew = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(
+  .inputValidator((d: unknown) =>
     z.object({
       title: z.string().min(1),
       content: z.string().min(1),
       type: z.enum(["feature", "update", "bugfix", "improvement"]).default("feature"),
       file_url: z.string().optional(),
       file_name: z.string().optional(),
-    })
+    }).parse(d)
   )
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
@@ -75,7 +75,7 @@ export const listWhatsNew = createServerFn({ method: "GET" })
 // Get single whats_new entry
 export const getWhatsNew = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator(z.object({ id: z.string().uuid() }))
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
 
@@ -104,7 +104,7 @@ export const getWhatsNew = createServerFn({ method: "GET" })
 // Update whats_new entry
 export const updateWhatsNew = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(
+  .inputValidator((d: unknown) =>
     z.object({
       id: z.string().uuid(),
       title: z.string().min(1).optional(),
@@ -112,7 +112,7 @@ export const updateWhatsNew = createServerFn({ method: "POST" })
       type: z.enum(["feature", "update", "bugfix", "improvement"]).optional(),
       file_url: z.string().optional(),
       file_name: z.string().optional(),
-    })
+    }).parse(d)
   )
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
@@ -154,7 +154,7 @@ export const updateWhatsNew = createServerFn({ method: "POST" })
 // Delete whats_new entry
 export const deleteWhatsNew = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(z.object({ id: z.string().uuid() }))
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
 
