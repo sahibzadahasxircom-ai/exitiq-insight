@@ -23,6 +23,8 @@ export const Route = createFileRoute("/_authenticated/workspace")({
 
 function Workspace() {
   const { company } = useAuth();
+  console.log("Workspace component mounted, company:", company);
+  
   const [brandColor, setBrandColor] = useState("#2563eb");
   const [logo, setLogo] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -37,6 +39,8 @@ function Workspace() {
   const [preFormDescription, setPreFormDescription] = useState("Help us improve by sharing your feedback");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [backgroundStyle, setBackgroundStyle] = useState("gradient");
+  
+  console.log("Background style state:", backgroundStyle);
 
   // Load existing company pre-form settings
   useEffect(() => {
@@ -270,9 +274,12 @@ function Workspace() {
 
               <div className="space-y-2">
                 <Label htmlFor="background-style">Background Style</Label>
-                <Select value={backgroundStyle} onValueChange={setBackgroundStyle}>
+                <Select value={backgroundStyle} onValueChange={(value) => {
+                  console.log("Background style changed to:", value);
+                  setBackgroundStyle(value);
+                }}>
                   <SelectTrigger id="background-style">
-                    <SelectValue />
+                    <SelectValue placeholder="Select background style" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="gradient">Gradient</SelectItem>
