@@ -14,7 +14,7 @@ const CompanySchema = z.object({
 export type CompanyInput = z.infer<typeof CompanySchema>;
 
 export const createCompanyFn = createServerFn({ method: "POST" })
-  .validator(CompanySchema)
+  .inputValidator((d: unknown) => CompanySchema.parse(d))
   .handler(async ({ data }) => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -24,6 +24,18 @@ export const createCompanyFn = createServerFn({ method: "POST" })
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Check if a company with this name already exists
+    const { data: existingCompany } = await supabase
+      .from("companies")
+      .select("id, company_name")
+      .eq("company_name", data.company_name)
+      .maybeSingle();
+
+    if (existingCompany) {
+      console.log("Company with this name already exists, returning existing company:", existingCompany);
+      return existingCompany;
+    }
 
     const { data: company, error } = await supabase
       .from("companies")
@@ -44,10 +56,10 @@ export const createCompanyFn = createServerFn({ method: "POST" })
   });
 
 export const updateCompanyFn = createServerFn({ method: "POST" })
-  .validator(z.object({
+  .inputValidator((d: unknown) => z.object({
     companyId: z.string().uuid(),
     data: CompanySchema,
-  }))
+  }).parse(d))
   .handler(async ({ data }) => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -76,10 +88,10 @@ export const updateCompanyFn = createServerFn({ method: "POST" })
   });
 
 export const linkUserToCompanyFn = createServerFn({ method: "POST" })
-  .validator(z.object({
+  .inputValidator((d: unknown) => z.object({
     userId: z.string().uuid(),
     companyId: z.string().uuid(),
-  }))
+  }).parse(d))
   .handler(async ({ data }) => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;

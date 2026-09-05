@@ -35,7 +35,7 @@ function CompanyDetails() {
 
   // Pre-fill form from auth metadata if company doesn't exist
   useEffect(() => {
-    if (!company && profile?.user_metadata) {
+    if (!company && profile?.user_metadata && !profile?.company_id) {
       const metadata = profile.user_metadata as any;
       if (metadata.company_name && !formData.company_name) {
         setFormData(prev => ({

@@ -129,6 +129,9 @@ function SetupWizard() {
         } catch (error) {
           console.error("Error ensuring company exists:", error);
         }
+      } else if (profile?.company_id) {
+        // User already has a company_id, ensure it's set as fallback
+        setFallbackCompanyId(profile.company_id);
       }
     };
 

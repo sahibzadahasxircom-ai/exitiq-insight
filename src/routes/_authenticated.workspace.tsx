@@ -30,6 +30,13 @@ function Workspace() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState("");
   const [companyName, setCompanyName] = useState(company?.company_name || "");
+  
+  // Ensure company name is always synced with the loaded company data
+  useEffect(() => {
+    if (company?.company_name) {
+      setCompanyName(company.company_name);
+    }
+  }, [company?.company_name]);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
