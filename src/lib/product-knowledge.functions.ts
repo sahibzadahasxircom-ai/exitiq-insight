@@ -29,7 +29,7 @@ export const createProductKnowledge = createServerFn({ method: "POST" })
       throw new Error("Company not found");
     }
 
-    const { data: knowledge, error } = await supabase
+    const { data: knowledge, error } = await (supabase as any)
       .from("product_details")
       .insert({
         company_id: profile.company_id,
@@ -60,7 +60,7 @@ export const listProductKnowledge = createServerFn({ method: "GET" })
       throw new Error("Company not found");
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("product_details")
       .select("*")
       .eq("company_id", profile.company_id)
@@ -77,7 +77,7 @@ export const getProductKnowledge = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
 
-    const { data: knowledge, error } = await supabase
+    const { data: knowledge, error } = await (supabase as any)
       .from("product_details")
       .select("*")
       .eq("id", data.id)
@@ -113,7 +113,7 @@ export const updateProductKnowledge = createServerFn({ method: "POST" })
     const { userId, supabase } = context;
 
     // Verify ownership
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from("product_details")
       .select("company_id")
       .eq("id", data.id)
@@ -129,7 +129,7 @@ export const updateProductKnowledge = createServerFn({ method: "POST" })
       throw new Error("Access denied");
     }
 
-    const { data: knowledge, error } = await supabase
+    const { data: knowledge, error } = await (supabase as any)
       .from("product_details")
       .update({
         ...(data.title && { title: data.title }),
@@ -151,7 +151,7 @@ export const deleteProductKnowledge = createServerFn({ method: "POST" })
     const { userId, supabase } = context;
 
     // Verify ownership
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from("product_details")
       .select("company_id")
       .eq("id", data.id)
@@ -167,7 +167,7 @@ export const deleteProductKnowledge = createServerFn({ method: "POST" })
       throw new Error("Access denied");
     }
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("product_details")
       .delete()
       .eq("id", data.id);
@@ -180,7 +180,7 @@ export const deleteProductKnowledge = createServerFn({ method: "POST" })
 export async function getProductKnowledgeForAI(companyId: string): Promise<string> {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("product_details")
     .select("title, content, type, created_at")
     .eq("company_id", companyId)

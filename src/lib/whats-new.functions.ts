@@ -28,7 +28,7 @@ export const createWhatsNew = createServerFn({ method: "POST" })
       throw new Error("Company not found");
     }
 
-    const { data: whatsNew, error } = await supabase
+    const { data: whatsNew, error } = await (supabase as any)
       .from("whats_new")
       .insert({
         company_id: profile.company_id,
@@ -62,7 +62,7 @@ export const listWhatsNew = createServerFn({ method: "GET" })
       throw new Error("Company not found");
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("whats_new")
       .select("*")
       .eq("company_id", profile.company_id)
@@ -79,7 +79,7 @@ export const getWhatsNew = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
 
-    const { data: whatsNew, error } = await supabase
+    const { data: whatsNew, error } = await (supabase as any)
       .from("whats_new")
       .select("*")
       .eq("id", data.id)
@@ -118,7 +118,7 @@ export const updateWhatsNew = createServerFn({ method: "POST" })
     const { userId, supabase } = context;
 
     // Verify ownership
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from("whats_new")
       .select("company_id")
       .eq("id", data.id)
@@ -134,7 +134,7 @@ export const updateWhatsNew = createServerFn({ method: "POST" })
       throw new Error("Access denied");
     }
 
-    const { data: whatsNew, error } = await supabase
+    const { data: whatsNew, error } = await (supabase as any)
       .from("whats_new")
       .update({
         ...(data.title && { title: data.title }),
@@ -159,7 +159,7 @@ export const deleteWhatsNew = createServerFn({ method: "POST" })
     const { userId, supabase } = context;
 
     // Verify ownership
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from("whats_new")
       .select("company_id")
       .eq("id", data.id)
@@ -175,7 +175,7 @@ export const deleteWhatsNew = createServerFn({ method: "POST" })
       throw new Error("Access denied");
     }
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("whats_new")
       .delete()
       .eq("id", data.id);
@@ -191,7 +191,7 @@ export async function getWhatsNewForAI(companyId: string): Promise<string> {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("whats_new")
     .select("id, title, content, type, created_at")
     .eq("company_id", companyId)

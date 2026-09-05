@@ -89,7 +89,10 @@ function ProductKnowledgePage() {
 
   // Create mutation for product details
   const createProductDetailsMutation = useMutation({
-    mutationFn: createProductKnowledge,
+    mutationFn: async (data: { title: string; content: string }) => {
+      const result = await createProductKnowledge(data);
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["product-knowledge"] });
       toast.success("Product details added");
@@ -97,6 +100,7 @@ function ProductKnowledgePage() {
       resetForm();
     },
     onError: (error: any) => {
+      console.error("Product details error:", error);
       toast.error(error.message || "Failed to add product details");
     },
   });
