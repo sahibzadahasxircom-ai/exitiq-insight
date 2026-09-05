@@ -46,6 +46,78 @@ function PreForm() {
   const brandColor = company?.brand_color || "#2563eb";
   const companyName = company?.company_name || "Your Company";
   const companyLogo = company?.company_logo;
+  const backgroundStyle = company?.background_style || "gradient";
+
+  // Render background based on style
+  const renderBackground = () => {
+    switch (backgroundStyle) {
+      case "mesh":
+        return (
+          <div 
+            className="absolute inset-0 opacity-20"
+            style={{
+              background: `
+                radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
+                radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
+                radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
+                radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
+                radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
+                radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
+              `
+            }}
+          />
+        );
+      case "aurora":
+        return (
+          <div 
+            className="absolute inset-0 opacity-15"
+            style={{
+              background: `
+                linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
+                linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
+                linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
+              `
+            }}
+          />
+        );
+      case "dots":
+        return (
+          <div 
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `radial-gradient(circle, ${brandColor} 1px, transparent 1px)`,
+              backgroundSize: '20px 20px'
+            }}
+          />
+        );
+      case "layers":
+        return (
+          <>
+            <div 
+              className="absolute inset-0 opacity-10"
+              style={{
+                background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+              }}
+            />
+            <div 
+              className="absolute inset-0 opacity-5"
+              style={{
+                background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
+              }}
+            />
+          </>
+        );
+      default: // gradient
+        return (
+          <div 
+            className="absolute inset-0 opacity-15"
+            style={{
+              background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+            }}
+          />
+        );
+    }
+  };
 
   const handleContinue = async () => {
     setIsSubmitting(true);
@@ -77,13 +149,8 @@ function PreForm() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background gradient effect using brand color */}
-      <div 
-        className="absolute inset-0 opacity-15"
-        style={{
-          background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
-        }}
-      />
+      {/* Background effect based on selected style */}
+      {renderBackground()}
       
       {/* Header with company branding */}
       <header className="border-b border-border bg-background/90 backdrop-blur relative z-10">

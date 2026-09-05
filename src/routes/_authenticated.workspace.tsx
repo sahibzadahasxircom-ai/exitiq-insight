@@ -36,6 +36,7 @@ function Workspace() {
   const [preFormTitle, setPreFormTitle] = useState("We're sorry to see you go");
   const [preFormDescription, setPreFormDescription] = useState("Help us improve by sharing your feedback");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [backgroundStyle, setBackgroundStyle] = useState("gradient");
 
   // Load existing company pre-form settings
   useEffect(() => {
@@ -43,7 +44,7 @@ function Workspace() {
       const loadCompanySettings = async () => {
         const { data } = await supabase
           .from("companies")
-          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name")
+          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name, background_style")
           .eq("id", company.id)
           .single();
         
@@ -54,6 +55,7 @@ function Workspace() {
           if (data.brand_color) setBrandColor(data.brand_color);
           if (data.company_logo) setLogo(data.company_logo);
           if (data.company_name) setCompanyName(data.company_name);
+          if (data.background_style) setBackgroundStyle(data.background_style);
         }
       };
       loadCompanySettings();
@@ -116,6 +118,7 @@ function Workspace() {
           brand_color: brandColor,
           company_logo: logoUrl,
           company_name: companyName,
+          background_style: backgroundStyle,
         })
         .eq("id", company.id);
 
@@ -263,6 +266,25 @@ function Workspace() {
                     className="flex-1"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="background-style">Background Style</Label>
+                <Select value={backgroundStyle} onValueChange={setBackgroundStyle}>
+                  <SelectTrigger id="background-style">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gradient">Gradient</SelectItem>
+                    <SelectItem value="mesh">Mesh Gradient</SelectItem>
+                    <SelectItem value="aurora">Aurora</SelectItem>
+                    <SelectItem value="dots">Dots Pattern</SelectItem>
+                    <SelectItem value="layers">Layers</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Choose the background effect style for the pre-form page
+                </p>
               </div>
 
               <div className="pt-4">
