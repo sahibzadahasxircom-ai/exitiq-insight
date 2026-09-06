@@ -83,10 +83,10 @@ function CustomerInterview() {
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
           <div className="flex items-center gap-3">
             {companyLogo ? (
-              <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain" />
+              <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain rounded-full" />
             ) : (
               <div 
-                className="h-8 w-8 rounded flex items-center justify-center text-white font-bold text-sm"
+                className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
                 style={{ backgroundColor: brandColor }}
               >
                 {companyName?.charAt(0).toUpperCase() || "E"}
