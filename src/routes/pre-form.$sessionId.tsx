@@ -187,7 +187,7 @@ function PreForm() {
       </header>
 
       {/* Main Content */}
-      <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-6 py-12 relative z-10">
+      <div className={`flex items-center justify-center px-6 py-12 relative z-10 overflow-hidden ${isModal ? 'min-h-[500px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
         <Card 
           className={`w-full max-w-md shadow-soft relative overflow-hidden ${
             formStyle === "casual" ? "rounded-2xl border-2" : 

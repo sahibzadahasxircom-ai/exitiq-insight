@@ -11,14 +11,23 @@
   var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
   var companyId = null;
   
+  console.log('Leaveesy Widget: Script element:', script);
+  
   if (script) {
     // Try attribute first
     companyId = script.getAttribute('data-company-id');
+    console.log('Leaveesy Widget: Company ID from attribute:', companyId);
     
     // If not found, try URL query parameter
     if (!companyId && script.src) {
-      var scriptUrl = new URL(script.src);
-      companyId = scriptUrl.searchParams.get('data-company-id');
+      try {
+        var scriptUrl = new URL(script.src);
+        companyId = scriptUrl.searchParams.get('data-company-id');
+        console.log('Leaveesy Widget: Company ID from URL param:', companyId);
+        console.log('Leaveesy Widget: Script src:', script.src);
+      } catch (e) {
+        console.error('Leaveesy Widget: Failed to parse script URL:', e);
+      }
     }
   }
 
@@ -63,7 +72,7 @@
       
       // Create modal container
       var container = document.createElement('div');
-      container.style.cssText = 'background:white;border-radius:12px;max-width:500px;width:90%;max-height:90vh;overflow:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);position:relative;';
+      container.style.cssText = 'background:white;border-radius:12px;max-width:500px;width:90%;max-height:90vh;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);position:relative;';
       
       // Create close button
       var closeBtn = document.createElement('button');
@@ -77,7 +86,7 @@
       // Create iframe
       var iframe = document.createElement('iframe');
       iframe.src = url;
-      iframe.style.cssText = 'width:100%;height:500px;border:none;border-radius:12px;';
+      iframe.style.cssText = 'width:100%;height:500px;border:none;border-radius:12px;overflow:hidden;';
       
       // Assemble modal
       container.appendChild(closeBtn);
@@ -196,8 +205,13 @@
               var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
               var leaveesyUrl;
               if (script && script.src) {
-                var scriptUrl = new URL(script.src);
-                leaveesyUrl = scriptUrl.origin + '/pre-form/' + data.interviewSessionId + '?modal=true';
+                try {
+                  var scriptUrl = new URL(script.src);
+                  leaveesyUrl = scriptUrl.origin + '/pre-form/' + data.interviewSessionId + '?modal=true';
+                } catch (e) {
+                  console.error('Leaveesy Widget: Failed to parse script URL:', e);
+                  leaveesyUrl = 'https://leaveesy.vercel.app/pre-form/' + data.interviewSessionId + '?modal=true';
+                }
               } else {
                 leaveesyUrl = 'https://leaveesy.vercel.app/pre-form/' + data.interviewSessionId + '?modal=true';
               }
