@@ -229,6 +229,8 @@ function SignUpForm() {
         },
       });
 
+      console.log("Company created with full data:", newCompany);
+
       console.log("Company created with ID:", newCompany.id);
 
       // Get the user ID from auth

@@ -4,9 +4,9 @@ import { createClient } from "@supabase/supabase-js";
 
 const CompanySchema = z.object({
   company_name: z.string().min(1),
-  company_url: z.string().url().optional(),
-  company_blog_url: z.string().url().optional(),
-  company_changelog_url: z.string().url().optional(),
+  company_url: z.string().url().optional().or(z.literal("")),
+  company_blog_url: z.string().url().optional().or(z.literal("")),
+  company_changelog_url: z.string().url().optional().or(z.literal("")),
   company_size: z.string().optional(),
   company_industry: z.string().optional(),
 });
@@ -41,9 +41,9 @@ export const createCompanyFn = createServerFn({ method: "POST" })
       .from("companies")
       .insert({
         company_name: data.company_name,
-        company_url: data.company_url,
-        company_size: data.company_size,
-        company_industry: data.company_industry,
+        company_url: data.company_url || null,
+        company_size: data.company_size || null,
+        company_industry: data.company_industry || null,
       })
       .select()
       .single();
