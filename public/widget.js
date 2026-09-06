@@ -32,6 +32,7 @@
     initialized: false,
     companyId: companyId,
     queue: [],
+    modal: null,
     
     init: function(options) {
       this.initialized = true;
@@ -48,6 +49,88 @@
       window.dispatchEvent(event);
       
       console.log('Leaveesy Widget initialized for company:', companyId);
+    },
+    
+    showModal: function(url) {
+      // Remove existing modal if any
+      if (this.modal) {
+        document.body.removeChild(this.modal);
+      }
+      
+      // Create modal overlay
+      var modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+      
+      // Create modal container
+      var container = document.createElement('div');
+      container.style.cssText = 'background:white;border-radius:12px;max-width:500px;width:90%;max-height:90vh;overflow:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);position:relative;';
+      
+      // Create close button
+      var closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '×';
+      closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;background:none;border:none;font-size:24px;cursor:pointer;color:#666;padding:5px;line-height:1;z-index:10;';
+      closeBtn.onclick = function() {
+        document.body.removeChild(modal);
+        window.leaveesy.modal = null;
+      };
+      
+      // Create iframe
+      var iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.style.cssText = 'width:100%;height:500px;border:none;border-radius:12px;';
+      
+      // Assemble modal
+      container.appendChild(closeBtn);
+      container.appendChild(iframe);
+      modal.appendChild(container);
+      
+      // Add to DOM
+      document.body.appendChild(modal);
+      this.modal = modal;
+      
+      // Listen for messages from iframe
+      var messageHandler = function(e) {
+        if (e.data && e.data.type === 'leaveesy-continue') {
+          console.log('Leaveesy Widget: Received continue message, sessionId:', e.data.sessionId);
+          // Close modal
+          document.body.removeChild(modal);
+          window.leaveesy.modal = null;
+          window.removeEventListener('message', messageHandler);
+          
+          // Navigate to interview
+          var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
+          var interviewUrl;
+          if (script && script.src) {
+            var scriptUrl = new URL(script.src);
+            interviewUrl = scriptUrl.origin + '/interview/' + e.data.sessionId;
+          } else {
+            interviewUrl = 'https://leaveesy.vercel.app/interview/' + e.data.sessionId;
+          }
+          window.location.href = interviewUrl;
+        }
+      };
+      window.addEventListener('message', messageHandler);
+      
+      // Close on escape key
+      var escapeHandler = function(e) {
+        if (e.key === 'Escape' && window.leaveesy.modal) {
+          document.body.removeChild(window.leaveesy.modal);
+          window.leaveesy.modal = null;
+          document.removeEventListener('keydown', escapeHandler);
+          window.removeEventListener('message', messageHandler);
+        }
+      };
+      document.addEventListener('keydown', escapeHandler);
+      
+      // Close on backdrop click
+      modal.onclick = function(e) {
+        if (e.target === modal && window.leaveesy.modal) {
+          document.body.removeChild(window.leaveesy.modal);
+          window.leaveesy.modal = null;
+          document.removeEventListener('keydown', escapeHandler);
+          window.removeEventListener('message', messageHandler);
+        }
+      };
     },
     
     track: function(eventName, data) {
@@ -105,26 +188,26 @@
             console.log('Leaveesy Widget: Has interviewSessionId:', !!data.interviewSessionId);
             console.log('Leaveesy Widget: interviewSessionId value:', data.interviewSessionId);
             
-            // If this is a SignOut event and we got an interview session ID, redirect to pre-form
+            // If this is a SignOut event and we got an interview session ID, show pre-form modal
             if (eventName === 'SignOut' && data.interviewSessionId) {
-              console.log('Leaveesy Widget: Redirecting to pre-form:', data.interviewSessionId);
+              console.log('Leaveesy Widget: Showing pre-form modal:', data.interviewSessionId);
               
               // Get the leaveesy URL from the script source
               var script = document.currentScript || document.querySelector('script[src*="widget.js"]');
               var leaveesyUrl;
               if (script && script.src) {
                 var scriptUrl = new URL(script.src);
-                leaveesyUrl = scriptUrl.origin + '/pre-form/' + data.interviewSessionId;
+                leaveesyUrl = scriptUrl.origin + '/pre-form/' + data.interviewSessionId + '?modal=true';
               } else {
-                leaveesyUrl = 'https://leaveesy.vercel.app/pre-form/' + data.interviewSessionId;
+                leaveesyUrl = 'https://leaveesy.vercel.app/pre-form/' + data.interviewSessionId + '?modal=true';
               }
               
-              console.log('Leaveesy Widget: Redirecting to URL:', leaveesyUrl);
+              console.log('Leaveesy Widget: Pre-form URL:', leaveesyUrl);
               
-              // Redirect to the pre-form
-              window.location.href = leaveesyUrl;
+              // Create and show modal
+              window.leaveesy.showModal(leaveesyUrl);
             } else {
-              console.log('Leaveesy Widget: Not redirecting - conditions not met');
+              console.log('Leaveesy Widget: Not showing modal - conditions not met');
               console.log('Leaveesy Widget: eventName:', eventName, 'interviewSessionId:', data.interviewSessionId);
             }
           } catch (parseError) {

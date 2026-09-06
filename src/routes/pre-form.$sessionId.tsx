@@ -21,7 +21,9 @@ export const Route = createFileRoute("/pre-form/$sessionId")({
 
 function PreForm() {
   const { sessionId } = Route.useParams();
-  console.log("PreForm component mounted with sessionId:", sessionId);
+  const searchParams = new URLSearchParams(window.location.search);
+  const isModal = searchParams.get('modal') === 'true';
+  console.log("PreForm component mounted with sessionId:", sessionId, "isModal:", isModal);
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -135,8 +137,13 @@ function PreForm() {
         } 
       });
       
-      // Redirect to interview with the session ID
-      window.location.href = `/interview/${sessionId}`;
+      // If in modal, send message to parent to close modal and navigate
+      if (isModal) {
+        window.parent.postMessage({ type: 'leaveesy-continue', sessionId }, '*');
+      } else {
+        // Redirect to interview with the session ID
+        window.location.href = `/interview/${sessionId}`;
+      }
     } catch (error) {
       console.error("Failed to update session:", error);
       setIsSubmitting(false);
@@ -152,16 +159,16 @@ function PreForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className={`min-h-screen bg-background relative overflow-hidden ${isModal ? 'p-4' : ''}`}>
       {/* Header with company branding */}
-      <header className="border-b border-border bg-background/90 backdrop-blur relative z-10">
+      <header className={`border-b border-border bg-background/90 backdrop-blur relative z-10 ${isModal ? 'rounded-t-lg' : ''}`}>
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
             {companyLogo ? (
-              <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain" />
+              <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain rounded-full" />
             ) : (
               <div 
-                className="h-8 w-8 rounded flex items-center justify-center text-white font-bold text-sm"
+                className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
                 style={{ backgroundColor: brandColor }}
               >
                 {companyName?.charAt(0).toUpperCase() || "E"}
@@ -169,11 +176,13 @@ function PreForm() {
             )}
             <span className="font-semibold">{companyName}</span>
           </div>
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-1.5">
-              <ArrowLeft className="h-3.5 w-3.5" /> Back
-            </Button>
-          </Link>
+          {!isModal && (
+            <Link to="/">
+              <Button variant="ghost" size="sm" className="gap-1.5">
+                <ArrowLeft className="h-3.5 w-3.5" /> Back
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
 
