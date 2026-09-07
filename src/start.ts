@@ -89,12 +89,12 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
           // Still return success to not break the widget, but log the error
         }
         
-        // If this is a SignOut event, create an interview session
+        // If this is a SignOut, CancelSubscription, or DeleteAccount event, create an interview session
         let interviewSessionId = null;
-        if (body.event_name === "SignOut") {
-          console.log("SignOut event detected, creating new interview session");
+        if (body.event_name === "SignOut" || body.event_name === "CancelSubscription" || body.event_name === "DeleteAccount") {
+          console.log(`${body.event_name} event detected, creating new interview session`);
           
-          // Always create a new interview session for each SignOut event
+          // Always create a new interview session for each event
           console.log("Creating new interview session for company:", body.company_id);
           const { data: newSession, error: sessionError } = await supabase
             .from("interview_sessions")
@@ -116,6 +116,19 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
             console.log("Created new interview session:", interviewSessionId);
             console.log("Full session data:", newSession);
           }
+        }
+
+        // Update company integration status and last event timestamp
+        const { error: updateError } = await supabase
+          .from("companies")
+          .update({
+            last_event_at: new Date().toISOString(),
+            integration_status: "listening_for_events",
+          })
+          .eq("id", body.company_id);
+
+        if (updateError) {
+          console.error("Failed to update company integration status:", updateError);
         }
         
         console.log("Returning response with interviewSessionId:", interviewSessionId);
@@ -139,6 +152,108 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
           },
+        });
+      }
+    }
+    
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
+  // Handle webhook events from billing platforms
+  if (url.pathname === '/api/webhook') {
+    if (request.method === 'POST') {
+      try {
+        const body = await request.json();
+        
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+        // Extract company_id from webhook URL query parameter
+        const companyId = url.searchParams.get('company_id');
+        
+        if (!companyId) {
+          return new Response(JSON.stringify({ success: false, error: "Missing company_id" }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Verify company exists
+        const { data: company, error: companyError } = await supabase
+          .from("companies")
+          .select("id, webhook_secret")
+          .eq("id", companyId)
+          .single();
+        
+        if (companyError || !company) {
+          return new Response(JSON.stringify({ success: false, error: "Invalid company ID" }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Log the webhook event
+        console.log("Webhook event received:", {
+          company_id: companyId,
+          event_type: body.type || body.event_type,
+          timestamp: new Date().toISOString(),
+        });
+
+        // Create interview session for cancellation events
+        let interviewSessionId = null;
+        const eventType = body.type || body.event_type || '';
+        
+        if (eventType.toLowerCase().includes('cancel') || eventType.toLowerCase().includes('delete')) {
+          console.log("Cancellation event detected, creating interview session");
+          
+          const { data: newSession, error: sessionError } = await supabase
+            .from("interview_sessions")
+            .insert({
+              company_id: companyId,
+              customer_name: body.data?.customer_name || "Webhook User",
+              customer_email: body.data?.customer_email || "webhook@example.com",
+              interview_status: "active",
+              interview_progress: "started",
+              source_url: body.data?.url || "webhook",
+            })
+            .select("id")
+            .single();
+          
+          if (sessionError) {
+            console.error("Failed to create interview session:", sessionError);
+          } else {
+            interviewSessionId = newSession.id;
+            console.log("Created interview session from webhook:", interviewSessionId);
+          }
+        }
+
+        // Update company integration status and last event timestamp
+        const { error: updateError } = await supabase
+          .from("companies")
+          .update({
+            last_event_at: new Date().toISOString(),
+            integration_status: "listening_for_events",
+          })
+          .eq("id", companyId);
+
+        if (updateError) {
+          console.error("Failed to update company integration status:", updateError);
+        }
+
+        return new Response(JSON.stringify({ 
+          success: true, 
+          interviewSessionId: interviewSessionId 
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error("Webhook error:", error);
+        return new Response(JSON.stringify({ success: false, error: "Internal server error" }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
         });
       }
     }

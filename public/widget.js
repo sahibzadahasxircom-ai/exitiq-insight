@@ -197,9 +197,9 @@
             console.log('Leaveesy Widget: Has interviewSessionId:', !!data.interviewSessionId);
             console.log('Leaveesy Widget: interviewSessionId value:', data.interviewSessionId);
             
-            // If this is a SignOut event and we got an interview session ID, show pre-form modal
-            if (eventName === 'SignOut' && data.interviewSessionId) {
-              console.log('Leaveesy Widget: Showing pre-form modal:', data.interviewSessionId);
+            // If this is a SignOut, CancelSubscription, or DeleteAccount event and we got an interview session ID, show pre-form modal
+            if ((eventName === 'SignOut' || eventName === 'CancelSubscription' || eventName === 'DeleteAccount') && data.interviewSessionId) {
+              console.log('Leaveesy Widget: Showing pre-form modal for event:', eventName, 'session:', data.interviewSessionId);
               
               // Get the leaveesy URL from the script source
               var script = document.currentScript || document.querySelector('script[src*="widget.js"]');

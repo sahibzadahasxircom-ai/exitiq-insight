@@ -27,5 +27,5 @@ export function getWidgetScriptUrl(companyId: string): string {
 // Helper to get webhook URL for a company
 export function getWebhookUrl(companyId: string): string {
   const { webhookUrl } = getAppConfig();
-  return `${webhookUrl}/${companyId}`;
+  return `${webhookUrl}?company_id=${companyId}`;
 }
