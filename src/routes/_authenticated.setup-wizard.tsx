@@ -718,7 +718,15 @@ function SetupWizard() {
                 className="w-full p-3 border rounded-lg text-sm"
               />
             </div>
-            <p className="text-xs text-muted-foreground">Add the snippet to your website's &lt;head&gt; section, then click the button below to test the integration.</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-2">How to Verify Your Integration</h4>
+              <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                <li>Copy the snippet above and paste it into your website's &lt;head&gt; section</li>
+                <li>Save and publish your website changes</li>
+                <li>Go to your website and click the button: <strong>"{answers.buttonName || "Sign Out"}"</strong></li>
+                <li>Come back here and click <strong>"Check Status"</strong> to verify</li>
+              </ol>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -731,62 +739,80 @@ function SetupWizard() {
                 
                 setLoading(true);
                 
-                // Send a test event to the widget endpoint
-                try {
-                  const response = await fetch('/api/widget/events', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      company_id: companyId,
-                      event_name: answers.exitMethod === "all" ? "SignOut" : 
-                                  answers.exitMethod === "cancel-subscription" ? "CancelSubscription" :
-                                  answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut",
-                      event_data: { test: true },
-                      timestamp: new Date().toISOString(),
-                      url: window.location.href,
-                      user_agent: navigator.userAgent,
-                    }),
-                  });
-                  
-                  const data = await response.json();
-                  
-                  if (data.success) {
-                    // Store integration in integrations table
-                    const { error: insertError } = await supabase
-                      .from("integrations")
-                      .insert({
-                        company_id: companyId,
-                        integration_type: "javascript",
-                        status: "connected",
-                        config: {
-                          productType: answers.productType,
-                          exitMethod: answers.exitMethod,
-                          buttonName: answers.buttonName,
-                          eventTypes: getEventTypes(),
-                        },
-                        connected_at: new Date().toISOString(),
-                      });
-
-                    if (insertError) {
-                      console.error("Failed to store integration:", insertError);
-                    }
-
-                    toast.success("Integration verified successfully!");
-                    setStep("complete");
-                  } else {
-                    toast.error("Verification failed. Please try again.");
-                  }
-                } catch (error) {
-                  console.error("Verification error:", error);
-                  toast.error("Verification failed. Please try again.");
-                } finally {
-                  setLoading(false);
+                // Update company status to waiting_for_verification
+                const { error } = await supabase
+                  .from("companies")
+                  .update({
+                    integration_status: "waiting_for_verification",
+                  })
+                  .eq("id", companyId);
+                
+                if (error) {
+                  toast.error("Failed to start verification");
+                  console.error(error);
+                } else {
+                  toast.success("Verification started. We're waiting for your first event.");
                 }
+                
+                setLoading(false);
               }}
               disabled={loading}
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Test Integration
+              Start Verification
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={async () => {
+                const companyId = profile?.company_id || fallbackCompanyId;
+                if (!companyId) {
+                  toast.error("No company ID found. Please refresh the page or contact support.");
+                  return;
+                }
+                
+                setLoading(true);
+                
+                // Check if we've received an event
+                const { data: company } = await supabase
+                  .from("companies")
+                  .select("integration_status, last_event_at")
+                  .eq("id", companyId)
+                  .single();
+                
+                if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
+                  // Store integration in integrations table
+                  const { error: insertError } = await supabase
+                    .from("integrations")
+                    .insert({
+                      company_id: companyId,
+                      integration_type: "javascript",
+                      status: "connected",
+                      config: {
+                        productType: answers.productType,
+                        exitMethod: answers.exitMethod,
+                        buttonName: answers.buttonName,
+                        eventTypes: getEventTypes(),
+                      },
+                      connected_at: new Date().toISOString(),
+                    });
+
+                  if (insertError) {
+                    console.error("Failed to store integration:", insertError);
+                  }
+
+                  toast.success("Integration verified successfully! We received your event.");
+                  setStep("complete");
+                } else {
+                  toast.info("We haven't received an event yet. Please click the button on your website first.");
+                }
+                
+                setLoading(false);
+              }}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Check Status
             </Button>
           </div>
         )}
@@ -811,6 +837,17 @@ function SetupWizard() {
               <p className="text-xs text-red-500">Warning: No company ID found. Please refresh the page or contact support.</p>
             )}
             <p className="text-xs text-muted-foreground">Add this webhook URL to your {answers.billingPlatform} account's webhook settings. Select cancellation events.</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-2">How to Verify Your Webhook</h4>
+              <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                <li>Copy the webhook URL above</li>
+                <li>Go to your {answers.billingPlatform} dashboard</li>
+                <li>Add the webhook URL to your webhook settings</li>
+                <li>Select "customer.subscription.deleted" or similar cancellation events</li>
+                <li>Test by cancelling a subscription or sending a test event from {answers.billingPlatform}</li>
+                <li>Come back here and click <strong>"Check Status"</strong> to verify</li>
+              </ol>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -823,61 +860,80 @@ function SetupWizard() {
                 
                 setLoading(true);
                 
-                // Send a test webhook event
-                try {
-                  const webhookUrl = getWebhookUrl(companyId);
-                  const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      type: 'customer.subscription.deleted',
-                      data: {
-                        customer_name: 'Test Customer',
-                        customer_email: 'test@example.com',
-                        url: 'webhook-test',
-                      },
-                    }),
-                  });
-                  
-                  const data = await response.json();
-                  
-                  if (data.success) {
-                    // Store integration in integrations table
-                    const { error: insertError } = await supabase
-                      .from("integrations")
-                      .insert({
-                        company_id: companyId,
-                        integration_type: "webhook",
-                        status: "connected",
-                        config: {
-                          productType: answers.productType,
-                          exitMethod: answers.exitMethod,
-                          billingPlatform: answers.billingPlatform,
-                          eventTypes: getEventTypes(),
-                        },
-                        connected_at: new Date().toISOString(),
-                      });
-
-                    if (insertError) {
-                      console.error("Failed to store integration:", insertError);
-                    }
-
-                    toast.success("Webhook verified successfully!");
-                    setStep("complete");
-                  } else {
-                    toast.error("Webhook verification failed. Please try again.");
-                  }
-                } catch (error) {
-                  console.error("Webhook verification error:", error);
-                  toast.error("Webhook verification failed. Please try again.");
-                } finally {
-                  setLoading(false);
+                // Update company status to waiting_for_verification
+                const { error } = await supabase
+                  .from("companies")
+                  .update({
+                    integration_status: "waiting_for_verification",
+                  })
+                  .eq("id", companyId);
+                
+                if (error) {
+                  toast.error("Failed to start verification");
+                  console.error(error);
+                } else {
+                  toast.success("Verification started. We're waiting for your first webhook event.");
                 }
+                
+                setLoading(false);
               }}
               disabled={loading}
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Test Webhook
+              Start Verification
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={async () => {
+                const companyId = profile?.company_id || fallbackCompanyId;
+                if (!companyId) {
+                  toast.error("No company ID found. Please refresh the page or contact support.");
+                  return;
+                }
+                
+                setLoading(true);
+                
+                // Check if we've received an event
+                const { data: company } = await supabase
+                  .from("companies")
+                  .select("integration_status, last_event_at")
+                  .eq("id", companyId)
+                  .single();
+                
+                if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
+                  // Store integration in integrations table
+                  const { error: insertError } = await supabase
+                    .from("integrations")
+                    .insert({
+                      company_id: companyId,
+                      integration_type: "webhook",
+                      status: "connected",
+                      config: {
+                        productType: answers.productType,
+                        exitMethod: answers.exitMethod,
+                        billingPlatform: answers.billingPlatform,
+                        eventTypes: getEventTypes(),
+                      },
+                      connected_at: new Date().toISOString(),
+                    });
+
+                  if (insertError) {
+                    console.error("Failed to store integration:", insertError);
+                  }
+
+                  toast.success("Webhook verified successfully! We received your event.");
+                  setStep("complete");
+                } else {
+                  toast.info("We haven't received a webhook event yet. Please test from your billing platform first.");
+                }
+                
+                setLoading(false);
+              }}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Check Status
             </Button>
           </div>
         )}
@@ -985,6 +1041,17 @@ function SetupWizard() {
               <p className="text-xs text-muted-foreground">Add this snippet to track sign out and delete account button clicks.</p>
             </div>
             
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-2">How to Verify Both Integrations</h4>
+              <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                <li><strong>Webhook:</strong> Add the webhook URL to your {answers.billingPlatform} dashboard and test a cancellation event</li>
+                <li><strong>Widget:</strong> Copy the snippet above and paste it into your website's &lt;head&gt; section</li>
+                <li>Save and publish your website changes</li>
+                <li>Go to your website and click the button: <strong>"{answers.buttonName || "Sign Out"}"</strong></li>
+                <li>Come back here and click <strong>"Check Status"</strong> to verify both integrations</li>
+              </ol>
+            </div>
+            
             <Button
               variant="outline"
               size="sm"
@@ -997,89 +1064,95 @@ function SetupWizard() {
                 
                 setLoading(true);
                 
-                // Test both integrations
-                try {
-                  // Test webhook
-                  const webhookUrl = getWebhookUrl(companyId);
-                  const webhookResponse = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      type: 'customer.subscription.deleted',
-                      data: { customer_name: 'Test Customer', customer_email: 'test@example.com', url: 'webhook-test' },
-                    }),
-                  });
-                  
-                  const webhookData = await webhookResponse.json();
-                  
-                  // Test widget
-                  const widgetResponse = await fetch('/api/widget/events', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      company_id: companyId,
-                      event_name: "SignOut",
-                      event_data: { test: true },
-                      timestamp: new Date().toISOString(),
-                      url: window.location.href,
-                      user_agent: navigator.userAgent,
-                    }),
-                  });
-                  
-                  const widgetData = await widgetResponse.json();
-                  
-                  if (webhookData.success && widgetData.success) {
-                    // Store both integrations in integrations table
-                    const { error: webhookInsertError } = await supabase
-                      .from("integrations")
-                      .insert({
-                        company_id: companyId,
-                        integration_type: "webhook",
-                        status: "connected",
-                        config: {
-                          productType: answers.productType,
-                          exitMethod: answers.exitMethod,
-                          billingPlatform: answers.billingPlatform,
-                          eventTypes: ["cancel_sub"],
-                        },
-                        connected_at: new Date().toISOString(),
-                      });
-
-                    const { error: widgetInsertError } = await supabase
-                      .from("integrations")
-                      .insert({
-                        company_id: companyId,
-                        integration_type: "javascript",
-                        status: "connected",
-                        config: {
-                          productType: answers.productType,
-                          exitMethod: answers.exitMethod,
-                          buttonName: answers.buttonName,
-                          eventTypes: ["sign_out", "delete_account"],
-                        },
-                        connected_at: new Date().toISOString(),
-                      });
-
-                    if (webhookInsertError || widgetInsertError) {
-                      console.error("Failed to store integrations:", webhookInsertError, widgetInsertError);
-                    }
-
-                    toast.success("Both integrations verified successfully!");
-                    setStep("complete");
-                  } else {
-                    toast.error("Verification failed. Please try again.");
-                  }
-                } catch (error) {
-                  console.error("Verification error:", error);
-                  toast.error("Verification failed. Please try again.");
-                } finally {
-                  setLoading(false);
+                // Update company status to waiting_for_verification
+                const { error } = await supabase
+                  .from("companies")
+                  .update({
+                    integration_status: "waiting_for_verification",
+                  })
+                  .eq("id", companyId);
+                
+                if (error) {
+                  toast.error("Failed to start verification");
+                  console.error(error);
+                } else {
+                  toast.success("Verification started. We're waiting for your first events.");
                 }
+                
+                setLoading(false);
               }}
               disabled={loading}
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Test Both Integrations
+              Start Verification
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={async () => {
+                const companyId = profile?.company_id || fallbackCompanyId;
+                if (!companyId) {
+                  toast.error("No company ID found. Please refresh the page or contact support.");
+                  return;
+                }
+                
+                setLoading(true);
+                
+                // Check if we've received events
+                const { data: company } = await supabase
+                  .from("companies")
+                  .select("integration_status, last_event_at")
+                  .eq("id", companyId)
+                  .single();
+                
+                if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
+                  // Store both integrations in integrations table
+                  const { error: webhookInsertError } = await supabase
+                    .from("integrations")
+                    .insert({
+                      company_id: companyId,
+                      integration_type: "webhook",
+                      status: "connected",
+                      config: {
+                        productType: answers.productType,
+                        exitMethod: answers.exitMethod,
+                        billingPlatform: answers.billingPlatform,
+                        eventTypes: ["cancel_sub"],
+                      },
+                      connected_at: new Date().toISOString(),
+                    });
+
+                  const { error: widgetInsertError } = await supabase
+                    .from("integrations")
+                    .insert({
+                      company_id: companyId,
+                      integration_type: "javascript",
+                      status: "connected",
+                      config: {
+                        productType: answers.productType,
+                        exitMethod: answers.exitMethod,
+                        buttonName: answers.buttonName,
+                        eventTypes: ["sign_out", "delete_account"],
+                      },
+                      connected_at: new Date().toISOString(),
+                    });
+
+                  if (webhookInsertError || widgetInsertError) {
+                    console.error("Failed to store integrations:", webhookInsertError, widgetInsertError);
+                  }
+
+                  toast.success("Both integrations verified successfully! We received your events.");
+                  setStep("complete");
+                } else {
+                  toast.info("We haven't received events yet. Please test both integrations first.");
+                }
+                
+                setLoading(false);
+              }}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Check Status
             </Button>
           </div>
         )}
