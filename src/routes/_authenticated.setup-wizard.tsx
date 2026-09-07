@@ -176,7 +176,7 @@ function SetupWizard() {
   ];
 
   const exitMethods = [
-    { id: "all", label: "All (Cancel Subscription + Delete Account + Sign Out)" },
+    { id: "all", label: "All (1,2,3)" },
     { id: "cancel-subscription", label: "Cancel Subscription" },
     { id: "delete-account", label: "Delete Account" },
     { id: "sign-out", label: "Sign Out / Log Out" },
@@ -382,10 +382,11 @@ function SetupWizard() {
         </Button>
         <Button 
           onClick={() => {
-            if (answers.exitMethod === "cancel-subscription") {
+            // If cancel subscription or all (which includes cancel), ask about billing platform
+            if (answers.exitMethod === "cancel-subscription" || answers.exitMethod === "all") {
               setStep("billing-platform");
             } else {
-              setStep("recommendation");
+              setStep("button-name");
             }
           }}
           disabled={!answers.exitMethod}
@@ -750,6 +751,26 @@ function SetupWizard() {
                   const data = await response.json();
                   
                   if (data.success) {
+                    // Store integration in integrations table
+                    const { error: insertError } = await supabase
+                      .from("integrations")
+                      .insert({
+                        company_id: companyId,
+                        integration_type: "javascript",
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          buttonName: answers.buttonName,
+                          eventTypes: getEventTypes(),
+                        },
+                        connected_at: new Date().toISOString(),
+                      });
+
+                    if (insertError) {
+                      console.error("Failed to store integration:", insertError);
+                    }
+
                     toast.success("Integration verified successfully!");
                     setStep("complete");
                   } else {
@@ -821,6 +842,26 @@ function SetupWizard() {
                   const data = await response.json();
                   
                   if (data.success) {
+                    // Store integration in integrations table
+                    const { error: insertError } = await supabase
+                      .from("integrations")
+                      .insert({
+                        company_id: companyId,
+                        integration_type: "webhook",
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          billingPlatform: answers.billingPlatform,
+                          eventTypes: getEventTypes(),
+                        },
+                        connected_at: new Date().toISOString(),
+                      });
+
+                    if (insertError) {
+                      console.error("Failed to store integration:", insertError);
+                    }
+
                     toast.success("Webhook verified successfully!");
                     setStep("complete");
                   } else {
@@ -988,6 +1029,41 @@ function SetupWizard() {
                   const widgetData = await widgetResponse.json();
                   
                   if (webhookData.success && widgetData.success) {
+                    // Store both integrations in integrations table
+                    const { error: webhookInsertError } = await supabase
+                      .from("integrations")
+                      .insert({
+                        company_id: companyId,
+                        integration_type: "webhook",
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          billingPlatform: answers.billingPlatform,
+                          eventTypes: ["cancel_sub"],
+                        },
+                        connected_at: new Date().toISOString(),
+                      });
+
+                    const { error: widgetInsertError } = await supabase
+                      .from("integrations")
+                      .insert({
+                        company_id: companyId,
+                        integration_type: "javascript",
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          buttonName: answers.buttonName,
+                          eventTypes: ["sign_out", "delete_account"],
+                        },
+                        connected_at: new Date().toISOString(),
+                      });
+
+                    if (webhookInsertError || widgetInsertError) {
+                      console.error("Failed to store integrations:", webhookInsertError, widgetInsertError);
+                    }
+
                     toast.success("Both integrations verified successfully!");
                     setStep("complete");
                   } else {
@@ -1109,10 +1185,10 @@ function SetupWizard() {
       <div className="space-y-3">
         <Button 
           size="lg" 
-          onClick={() => navigate({ to: "/dashboard" })}
+          onClick={() => navigate({ to: "/workspace/pre-form" })}
           className="w-full"
         >
-          Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+          Go to Pre-form <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
         
         <Button 
@@ -1121,7 +1197,7 @@ function SetupWizard() {
           onClick={() => navigate({ to: "/integrations" })}
           className="w-full"
         >
-          Customize Customer Experience
+          Manage Integrations
         </Button>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
-  CreditCard, 
   Code, 
   Webhook, 
   Zap, 
@@ -12,10 +12,12 @@ import {
   RefreshCw, 
   Trash2,
   Plus,
-  Settings
+  Settings,
+  X
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { IntegrationModals } from "@/components/integrations/IntegrationModals";
+import { getWidgetScriptUrl, getWebhookUrl } from "@/lib/config";
 
 interface IntegrationData {
   id: string;
@@ -48,6 +50,8 @@ function Integrations() {
   const [company, setCompany] = useState<any>(null);
   const [modalIntegration, setModalIntegration] = useState<string | null>(null);
   const [modalIntegrationId, setModalIntegrationId] = useState<string | null>(null);
+  const [showSnippetModal, setShowSnippetModal] = useState(false);
+  const [snippetContent, setSnippetContent] = useState<string>("");
 
   useEffect(() => {
     loadIntegrations();
@@ -63,59 +67,51 @@ function Integrations() {
   }, []);
 
   const loadIntegrations = async () => {
+    setLoading(true);
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.navigate({ to: "/auth" });
+      const { data: profile } = await supabase.auth.getUser();
+      if (!profile?.user?.id) {
+        console.error("No user found");
         return;
       }
 
-      // Get company ID from profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("company_id")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (!profile) {
-        router.navigate({ to: "/auth" });
-        return;
-      }
-
-      setCompanyId(profile.company_id);
-
-      // Load company data to get integration info
-      const { data: company, error } = await supabase
+      // Load company data
+      const { data: company, error: companyError } = await supabase
         .from("companies")
         .select("*")
         .eq("id", profile.company_id)
         .single();
 
-      if (error) {
-        console.error("Failed to load company:", error);
+      if (companyError) {
+        console.error("Failed to load company:", companyError);
         return;
       }
 
       setCompany(company);
 
-      // Build integrations list from company data
-      const integrationList: IntegrationData[] = [];
-      
-      if (company.integration_type) {
-        integrationList.push({
-          id: company.id,
-          integration_type: company.integration_type as "javascript" | "webhook",
-          status: (company.integration_status as any) || "not_connected",
-          config: company.integration_config,
-          connected_at: company.updated_at,
-          last_event_at: company.last_event_at,
-          last_error: null,
-          created_at: company.created_at,
-          updated_at: company.updated_at,
-          company_id: company.id,
-        });
+      // Load integrations from the integrations table
+      const { data: integrationsData, error: integrationsError } = await supabase
+        .from("integrations")
+        .select("*")
+        .eq("company_id", profile.company_id);
+
+      if (integrationsError) {
+        console.error("Failed to load integrations:", integrationsError);
+        return;
       }
+
+      const integrationList: IntegrationData[] = (integrationsData || []).map((integration) => ({
+        id: integration.id,
+        integration_type: integration.integration_type as "javascript" | "webhook",
+        status: integration.status as "not_connected" | "waiting_for_verification" | "connected" | "listening_for_events",
+        config: integration.config,
+        connected_at: integration.connected_at,
+        last_event_at: company.last_event_at,
+        last_error: integration.last_error,
+        created_at: integration.created_at,
+        updated_at: integration.updated_at,
+        company_id: integration.company_id,
+      }));
 
       setIntegrations(integrationList);
     } catch (error) {
@@ -188,41 +184,101 @@ function Integrations() {
   };
 
   const handleDisconnect = async (integrationId: string, type: string) => {
-    if (!confirm(`Are you sure you want to disconnect ${getIntegrationName(type)}?`)) {
+    if (!confirm("Are you sure you want to disconnect this integration?")) {
       return;
     }
 
     try {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("integrations")
-        .update({
-          status: "disconnected",
-          updated_at: new Date().toISOString(),
-        })
+        .delete()
         .eq("id", integrationId);
 
       if (error) {
-        console.error("Failed to disconnect integration:", error);
-        alert("Failed to disconnect integration");
+        toast.error("Failed to disconnect integration");
+        console.error(error);
       } else {
-        await loadIntegrations();
+        toast.success("Integration disconnected successfully");
+        loadIntegrations();
       }
     } catch (error) {
       console.error("Error disconnecting integration:", error);
-      alert("Failed to disconnect integration");
+      toast.error("Failed to disconnect integration");
     }
   };
 
-  const handleConnect = (type: string) => {
-    // Open the modal for the integration type
-    setModalIntegration(type);
-    setModalIntegrationId(null);
+  const handleReconnect = async (integrationId: string, type: string) => {
+    // Redirect to setup wizard for reconnection
+    router.push("/setup-wizard");
   };
 
-  const handleReconnect = async (integrationId: string, type: string) => {
-    // Open the modal for existing integration
-    setModalIntegration(type);
-    setModalIntegrationId(integrationId);
+  const handleConnect = (type: string) => {
+    // Redirect to setup wizard for new connection
+    router.push("/setup-wizard");
+  };
+
+  const handleViewSnippet = (integration: IntegrationData) => {
+    if (integration.integration_type === "javascript") {
+      const buttonName = integration.config?.buttonName || "Sign Out";
+      const companyId = integration.company_id;
+      const snippet = `<!-- leaveesy Global Tracking Script Tag -->
+<script src="${getWidgetScriptUrl(companyId)}"></script>
+
+<script>
+  // Wait for leaveesy to be ready before attaching event listeners
+  window.addEventListener('leaveesyReady', function() {
+    console.log('leaveesy is ready');
+    
+    // Auto-detect buttons by text
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${buttonName.toLowerCase()}' || buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account' || buttonText === 'cancel subscription') {
+        btn.addEventListener('click', function(e) {
+          if (window.leaveesy) {
+            console.log('Tracking event');
+            window.leaveesy.track("SignOut", { action: "process_started" });
+          }
+        });
+      }
+    });
+  });
+  
+  // Fallback: if leaveesy is already loaded, attach listeners immediately
+  if (window.leaveesy) {
+    console.log('leaveesy already loaded');
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${buttonName.toLowerCase()}' || buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account' || buttonText === 'cancel subscription') {
+        btn.addEventListener('click', function(e) {
+          console.log('Tracking event');
+          window.leaveesy.track("SignOut", { action: "process_started" });
+        });
+      }
+    });
+  }
+</script>`;
+      setSnippetContent(snippet);
+    } else if (integration.integration_type === "webhook") {
+      const webhookUrl = getWebhookUrl(integration.company_id);
+      const snippet = `Webhook URL: ${webhookUrl}
+
+Add this webhook URL to your billing platform's webhook settings.
+Select cancellation events to send to this endpoint.
+
+Example webhook payload:
+{
+  "type": "customer.subscription.deleted",
+  "data": {
+    "customer_name": "John Doe",
+    "customer_email": "john@example.com",
+    "url": "https://your-website.com"
+  }
+}`;
+      setSnippetContent(snippet);
+    }
+    setShowSnippetModal(true);
   };
 
   if (loading) {
@@ -288,12 +344,10 @@ function Integrations() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => {
-                          setModalIntegration(integration.integration_type);
-                          setModalIntegrationId(integration.id);
-                        }}
+                        onClick={() => handleViewSnippet(integration)}
+                        title="View Snippet"
                       >
-                        <Settings className="h-4 w-4 text-muted-foreground" />
+                        <Code className="h-4 w-4 text-muted-foreground" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -390,7 +444,40 @@ function Integrations() {
           setModalIntegrationId(null);
         }}
       />
+
+      {/* Snippet Modal */}
+      {showSnippetModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="font-semibold">Integration Snippet</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSnippetModal(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-4 overflow-y-auto max-h-[60vh]">
+              <pre className="bg-muted p-4 rounded-lg text-sm font-mono whitespace-pre-wrap break-all">
+                {snippetContent}
+              </pre>
+            </div>
+            <div className="p-4 border-t">
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(snippetContent);
+                  toast.success("Snippet copied to clipboard");
+                }}
+                className="w-full"
+              >
+                Copy Snippet
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
