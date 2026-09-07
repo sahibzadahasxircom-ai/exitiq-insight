@@ -176,6 +176,7 @@ function SetupWizard() {
   ];
 
   const exitMethods = [
+    { id: "all", label: "All (Cancel Subscription + Delete Account + Sign Out)" },
     { id: "cancel-subscription", label: "Cancel Subscription" },
     { id: "delete-account", label: "Delete Account" },
     { id: "sign-out", label: "Sign Out / Log Out" },
@@ -191,6 +192,26 @@ function SetupWizard() {
   ];
 
   const getRecommendation = () => {
+    // All events with billing platform - use both webhook (for cancel) + widget (for sign out/delete)
+    if (answers.exitMethod === "all" && answers.billingPlatform !== "none") {
+      return {
+        type: "both",
+        title: "Configure Both Integrations",
+        description: `Since you use ${answers.billingPlatform} for subscriptions, we recommend Webhooks for cancellations and JavaScript Widget for sign out/delete account.`,
+        buttonText: "Configure Both",
+      };
+    }
+    
+    // All events with custom backend - use widget with multiple event types
+    if (answers.exitMethod === "all" && answers.billingPlatform === "none") {
+      return {
+        type: "widget",
+        title: "Connect JavaScript Widget",
+        description: "We recommend the JavaScript Widget to track all button clicks (cancel, delete, sign out).",
+        buttonText: "Connect JavaScript Widget",
+      };
+    }
+    
     // Cancel subscription with billing platform (Stripe, Paddle, Chargebee, etc.)
     if (answers.exitMethod === "cancel-subscription" && answers.billingPlatform !== "none") {
       return {
@@ -238,11 +259,18 @@ function SetupWizard() {
       eventTypes: getEventTypes(),
     };
 
+    // For "both" type, we'll store webhook as primary and widget in config
+    const integrationType = recommendation.type === "webhook" ? "webhook" : 
+                          recommendation.type === "both" ? "webhook" : "javascript";
+
     const { error } = await supabase
       .from("companies")
       .update({
-        integration_type: recommendation.type === "webhook" ? "webhook" : "javascript",
-        integration_config: integrationConfig,
+        integration_type: integrationType,
+        integration_config: {
+          ...integrationConfig,
+          useWidgetAlso: recommendation.type === "both" || recommendation.type === "widget",
+        },
         setup_completed: false,
       })
       .eq("id", companyId);
@@ -258,9 +286,13 @@ function SetupWizard() {
 
   const getEventTypes = () => {
     const types = [];
-    if (answers.exitMethod === "cancel-subscription") types.push("cancel_sub");
-    if (answers.exitMethod === "delete-account") types.push("delete_account");
-    if (answers.exitMethod === "sign-out") types.push("sign_out");
+    if (answers.exitMethod === "all") {
+      types.push("cancel_sub", "delete_account", "sign_out");
+    } else {
+      if (answers.exitMethod === "cancel-subscription") types.push("cancel_sub");
+      if (answers.exitMethod === "delete-account") types.push("delete_account");
+      if (answers.exitMethod === "sign-out") types.push("sign_out");
+    }
     return types;
   };
 
@@ -391,7 +423,8 @@ function SetupWizard() {
         </Button>
         <Button 
           onClick={() => {
-            if (answers.billingPlatform === "none" || answers.exitMethod !== "cancel-subscription") {
+            // Always go to button name selection if not using billing platform
+            if (answers.billingPlatform === "none") {
               setStep("button-name");
             } else {
               setStep("recommendation");
@@ -694,23 +727,44 @@ function SetupWizard() {
                   toast.error("No company ID found. Please refresh the page or contact support.");
                   return;
                 }
-                // Update company status to WAITING_FOR_VERIFICATION
-                const { error } = await supabase
-                  .from("companies")
-                  .update({
-                    integration_status: "waiting_for_verification",
-                  })
-                  .eq("id", companyId);
                 
-                if (error) {
-                  toast.error("Failed to start verification");
-                  console.error(error);
-                } else {
-                  toast.success("Verification started. Click your button on your website to complete.");
-                  setStep("complete");
+                setLoading(true);
+                
+                // Send a test event to the widget endpoint
+                try {
+                  const response = await fetch('/api/widget/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      company_id: companyId,
+                      event_name: answers.exitMethod === "all" ? "SignOut" : 
+                                  answers.exitMethod === "cancel-subscription" ? "CancelSubscription" :
+                                  answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut",
+                      event_data: { test: true },
+                      timestamp: new Date().toISOString(),
+                      url: window.location.href,
+                      user_agent: navigator.userAgent,
+                    }),
+                  });
+                  
+                  const data = await response.json();
+                  
+                  if (data.success) {
+                    toast.success("Integration verified successfully!");
+                    setStep("complete");
+                  } else {
+                    toast.error("Verification failed. Please try again.");
+                  }
+                } catch (error) {
+                  console.error("Verification error:", error);
+                  toast.error("Verification failed. Please try again.");
+                } finally {
+                  setLoading(false);
                 }
               }}
+              disabled={loading}
             >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Test Integration
             </Button>
           </div>
@@ -745,24 +799,211 @@ function SetupWizard() {
                   toast.error("No company ID found. Please refresh the page or contact support.");
                   return;
                 }
-                // Update company status to WAITING_FOR_VERIFICATION
-                const { error } = await supabase
-                  .from("companies")
-                  .update({
-                    integration_status: "waiting_for_verification",
-                  })
-                  .eq("id", companyId);
                 
-                if (error) {
-                  toast.error("Failed to start verification");
-                  console.error(error);
-                } else {
-                  toast.success("Verification started. Send a test event from your platform to complete.");
-                  setStep("complete");
+                setLoading(true);
+                
+                // Send a test webhook event
+                try {
+                  const webhookUrl = getWebhookUrl(companyId);
+                  const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      type: 'customer.subscription.deleted',
+                      data: {
+                        customer_name: 'Test Customer',
+                        customer_email: 'test@example.com',
+                        url: 'webhook-test',
+                      },
+                    }),
+                  });
+                  
+                  const data = await response.json();
+                  
+                  if (data.success) {
+                    toast.success("Webhook verified successfully!");
+                    setStep("complete");
+                  } else {
+                    toast.error("Webhook verification failed. Please try again.");
+                  }
+                } catch (error) {
+                  console.error("Webhook verification error:", error);
+                  toast.error("Webhook verification failed. Please try again.");
+                } finally {
+                  setLoading(false);
                 }
               }}
+              disabled={loading}
             >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Test Webhook
+            </Button>
+          </div>
+        )}
+        
+        {recommendation.type === "both" && (
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Label className="font-semibold">Step 1: Configure Webhook for Cancellations</Label>
+              <div className="relative">
+                <div className="bg-muted p-4 rounded-lg text-sm font-mono break-all">
+                  {getWebhookUrl(profile?.company_id || fallbackCompanyId || 'YOUR_COMPANY_ID')}
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="absolute top-2 right-2"
+                  onClick={() => copyToClipboard(getWebhookUrl(profile?.company_id || fallbackCompanyId || 'YOUR_COMPANY_ID'))}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Add this webhook URL to your {answers.billingPlatform} account for subscription cancellation events.</p>
+            </div>
+            
+            <div className="space-y-3">
+              <Label className="font-semibold">Step 2: Add JavaScript Widget for Sign Out / Delete Account</Label>
+              <div className="relative">
+                <div className="bg-muted p-4 rounded-lg text-sm font-mono break-all max-h-48 overflow-y-auto">
+                  {`<!-- leaveesy Global Tracking Script Tag -->
+<script src="${getWidgetScriptUrl(profile?.company_id || fallbackCompanyId || 'YOUR_COMPANY_ID')}"></script>
+
+<script>
+  // Wait for leaveesy to be ready before attaching event listeners
+  window.addEventListener('leaveesyReady', function() {
+    console.log('leaveesy is ready');
+    
+    // Auto-detect buttons by text
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${answers.buttonName.toLowerCase()}' || buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account') {
+        btn.addEventListener('click', function(e) {
+          if (window.leaveesy) {
+            console.log('Tracking event');
+            window.leaveesy.track("SignOut", { action: "process_started" });
+          }
+        });
+      }
+    });
+  });
+  
+  // Fallback: if leaveesy is already loaded, attach listeners immediately
+  if (window.leaveesy) {
+    console.log('leaveesy already loaded');
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${answers.buttonName.toLowerCase()}' || buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account') {
+        btn.addEventListener('click', function(e) {
+          console.log('Tracking event');
+          window.leaveesy.track("SignOut", { action: "process_started" });
+        });
+      }
+    });
+  }
+</script>`}
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="absolute top-2 right-2"
+                  onClick={() => copyToClipboard(`<!-- leaveesy Global Tracking Script Tag -->
+<script src="${getWidgetScriptUrl(profile?.company_id || fallbackCompanyId || 'YOUR_COMPANY_ID')}"></script>
+
+<script>
+  window.addEventListener('leaveesyReady', function() {
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${answers.buttonName.toLowerCase()}' || buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account') {
+        btn.addEventListener('click', function(e) {
+          if (window.leaveesy) {
+            window.leaveesy.track("SignOut", { action: "process_started" });
+          }
+        });
+      }
+    });
+  });
+  if (window.leaveesy) {
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${answers.buttonName.toLowerCase()}' || buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account') {
+        btn.addEventListener('click', function(e) {
+          window.leaveesy.track("SignOut", { action: "process_started" });
+        });
+      }
+    });
+  }
+</script>`)}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Add this snippet to track sign out and delete account button clicks.</p>
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const companyId = profile?.company_id || fallbackCompanyId;
+                if (!companyId) {
+                  toast.error("No company ID found. Please refresh the page or contact support.");
+                  return;
+                }
+                
+                setLoading(true);
+                
+                // Test both integrations
+                try {
+                  // Test webhook
+                  const webhookUrl = getWebhookUrl(companyId);
+                  const webhookResponse = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      type: 'customer.subscription.deleted',
+                      data: { customer_name: 'Test Customer', customer_email: 'test@example.com', url: 'webhook-test' },
+                    }),
+                  });
+                  
+                  const webhookData = await webhookResponse.json();
+                  
+                  // Test widget
+                  const widgetResponse = await fetch('/api/widget/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      company_id: companyId,
+                      event_name: "SignOut",
+                      event_data: { test: true },
+                      timestamp: new Date().toISOString(),
+                      url: window.location.href,
+                      user_agent: navigator.userAgent,
+                    }),
+                  });
+                  
+                  const widgetData = await widgetResponse.json();
+                  
+                  if (webhookData.success && widgetData.success) {
+                    toast.success("Both integrations verified successfully!");
+                    setStep("complete");
+                  } else {
+                    toast.error("Verification failed. Please try again.");
+                  }
+                } catch (error) {
+                  console.error("Verification error:", error);
+                  toast.error("Verification failed. Please try again.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Test Both Integrations
             </Button>
           </div>
         )}
