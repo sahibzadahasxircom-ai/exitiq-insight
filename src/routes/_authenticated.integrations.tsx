@@ -19,11 +19,11 @@ import { IntegrationModals } from "@/components/integrations/IntegrationModals";
 
 interface IntegrationData {
   id: string;
-  integration_type: "stripe" | "api" | "javascript" | "webhook";
-  status: "pending" | "connecting" | "connected" | "disconnected" | "failed" | "needs_attention";
+  integration_type: "javascript" | "webhook";
+  status: "not_connected" | "waiting_for_verification" | "connected" | "listening_for_events";
   config: any;
   connected_at: string | null;
-  last_sync_at: string | null;
+  last_event_at: string | null;
   last_error: string | null;
   created_at: string;
   updated_at: string;
@@ -45,6 +45,7 @@ function Integrations() {
   const [integrations, setIntegrations] = useState<IntegrationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const [company, setCompany] = useState<any>(null);
   const [modalIntegration, setModalIntegration] = useState<string | null>(null);
   const [modalIntegrationId, setModalIntegrationId] = useState<string | null>(null);
 
@@ -96,17 +97,19 @@ function Integrations() {
         return;
       }
 
+      setCompany(company);
+
       // Build integrations list from company data
       const integrationList: IntegrationData[] = [];
       
       if (company.integration_type) {
         integrationList.push({
           id: company.id,
-          integration_type: company.integration_type,
-          status: company.setup_completed ? "connected" : "pending",
+          integration_type: company.integration_type as "javascript" | "webhook",
+          status: (company.integration_status as any) || "not_connected",
           config: company.integration_config,
           connected_at: company.updated_at,
-          last_sync_at: company.updated_at,
+          last_event_at: company.last_event_at,
           last_error: null,
           created_at: company.created_at,
           updated_at: company.updated_at,
@@ -124,8 +127,6 @@ function Integrations() {
 
   const getIntegrationIcon = (type: string) => {
     switch (type) {
-      case "stripe": return <CreditCard className="h-4 w-4" />;
-      case "api": return <Code className="h-4 w-4" />;
       case "javascript": return <Zap className="h-4 w-4" />;
       case "webhook": return <Webhook className="h-4 w-4" />;
       default: return <Code className="h-4 w-4" />;
@@ -134,8 +135,6 @@ function Integrations() {
 
   const getIntegrationName = (type: string) => {
     switch (type) {
-      case "stripe": return "Stripe";
-      case "api": return "REST API";
       case "javascript": return "JavaScript Widget";
       case "webhook": return "Webhooks";
       default: return type;
@@ -144,10 +143,8 @@ function Integrations() {
 
   const getIntegrationDescription = (type: string) => {
     switch (type) {
-      case "stripe": return "Connect payment data";
-      case "api": return "Build custom integrations";
-      case "javascript": return "Add to your website";
-      case "webhook": return "Real-time notifications";
+      case "javascript": return "Track button clicks on your website";
+      case "webhook": return "Receive events from billing platforms";
       default: return "";
     }
   };
@@ -161,37 +158,24 @@ function Integrations() {
             Connected
           </span>
         );
-      case "connecting":
+      case "listening_for_events":
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+            <Check className="h-3 w-3 mr-1" />
+            Listening for events
+          </span>
+        );
+      case "waiting_for_verification":
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
             <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-            Connecting
+            Waiting for connection...
           </span>
         );
-      case "pending":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
-            Pending
-          </span>
-        );
-      case "disconnected":
+      case "not_connected":
         return (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
             Not Connected
-          </span>
-        );
-      case "failed":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            Error
-          </span>
-        );
-      case "needs_attention":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            Needs Setup
           </span>
         );
       default:
@@ -250,14 +234,12 @@ function Integrations() {
   }
 
   const availableIntegrations = [
-    { id: "stripe", name: "Stripe", icon: CreditCard, description: "Connect payment data" },
-    { id: "api", name: "REST API", icon: Code, description: "Build custom integrations" },
-    { id: "javascript", name: "JavaScript Widget", icon: Zap, description: "Add to your website" },
-    { id: "webhook", name: "Webhooks", icon: Webhook, description: "Real-time notifications" },
+    { id: "javascript", name: "JavaScript Widget", icon: Zap, description: "Track button clicks on your website" },
+    { id: "webhook", name: "Webhooks", icon: Webhook, description: "Receive events from billing platforms" },
   ];
 
-  const connectedIntegrations = integrations.filter(i => i.status === "connected");
-  const disconnectedIntegrations = integrations.filter(i => i.status !== "connected");
+  const connectedIntegrations = integrations.filter(i => i.status === "connected" || i.status === "listening_for_events");
+  const disconnectedIntegrations = integrations.filter(i => i.status !== "connected" && i.status !== "listening_for_events");
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-6 md:px-6 md:py-8">
@@ -266,6 +248,11 @@ function Integrations() {
         <p className="text-sm text-muted-foreground mt-1">
           Manage your connected platforms and services
         </p>
+        {company?.company_name && (
+          <p className="text-xs text-muted-foreground mt-2">
+            These integrations are configured for <span className="font-medium">{company.company_name}</span> only
+          </p>
+        )}
       </div>
 
       {connectedIntegrations.length > 0 && (
@@ -283,6 +270,16 @@ function Integrations() {
                       <div>
                         <h3 className="font-medium text-sm">{getIntegrationName(integration.integration_type)}</h3>
                         <p className="text-xs text-muted-foreground">{getIntegrationDescription(integration.integration_type)}</p>
+                        {integration.config?.eventTypes && integration.config.eventTypes.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Tracking: {integration.config.eventTypes.map((t: string) => t.replace('_', ' ')).join(', ')}
+                          </p>
+                        )}
+                        {integration.last_event_at && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Last event: {new Date(integration.last_event_at).toLocaleString()}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

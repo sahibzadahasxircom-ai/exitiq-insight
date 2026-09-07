@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/setup-wizard")({
   component: SetupWizard,
 });
 
-type Step = "welcome" | "product-type" | "exit-method" | "billing-platform" | "recommendation" | "connection" | "complete";
+type Step = "welcome" | "product-type" | "exit-method" | "billing-platform" | "button-name" | "recommendation" | "connection" | "complete";
 
 function SetupWizard() {
   const { company, profile } = useAuth();
@@ -31,10 +31,12 @@ function SetupWizard() {
   const [copied, setCopied] = useState(false);
   const [widgetDomain, setWidgetDomain] = useState("");
   const [fallbackCompanyId, setFallbackCompanyId] = useState<string | null>(null);
+  const [customButtonName, setCustomButtonName] = useState("");
   const [answers, setAnswers] = useState({
     productType: "",
     exitMethod: "",
     billingPlatform: "",
+    buttonName: "",
   });
 
   // Fallback: If profile.company_id is null, create or link a company
@@ -169,78 +171,97 @@ function SetupWizard() {
 
   const productTypes = [
     { id: "saas", label: "SaaS Platform" },
-    { id: "mobile", label: "Mobile App" },
     { id: "website", label: "Website" },
     { id: "ecommerce", label: "E-commerce" },
-    { id: "other", label: "Other" },
   ];
 
   const exitMethods = [
     { id: "cancel-subscription", label: "Cancel Subscription" },
     { id: "delete-account", label: "Delete Account" },
-    { id: "end-trial", label: "End Free Trial" },
-    { id: "other", label: "Other" },
+    { id: "sign-out", label: "Sign Out / Log Out" },
   ];
 
   const billingPlatforms = [
     { id: "stripe", label: "Stripe" },
     { id: "paddle", label: "Paddle" },
-    { id: "lemonsqueezy", label: "LemonSqueezy" },
     { id: "chargebee", label: "Chargebee" },
+    { id: "flutterwave", label: "Flutterwave" },
     { id: "other", label: "Other" },
-    { id: "none", label: "None" },
+    { id: "none", label: "None (Custom Backend)" },
   ];
 
   const getRecommendation = () => {
-    if (answers.exitMethod === "cancel-subscription" && answers.billingPlatform === "stripe") {
+    // Cancel subscription with billing platform (Stripe, Paddle, Chargebee, etc.)
+    if (answers.exitMethod === "cancel-subscription" && answers.billingPlatform !== "none") {
       return {
-        type: "stripe",
-        title: "Connect Stripe",
-        description: "Since you use Stripe subscriptions, the fastest and most reliable option is connecting your Stripe account.",
-        buttonText: "Connect Stripe",
+        type: "webhook",
+        title: "Configure Webhook",
+        description: `Since you use ${answers.billingPlatform} for subscriptions, we recommend using Webhooks to detect cancellations.`,
+        buttonText: "Configure Webhook",
       };
     }
     
+    // Cancel subscription with custom backend
     if (answers.exitMethod === "cancel-subscription" && answers.billingPlatform === "none") {
       return {
         type: "widget",
         title: "Connect JavaScript Widget",
-        description: "We recommend the JavaScript Widget to automatically detect customer actions.",
+        description: "We recommend the JavaScript Widget to track cancel subscription button clicks.",
         buttonText: "Connect JavaScript Widget",
-        secondaryText: "Use API Instead",
       };
     }
     
-    if (answers.exitMethod === "cancel-subscription" && answers.billingPlatform !== "") {
-      return {
-        type: "webhook",
-        title: "Configure Webhook",
-        description: "We recommend using Webhooks to notify leaveesy whenever a customer leaves.",
-        buttonText: "Configure Webhook",
-        secondaryText: "Use API Instead",
-      };
-    }
-    
+    // Sign out or delete account - always use JavaScript Widget
     return {
       type: "widget",
       title: "Connect JavaScript Widget",
-      description: "We recommend the JavaScript Widget to automatically detect customer actions.",
+      description: "We recommend the JavaScript Widget to track button clicks on your website.",
       buttonText: "Connect JavaScript Widget",
-      secondaryText: "Use API Instead",
     };
   };
 
   const recommendation = getRecommendation();
 
   const handleConnect = async () => {
-    if (recommendation.type === "stripe") {
-      // Stripe OAuth - to be implemented with local backend
-      toast.info("Stripe OAuth integration coming soon. Please use manual setup for now.");
+    // Save integration configuration to company
+    const companyId = fallbackCompanyId || profile?.company_id;
+    if (!companyId) {
+      toast.error("Company ID not found");
       return;
     }
 
-    // For other integrations, show the connection steps without fake auto-completion
+    const integrationConfig = {
+      productType: answers.productType,
+      exitMethod: answers.exitMethod,
+      billingPlatform: answers.billingPlatform,
+      buttonName: answers.buttonName,
+      eventTypes: getEventTypes(),
+    };
+
+    const { error } = await supabase
+      .from("companies")
+      .update({
+        integration_type: recommendation.type === "webhook" ? "webhook" : "javascript",
+        integration_config: integrationConfig,
+        setup_completed: false,
+      })
+      .eq("id", companyId);
+
+    if (error) {
+      toast.error("Failed to save integration configuration");
+      console.error(error);
+      return;
+    }
+
     setStep("connection");
+  };
+
+  const getEventTypes = () => {
+    const types = [];
+    if (answers.exitMethod === "cancel-subscription") types.push("cancel_sub");
+    if (answers.exitMethod === "delete-account") types.push("delete_account");
+    if (answers.exitMethod === "sign-out") types.push("sign_out");
+    return types;
   };
 
   const copyToClipboard = (text: string) => {
@@ -369,8 +390,84 @@ function SetupWizard() {
           Back
         </Button>
         <Button 
-          onClick={() => setStep("recommendation")}
+          onClick={() => {
+            if (answers.billingPlatform === "none" || answers.exitMethod !== "cancel-subscription") {
+              setStep("button-name");
+            } else {
+              setStep("recommendation");
+            }
+          }}
           disabled={!answers.billingPlatform}
+        >
+          Continue <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  const buttonNameOptions = [
+    { id: "sign-out", label: "Sign Out" },
+    { id: "log-out", label: "Log Out" },
+    { id: "cancel-account", label: "Cancel Account" },
+    { id: "remove-account", label: "Remove Account" },
+    { id: "cancel-plan", label: "Cancel Plan" },
+    { id: "cancel-subscription", label: "Cancel Subscription" },
+    { id: "delete-account", label: "Delete Account" },
+    { id: "other", label: "Other (Custom)" },
+  ];
+
+  const renderButtonName = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold mb-2">What's the text on your button?</h2>
+        <p className="text-sm text-muted-foreground">Select the button text that users click to {answers.exitMethod === "cancel-subscription" ? "cancel" : answers.exitMethod === "delete-account" ? "delete" : "sign out"}</p>
+      </div>
+      <div className="grid grid-cols-1 gap-3">
+        {buttonNameOptions.map((option) => (
+          <button
+            key={option.id}
+            onClick={() => {
+              if (option.id === "other") {
+                setAnswers({ ...answers, buttonName: "" });
+              } else {
+                setAnswers({ ...answers, buttonName: option.label });
+              }
+            }}
+            className={`p-4 rounded-lg border text-left transition-all ${
+              answers.buttonName === option.label || (option.id === "other" && answers.buttonName === "")
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 hover:bg-muted/50"
+            }`}
+          >
+            <div className="font-medium">{option.label}</div>
+          </button>
+        ))}
+      </div>
+      {answers.buttonName === "" && (
+        <div>
+          <Label htmlFor="custom-button-name">Custom button text</Label>
+          <input
+            id="custom-button-name"
+            type="text"
+            value={customButtonName}
+            onChange={(e) => setCustomButtonName(e.target.value)}
+            placeholder="e.g., Close Account"
+            className="w-full mt-2 px-3 py-2 border rounded-md"
+          />
+        </div>
+      )}
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setStep("billing-platform")}>
+          Back
+        </Button>
+        <Button 
+          onClick={() => {
+            if (answers.buttonName === "" && customButtonName) {
+              setAnswers({ ...answers, buttonName: customButtonName });
+            }
+            setStep("recommendation");
+          }}
+          disabled={!answers.buttonName && !customButtonName}
         >
           Continue <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
@@ -497,27 +594,34 @@ function SetupWizard() {
   window.addEventListener('leaveesyReady', function() {
     console.log('leaveesy is ready');
     
-    const signoutBtn = document.querySelector('[data-leaveesy="signout"]') || document.getElementById('signout-btn');
-    if (signoutBtn) {
-      signoutBtn.addEventListener('click', function(e) {
-        if (window.leaveesy) {
-          console.log('Tracking SignOut event');
-          window.leaveesy.track("SignOut", { action: "process_started" });
-        }
-      });
-    }
+    // Auto-detect buttons by text
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${answers.buttonName.toLowerCase()}') {
+        btn.addEventListener('click', function(e) {
+          if (window.leaveesy) {
+            console.log('Tracking ${answers.exitMethod === "cancel-subscription" ? "CancelSubscription" : answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut"} event');
+            window.leaveesy.track("${answers.exitMethod === "cancel-subscription" ? "CancelSubscription" : answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut"}", { action: "process_started" });
+          }
+        });
+      }
+    });
   });
   
   // Fallback: if leaveesy is already loaded, attach listeners immediately
   if (window.leaveesy) {
     console.log('leaveesy already loaded');
-    const signoutBtn = document.querySelector('[data-leaveesy="signout"]') || document.getElementById('signout-btn');
-    if (signoutBtn) {
-      signoutBtn.addEventListener('click', function(e) {
-        console.log('Tracking SignOut event');
-        window.leaveesy.track("SignOut", { action: "process_started" });
-      });
-    }
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${answers.buttonName.toLowerCase()}') {
+        btn.addEventListener('click', function(e) {
+          console.log('Tracking ${answers.exitMethod === "cancel-subscription" ? "CancelSubscription" : answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut"} event');
+          window.leaveesy.track("${answers.exitMethod === "cancel-subscription" ? "CancelSubscription" : answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut"}", { action: "process_started" });
+        });
+      }
+    });
   }
 </script>`}
               </div>
@@ -533,27 +637,34 @@ function SetupWizard() {
   window.addEventListener('leaveesyReady', function() {
     console.log('leaveesy is ready');
     
-    const signoutBtn = document.querySelector('[data-leaveesy="signout"]') || document.getElementById('signout-btn');
-    if (signoutBtn) {
-      signoutBtn.addEventListener('click', function(e) {
-        if (window.leaveesy) {
-          console.log('Tracking SignOut event');
-          window.leaveesy.track("SignOut", { action: "process_started" });
-        }
-      });
-    }
+    // Auto-detect buttons by text
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${answers.buttonName.toLowerCase()}') {
+        btn.addEventListener('click', function(e) {
+          if (window.leaveesy) {
+            console.log('Tracking ${answers.exitMethod === "cancel-subscription" ? "CancelSubscription" : answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut"} event');
+            window.leaveesy.track("${answers.exitMethod === "cancel-subscription" ? "CancelSubscription" : answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut"}", { action: "process_started" });
+          }
+        });
+      }
+    });
   });
   
   // Fallback: if leaveesy is already loaded, attach listeners immediately
   if (window.leaveesy) {
     console.log('leaveesy already loaded');
-    const signoutBtn = document.querySelector('[data-leaveesy="signout"]') || document.getElementById('signout-btn');
-    if (signoutBtn) {
-      signoutBtn.addEventListener('click', function(e) {
-        console.log('Tracking SignOut event');
-        window.leaveesy.track("SignOut", { action: "process_started" });
-      });
-    }
+    const buttons = document.querySelectorAll('button, a');
+    buttons.forEach(function(btn) {
+      const buttonText = btn.textContent?.trim().toLowerCase();
+      if (buttonText === '${answers.buttonName.toLowerCase()}') {
+        btn.addEventListener('click', function(e) {
+          console.log('Tracking ${answers.exitMethod === "cancel-subscription" ? "CancelSubscription" : answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut"} event');
+          window.leaveesy.track("${answers.exitMethod === "cancel-subscription" ? "CancelSubscription" : answers.exitMethod === "delete-account" ? "DeleteAccount" : "SignOut"}", { action: "process_started" });
+        });
+      }
+    });
   }
 </script>`)}
               >
@@ -573,7 +684,7 @@ function SetupWizard() {
                 className="w-full p-3 border rounded-lg text-sm"
               />
             </div>
-            <p className="text-xs text-muted-foreground">Add the snippet to your website's &lt;head&gt; section, then enter your domain and click verify. If your website is not accessible from this server, use manual verification below.</p>
+            <p className="text-xs text-muted-foreground">Add the snippet to your website's &lt;head&gt; section, then click the button below to test the integration.</p>
             <Button
               variant="outline"
               size="sm"
@@ -583,11 +694,24 @@ function SetupWizard() {
                   toast.error("No company ID found. Please refresh the page or contact support.");
                   return;
                 }
-                // Widget verification - to be implemented with local backend
-                toast.info("Widget verification coming soon. Please skip for now.");
+                // Update company status to WAITING_FOR_VERIFICATION
+                const { error } = await supabase
+                  .from("companies")
+                  .update({
+                    integration_status: "waiting_for_verification",
+                  })
+                  .eq("id", companyId);
+                
+                if (error) {
+                  toast.error("Failed to start verification");
+                  console.error(error);
+                } else {
+                  toast.success("Verification started. Click your button on your website to complete.");
+                  setStep("complete");
+                }
               }}
             >
-              Skip Domain Verification (Manual)
+              Test Integration
             </Button>
           </div>
         )}
@@ -611,6 +735,35 @@ function SetupWizard() {
             {!profile?.company_id && !fallbackCompanyId && (
               <p className="text-xs text-red-500">Warning: No company ID found. Please refresh the page or contact support.</p>
             )}
+            <p className="text-xs text-muted-foreground">Add this webhook URL to your {answers.billingPlatform} account's webhook settings. Select cancellation events.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const companyId = profile?.company_id || fallbackCompanyId;
+                if (!companyId) {
+                  toast.error("No company ID found. Please refresh the page or contact support.");
+                  return;
+                }
+                // Update company status to WAITING_FOR_VERIFICATION
+                const { error } = await supabase
+                  .from("companies")
+                  .update({
+                    integration_status: "waiting_for_verification",
+                  })
+                  .eq("id", companyId);
+                
+                if (error) {
+                  toast.error("Failed to start verification");
+                  console.error(error);
+                } else {
+                  toast.success("Verification started. Send a test event from your platform to complete.");
+                  setStep("complete");
+                }
+              }}
+            >
+              Test Webhook
+            </Button>
           </div>
         )}
         
