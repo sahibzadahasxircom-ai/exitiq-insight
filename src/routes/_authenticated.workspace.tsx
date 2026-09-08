@@ -210,40 +210,41 @@ function Workspace() {
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-6 md:px-6 md:py-8">
+    <div className="w-full max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Workspace</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold tracking-tight">Workspace</h1>
+        <p className="text-muted-foreground mt-2">
           Customize your workspace branding and customer experience.
         </p>
       </div>
 
-      <Tabs defaultValue="pre-form" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="pre-form">Pre-Form Customization</TabsTrigger>
+      <Tabs defaultValue="pre-form" className="space-y-8">
+        <TabsList className="bg-muted/50 p-1 rounded-lg">
+          <TabsTrigger value="pre-form" className="rounded-md">Pre-Form Customization</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pre-form" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Brand Identity</CardTitle>
+        <TabsContent value="pre-form" className="space-y-8">
+          <Card className="border-2">
+            <CardHeader className="bg-muted/30">
+              <CardTitle className="text-xl">Brand Identity</CardTitle>
               <CardDescription>
                 Customize your company logo, name, and brand color.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="company-name">Company Name</Label>
+            <CardContent className="space-y-8 pt-6">
+              <div className="space-y-3">
+                <Label htmlFor="company-name" className="text-base font-semibold">Company Name</Label>
                 <Input
                   id="company-name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="Your company name"
+                  className="h-11 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="logo-upload">Company Logo</Label>
+              <div className="space-y-3">
+                <Label htmlFor="logo-upload" className="text-base font-semibold">Company Logo</Label>
                 <div className="flex items-start gap-4">
                   <div className="flex-1">
                     <Input
@@ -279,68 +280,68 @@ function Workspace() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="brand-color">Brand Color</Label>
+              <div className="space-y-3">
+                <Label htmlFor="brand-color" className="text-base font-semibold">Brand Color</Label>
                 <div className="flex gap-3">
                   <Input
                     id="brand-color"
                     type="color"
                     value={brandColor}
                     onChange={(e) => setBrandColor(e.target.value)}
-                    className="w-20 h-10 p-1"
+                    className="w-20 h-11 p-1"
                   />
                   <Input
                     value={brandColor}
                     onChange={(e) => setBrandColor(e.target.value)}
                     placeholder="#2563eb"
-                    className="flex-1"
+                    className="flex-1 h-11"
                   />
                 </div>
               </div>
 
-              <div className="pt-4">
-                <Button onClick={handleSave} disabled={saving}>
+              <div className="pt-6">
+                <Button onClick={handleSave} disabled={saving} size="lg" className="w-full">
                   {saving ? "Saving..." : "Save Branding"}
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Preview</CardTitle>
+          <Card className="border-2">
+            <CardHeader className="bg-muted/30">
+              <CardTitle className="text-xl">Live Preview</CardTitle>
               <CardDescription>
                 See how your pre-form will look to customers in real-time.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="pt-6">
+              <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-semibold">Device Preview</Label>
-                  <div className="flex gap-1">
+                  <Label className="text-base font-semibold">Device Preview</Label>
+                  <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="icon"
-                      className={`h-8 w-8 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
+                      className={`h-10 w-10 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
                       onClick={() => setPreviewDevice("desktop")}
                     >
-                      <Monitor className="h-4 w-4" />
+                      <Monitor className="h-5 w-5" />
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
-                      className={`h-8 w-8 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
+                      className={`h-10 w-10 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
                       onClick={() => setPreviewDevice("tablet")}
                     >
-                      <Tablet className="h-4 w-4" />
+                      <Tablet className="h-5 w-5" />
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
-                      className={`h-8 w-8 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
+                      className={`h-10 w-10 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
                       onClick={() => setPreviewDevice("mobile")}
                     >
-                      <Smartphone className="h-4 w-4" />
+                      <Smartphone className="h-5 w-5" />
                     </Button>
                   </div>
                 </div>
@@ -455,30 +456,30 @@ function Workspace() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Form Style & Content</CardTitle>
+          <Card className="border-2">
+            <CardHeader className="bg-muted/30">
+              <CardTitle className="text-xl">Form Style & Content</CardTitle>
               <CardDescription>
                 Customize the form customers see before starting their conversation.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-8">
+            <CardContent className="space-y-8 pt-6">
               {/* Template Selection */}
               <div>
-                <Label className="text-sm font-semibold mb-3 block">Form Style</Label>
-                <div className="grid grid-cols-3 gap-3">
+                <Label className="text-base font-semibold mb-4 block">Form Style</Label>
+                <div className="grid grid-cols-3 gap-4">
                   {preFormTemplates.map((template) => (
                     <button
                       key={template.id}
                       onClick={() => setPreFormStyle(template.id)}
-                      className={`p-3 rounded-lg border text-left transition-all group ${
+                      className={`p-4 rounded-xl border-2 text-left transition-all group ${
                         preFormStyle === template.id
-                          ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                          ? "border-primary bg-primary/10 ring-2 ring-primary/30"
                           : "border-border hover:border-primary/50 hover:bg-muted/50"
                       }`}
                     >
-                      <div className="font-semibold text-sm mb-1">{template.name}</div>
-                      <div className="text-xs text-muted-foreground">{template.description}</div>
+                      <div className="font-semibold text-base mb-1">{template.name}</div>
+                      <div className="text-sm text-muted-foreground">{template.description}</div>
                     </button>
                   ))}
                 </div>
@@ -486,7 +487,7 @@ function Workspace() {
 
               {/* Background Effect */}
               <div>
-                <Label className="text-sm font-semibold mb-3 block">Form Background Effect</Label>
+                <Label className="text-base font-semibold mb-4 block">Form Background Effect</Label>
                 <Select value={backgroundStyle} onValueChange={(value) => {
                   console.log("Background style changed to:", value);
                   setBackgroundStyle(value);
@@ -508,38 +509,38 @@ function Workspace() {
               </div>
 
               {/* Button Colors - Side by Side */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <Label className="text-sm font-semibold mb-3 block">Button Color</Label>
+                  <Label className="text-base font-semibold mb-3 block">Button Color</Label>
                   <div className="flex gap-3">
                     <Input
                       type="color"
                       value={buttonColor}
                       onChange={(e) => setButtonColor(e.target.value)}
-                      className="w-20 h-10 p-1"
+                      className="w-20 h-11 p-1"
                     />
                     <Input
                       value={buttonColor}
                       onChange={(e) => setButtonColor(e.target.value)}
                       placeholder="#2563eb"
-                      className="flex-1"
+                      className="flex-1 h-11"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label className="text-sm font-semibold mb-3 block">Button Text Color</Label>
+                  <Label className="text-base font-semibold mb-3 block">Button Text Color</Label>
                   <div className="flex gap-3">
                     <Input
                       type="color"
                       value={buttonTextColor}
                       onChange={(e) => setButtonTextColor(e.target.value)}
-                      className="w-20 h-10 p-1"
+                      className="w-20 h-11 p-1"
                     />
                     <Input
                       value={buttonTextColor}
                       onChange={(e) => setButtonTextColor(e.target.value)}
                       placeholder="#ffffff"
-                      className="flex-1"
+                      className="flex-1 h-11"
                     />
                   </div>
                 </div>
@@ -547,44 +548,44 @@ function Workspace() {
 
               {/* Text Color */}
               <div>
-                <Label className="text-sm font-semibold mb-3 block">Pre-Form Text Color</Label>
+                <Label className="text-base font-semibold mb-3 block">Pre-Form Text Color</Label>
                 <div className="flex gap-3">
                   <Input
                     type="color"
                     value={textColor}
                     onChange={(e) => setTextColor(e.target.value)}
-                    className="w-20 h-10 p-1"
+                    className="w-20 h-11 p-1"
                   />
                   <Input
                     value={textColor}
                     onChange={(e) => setTextColor(e.target.value)}
                     placeholder="#000000"
-                    className="flex-1"
+                    className="flex-1 h-11"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   Color of the title and description text
                 </p>
               </div>
 
               {/* Solid Background Color */}
               <div>
-                <Label className="text-sm font-semibold mb-3 block">Solid Background Color</Label>
+                <Label className="text-base font-semibold mb-3 block">Solid Background Color</Label>
                 <div className="flex gap-3">
                   <Input
                     type="color"
                     value={solidBackgroundColor}
                     onChange={(e) => setSolidBackgroundColor(e.target.value)}
-                    className="w-20 h-10 p-1"
+                    className="w-20 h-11 p-1"
                   />
                   <Input
                     value={solidBackgroundColor}
                     onChange={(e) => setSolidBackgroundColor(e.target.value)}
                     placeholder="#000000"
-                    className="flex-1"
+                    className="flex-1 h-11"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   Solid background color for the pre-form card (gradients will overlay on top)
                 </p>
               </div>
@@ -593,7 +594,7 @@ function Workspace() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div>
-                    <Label htmlFor="pre-form-title" className="text-sm font-semibold mb-2 block">
+                    <Label htmlFor="pre-form-title" className="text-base font-semibold mb-3 block">
                       Form Title
                     </Label>
                     <Input
@@ -601,14 +602,14 @@ function Workspace() {
                       value={preFormTitle}
                       onChange={(e) => setPreFormTitle(e.target.value)}
                       placeholder="We're sorry to see you go"
-                      className="text-base"
+                      className="text-base h-11"
                     />
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-sm text-muted-foreground mt-2">
                       The main heading displayed on the pre-form page.
                     </p>
                   </div>
                   <div>
-                    <Label htmlFor="pre-form-description" className="text-sm font-semibold mb-2 block">
+                    <Label htmlFor="pre-form-description" className="text-base font-semibold mb-3 block">
                       Form Description
                     </Label>
                     <Textarea
@@ -619,24 +620,24 @@ function Workspace() {
                       rows={4}
                       className="text-base resize-none"
                     />
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-sm text-muted-foreground mt-2">
                       The subtitle text explaining the purpose of the form.
                     </p>
                   </div>
-                  
+
                   {/* Copy Examples */}
                   <div className="pt-4 border-t">
-                    <Label className="text-sm font-semibold mb-3 block">Copy Examples</Label>
+                    <Label className="text-base font-semibold mb-4 block">Copy Examples</Label>
                     <div className="space-y-3">
                       <button
                         onClick={() => {
                           setPreFormTitle("One last thing before you go.");
                           setPreFormDescription("We'd genuinely like to understand what made you leave. No long survey — just a quick conversation.");
                         }}
-                        className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                        className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
                       >
-                        <div className="font-medium text-sm mb-1">More Emotional</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="font-semibold text-sm mb-1">More Emotional</div>
+                        <div className="text-sm text-muted-foreground">
                           "One last thing before you go. We'd genuinely like to understand what made you leave. No long survey — just a quick conversation."
                         </div>
                       </button>
@@ -645,10 +646,10 @@ function Workspace() {
                           setPreFormTitle("Before you leave, can we ask why?");
                           setPreFormDescription("This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters.");
                         }}
-                        className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                        className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
                       >
-                        <div className="font-medium text-sm mb-1">Curiosity-Driven</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="font-semibold text-sm mb-1">Curiosity-Driven</div>
+                        <div className="text-sm text-muted-foreground">
                           "Before you leave, can we ask why? This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters."
                         </div>
                       </button>
@@ -657,10 +658,10 @@ function Workspace() {
                           setPreFormTitle("Before you go — one quick conversation?");
                           setPreFormDescription("We'd love to understand what happened. It takes less than 60 seconds.");
                         }}
-                        className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                        className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
                       >
-                        <div className="font-medium text-sm mb-1">Tight & Direct</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="font-semibold text-sm mb-1">Tight & Direct</div>
+                        <div className="text-sm text-muted-foreground">
                           "Before you go — one quick conversation? We'd love to understand what happened. It takes less than 60 seconds."
                         </div>
                       </button>
@@ -674,9 +675,9 @@ function Workspace() {
                   onClick={handleSave}
                   disabled={saving}
                   size="lg"
-                  className="gap-2"
+                  className="gap-2 px-8"
                 >
-                  <Save className="h-4 w-4" />
+                  <Save className="h-5 w-5" />
                   {saving ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
