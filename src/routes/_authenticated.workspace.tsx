@@ -308,6 +308,155 @@ function Workspace() {
 
           <Card>
             <CardHeader>
+              <CardTitle>Live Preview</CardTitle>
+              <CardDescription>
+                See how your pre-form will look to customers in real-time.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-semibold">Device Preview</Label>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={`h-8 w-8 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
+                      onClick={() => setPreviewDevice("desktop")}
+                    >
+                      <Monitor className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={`h-8 w-8 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
+                      onClick={() => setPreviewDevice("tablet")}
+                    >
+                      <Tablet className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={`h-8 w-8 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
+                      onClick={() => setPreviewDevice("mobile")}
+                    >
+                      <Smartphone className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div
+                  className={`mx-auto border rounded-xl overflow-hidden relative ${
+                    previewDevice === "desktop"
+                      ? "max-w-lg"
+                      : previewDevice === "tablet"
+                      ? "max-w-sm"
+                      : "max-w-[280px]"
+                  } ${
+                    preFormStyle === "casual" ? "rounded-2xl border-2" :
+                    preFormStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
+                  }`}
+                  style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
+                >
+                  {/* Background effect for the card - overlays on solid background if set */}
+                  {backgroundStyle === "mesh" && (
+                    <div
+                      className="absolute inset-0 opacity-40 pointer-events-none"
+                      style={{
+                        background: `
+                          radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
+                          radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
+                          radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
+                          radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
+                          radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
+                          radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
+                        `
+                      }}
+                    />
+                  )}
+                  {backgroundStyle === "aurora" && (
+                    <div
+                      className="absolute inset-0 opacity-30 pointer-events-none"
+                      style={{
+                        background: `
+                          linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
+                          linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
+                          linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
+                        `
+                      }}
+                    />
+                  )}
+                  {backgroundStyle === "dots" && (
+                    <div
+                      className="absolute inset-0 opacity-25 pointer-events-none"
+                      style={{
+                        backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
+                        backgroundSize: '30px 30px'
+                      }}
+                    />
+                  )}
+                  {backgroundStyle === "layers" && (
+                    <>
+                      <div
+                        className="absolute inset-0 opacity-25 pointer-events-none"
+                        style={{
+                          background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+                        }}
+                      />
+                      <div
+                        className="absolute inset-0 opacity-15 pointer-events-none"
+                        style={{
+                          background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
+                        }}
+                      />
+                    </>
+                  )}
+                  {backgroundStyle === "gradient" && (
+                    <div
+                      className="absolute inset-0 opacity-30 pointer-events-none"
+                      style={{
+                        background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+                      }}
+                    />
+                  )}
+
+                  <div className={`p-6 space-y-4 relative z-10 ${
+                    preFormStyle === "minimal" ? "text-center" : ""
+                  }`} style={{ color: textColor }}>
+                    <div className={`space-y-1 ${
+                      preFormStyle === "minimal" ? "text-center" : ""
+                    }`}>
+                      <h3 className={`${
+                        preFormStyle === "casual" ? "text-2xl font-semibold" :
+                        preFormStyle === "minimal" ? "text-xl font-medium" : "text-xl font-bold"
+                      } tracking-tight`} style={{ color: textColor }}>
+                        {preFormTitle}
+                      </h3>
+                      <p className={`${
+                        preFormStyle === "casual" ? "text-base" :
+                        preFormStyle === "minimal" ? "text-sm" : "text-sm"
+                      }`} style={{ color: textColor, opacity: 0.8 }}>
+                        {preFormDescription}
+                      </p>
+                    </div>
+                    <div className="pt-2">
+                      <button
+                        className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
+                          preFormStyle === "casual" ? "rounded-xl" :
+                          preFormStyle === "minimal" ? "rounded-md" : "rounded-lg"
+                        }`}
+                        style={{ backgroundColor: buttonColor, color: buttonTextColor }}
+                      >
+                        Start Conversation
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Form Style & Content</CardTitle>
               <CardDescription>
                 Customize the form customers see before starting their conversation.
@@ -518,171 +667,11 @@ function Workspace() {
                     </div>
                   </div>
                 </div>
-
-                {/* Live Preview */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-semibold">Live Preview</Label>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-8 w-8 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
-                        onClick={() => setPreviewDevice("desktop")}
-                      >
-                        <Monitor className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-8 w-8 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
-                        onClick={() => setPreviewDevice("tablet")}
-                      >
-                        <Tablet className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-8 w-8 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
-                        onClick={() => setPreviewDevice("mobile")}
-                      >
-                        <Smartphone className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div
-                    className={`mx-auto border rounded-xl overflow-hidden relative ${
-                      previewDevice === "desktop"
-                        ? "max-w-lg"
-                        : previewDevice === "tablet"
-                        ? "max-w-sm"
-                        : "max-w-[280px]"
-                    } ${
-                      preFormStyle === "casual" ? "rounded-2xl border-2" : 
-                      preFormStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
-                    }`}
-                    style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
-                  >
-                    {/* Background effect for the card - overlays on solid background if set */}
-                    {backgroundStyle === "mesh" && (
-                      <div 
-                        className="absolute inset-0 opacity-40 pointer-events-none"
-                        style={{
-                          background: `
-                            radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
-                            radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
-                          `
-                        }}
-                      />
-                    )}
-                    {backgroundStyle === "aurora" && (
-                      <div 
-                        className="absolute inset-0 opacity-30 pointer-events-none"
-                        style={{
-                          background: `
-                            linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
-                            linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
-                            linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
-                          `
-                        }}
-                      />
-                    )}
-                    {backgroundStyle === "dots" && (
-                      <div 
-                        className="absolute inset-0 opacity-25 pointer-events-none"
-                        style={{
-                          backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
-                          backgroundSize: '30px 30px'
-                        }}
-                      />
-                    )}
-                    {backgroundStyle === "layers" && (
-                      <>
-                        <div 
-                          className="absolute inset-0 opacity-25 pointer-events-none"
-                          style={{
-                            background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
-                          }}
-                        />
-                        <div 
-                          className="absolute inset-0 opacity-15 pointer-events-none"
-                          style={{
-                            background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
-                          }}
-                        />
-                      </>
-                    )}
-                    {backgroundStyle === "gradient" && (
-                      <div 
-                        className="absolute inset-0 opacity-30 pointer-events-none"
-                        style={{
-                          background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
-                        }}
-                      />
-                    )}
-                    
-                    <div className={`p-6 space-y-4 relative z-10 ${
-                      preFormStyle === "minimal" ? "text-center" : ""
-                    }`} style={{ color: textColor }}>
-                      <div className={`space-y-1 ${
-                        preFormStyle === "minimal" ? "text-center" : ""
-                      }`}>
-                        <h3 className={`${
-                          preFormStyle === "casual" ? "text-2xl font-semibold" :
-                          preFormStyle === "minimal" ? "text-xl font-medium" : "text-xl font-bold"
-                        } tracking-tight`} style={{ color: textColor }}>
-                          {preFormTitle}
-                        </h3>
-                        <p className={`${
-                          preFormStyle === "casual" ? "text-base" :
-                          preFormStyle === "minimal" ? "text-sm" : "text-sm"
-                        }`} style={{ color: textColor, opacity: 0.8 }}>
-                          {preFormDescription}
-                        </p>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="space-y-2">
-                          <Label className="text-xs">Your name (optional)</Label>
-                          <Input 
-                            placeholder="John Doe"
-                            disabled
-                            className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs">Your email (optional)</Label>
-                          <Input 
-                            type="email"
-                            placeholder="john@example.com"
-                            disabled
-                            className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
-                          />
-                        </div>
-                        <Button 
-                          className={`w-full gap-2 ${
-                            preFormStyle === "casual" ? "rounded-full text-lg py-6" :
-                            preFormStyle === "minimal" ? "border-2 bg-transparent hover:bg-muted" : ""
-                          }`}
-                          size="lg"
-                          disabled
-                          style={{ backgroundColor: buttonColor, color: buttonTextColor }}
-                        >
-                          Start Conversation
-                          <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <div className="flex justify-end pt-6 border-t">
-                <Button 
-                  onClick={handleSavePreForm} 
+                <Button
+                  onClick={handleSave}
                   disabled={saving}
                   size="lg"
                   className="gap-2"
