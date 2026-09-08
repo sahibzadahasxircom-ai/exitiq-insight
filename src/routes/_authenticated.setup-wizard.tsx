@@ -802,24 +802,53 @@ function SetupWizard() {
                   .single();
                 
                 if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
-                  // Store integration in integrations table
-                  const { error: insertError } = await supabase
+                  // Check if integration already exists
+                  const { data: existingIntegration } = await supabase
                     .from("integrations")
-                    .insert({
-                      company_id: companyId,
-                      integration_type: "javascript",
-                      status: "connected",
-                      config: {
-                        productType: answers.productType,
-                        exitMethod: answers.exitMethod,
-                        buttonName: answers.buttonName,
-                        eventTypes: getEventTypes(),
-                      },
-                      connected_at: new Date().toISOString(),
-                    });
+                    .select("id")
+                    .eq("company_id", companyId)
+                    .eq("integration_type", "javascript")
+                    .single();
 
-                  if (insertError) {
-                    console.error("Failed to store integration:", insertError);
+                  let error;
+                  if (existingIntegration) {
+                    // Update existing integration
+                    const { error: updateError } = await supabase
+                      .from("integrations")
+                      .update({
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          buttonName: answers.buttonName,
+                          eventTypes: getEventTypes(),
+                        },
+                        connected_at: new Date().toISOString(),
+                        last_error: null,
+                      })
+                      .eq("id", existingIntegration.id);
+                    error = updateError;
+                  } else {
+                    // Insert new integration
+                    const { error: insertError } = await supabase
+                      .from("integrations")
+                      .insert({
+                        company_id: companyId,
+                        integration_type: "javascript",
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          buttonName: answers.buttonName,
+                          eventTypes: getEventTypes(),
+                        },
+                        connected_at: new Date().toISOString(),
+                      });
+                    error = insertError;
+                  }
+
+                  if (error) {
+                    console.error("Failed to store integration:", error);
                   }
 
                   toast.success("Integration verified successfully! We received your event.");
@@ -923,24 +952,53 @@ function SetupWizard() {
                   .single();
                 
                 if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
-                  // Store integration in integrations table
-                  const { error: insertError } = await supabase
+                  // Check if integration already exists
+                  const { data: existingIntegration } = await supabase
                     .from("integrations")
-                    .insert({
-                      company_id: companyId,
-                      integration_type: "webhook",
-                      status: "connected",
-                      config: {
-                        productType: answers.productType,
-                        exitMethod: answers.exitMethod,
-                        billingPlatform: answers.billingPlatform,
-                        eventTypes: getEventTypes(),
-                      },
-                      connected_at: new Date().toISOString(),
-                    });
+                    .select("id")
+                    .eq("company_id", companyId)
+                    .eq("integration_type", "webhook")
+                    .single();
 
-                  if (insertError) {
-                    console.error("Failed to store integration:", insertError);
+                  let error;
+                  if (existingIntegration) {
+                    // Update existing integration
+                    const { error: updateError } = await supabase
+                      .from("integrations")
+                      .update({
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          billingPlatform: answers.billingPlatform,
+                          eventTypes: getEventTypes(),
+                        },
+                        connected_at: new Date().toISOString(),
+                        last_error: null,
+                      })
+                      .eq("id", existingIntegration.id);
+                    error = updateError;
+                  } else {
+                    // Insert new integration
+                    const { error: insertError } = await supabase
+                      .from("integrations")
+                      .insert({
+                        company_id: companyId,
+                        integration_type: "webhook",
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          billingPlatform: answers.billingPlatform,
+                          eventTypes: getEventTypes(),
+                        },
+                        connected_at: new Date().toISOString(),
+                      });
+                    error = insertError;
+                  }
+
+                  if (error) {
+                    console.error("Failed to store integration:", error);
                   }
 
                   toast.success("Webhook verified successfully! We received your event.");
@@ -1127,39 +1185,85 @@ function SetupWizard() {
                   .single();
                 
                 if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
-                  // Store both integrations in integrations table
-                  const { error: webhookInsertError } = await supabase
+                  // Check if integrations already exist
+                  const { data: existingWebhook } = await supabase
                     .from("integrations")
-                    .insert({
-                      company_id: companyId,
-                      integration_type: "webhook",
-                      status: "connected",
-                      config: {
-                        productType: answers.productType,
-                        exitMethod: answers.exitMethod,
-                        billingPlatform: answers.billingPlatform,
-                        eventTypes: ["cancel_sub"],
-                      },
-                      connected_at: new Date().toISOString(),
-                    });
+                    .select("id")
+                    .eq("company_id", companyId)
+                    .eq("integration_type", "webhook")
+                    .single();
 
-                  const { error: widgetInsertError } = await supabase
+                  const { data: existingWidget } = await supabase
                     .from("integrations")
-                    .insert({
-                      company_id: companyId,
-                      integration_type: "javascript",
-                      status: "connected",
-                      config: {
-                        productType: answers.productType,
-                        exitMethod: answers.exitMethod,
-                        buttonName: answers.buttonName,
-                        eventTypes: ["sign_out", "delete_account"],
-                      },
-                      connected_at: new Date().toISOString(),
-                    });
+                    .select("id")
+                    .eq("company_id", companyId)
+                    .eq("integration_type", "javascript")
+                    .single();
 
-                  if (webhookInsertError || widgetInsertError) {
-                    console.error("Failed to store integrations:", webhookInsertError, widgetInsertError);
+                  // Handle webhook integration
+                  if (existingWebhook) {
+                    await supabase
+                      .from("integrations")
+                      .update({
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          billingPlatform: answers.billingPlatform,
+                          eventTypes: ["cancel_sub"],
+                        },
+                        connected_at: new Date().toISOString(),
+                        last_error: null,
+                      })
+                      .eq("id", existingWebhook.id);
+                  } else {
+                    await supabase
+                      .from("integrations")
+                      .insert({
+                        company_id: companyId,
+                        integration_type: "webhook",
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          billingPlatform: answers.billingPlatform,
+                          eventTypes: ["cancel_sub"],
+                        },
+                        connected_at: new Date().toISOString(),
+                      });
+                  }
+
+                  // Handle widget integration
+                  if (existingWidget) {
+                    await supabase
+                      .from("integrations")
+                      .update({
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          buttonName: answers.buttonName,
+                          eventTypes: ["sign_out", "delete_account"],
+                        },
+                        connected_at: new Date().toISOString(),
+                        last_error: null,
+                      })
+                      .eq("id", existingWidget.id);
+                  } else {
+                    await supabase
+                      .from("integrations")
+                      .insert({
+                        company_id: companyId,
+                        integration_type: "javascript",
+                        status: "connected",
+                        config: {
+                          productType: answers.productType,
+                          exitMethod: answers.exitMethod,
+                          buttonName: answers.buttonName,
+                          eventTypes: ["sign_out", "delete_account"],
+                        },
+                        connected_at: new Date().toISOString(),
+                      });
                   }
 
                   toast.success("Both integrations verified successfully! We received your events.");

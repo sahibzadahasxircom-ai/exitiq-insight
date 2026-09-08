@@ -75,15 +75,40 @@ function Integrations() {
         return;
       }
 
+      // Get company_id from user metadata or fetch from companies table
+      let companyId = profile.user.user_metadata?.company_id;
+      
+      if (!companyId) {
+        // Try to fetch company by user_id
+        const { data: companyData } = await supabase
+          .from("companies")
+          .select("id")
+          .eq("user_id", profile.user.id)
+          .single();
+        
+        if (companyData) {
+          companyId = companyData.id;
+        }
+      }
+
+      if (!companyId) {
+        console.error("No company_id found");
+        setLoading(false);
+        return;
+      }
+
+      setCompanyId(companyId);
+
       // Load company data
       const { data: company, error: companyError } = await supabase
         .from("companies")
         .select("*")
-        .eq("id", profile.company_id)
+        .eq("id", companyId)
         .single();
 
       if (companyError) {
         console.error("Failed to load company:", companyError);
+        setLoading(false);
         return;
       }
 
@@ -93,10 +118,11 @@ function Integrations() {
       const { data: integrationsData, error: integrationsError } = await supabase
         .from("integrations")
         .select("*")
-        .eq("company_id", profile.company_id);
+        .eq("company_id", companyId);
 
       if (integrationsError) {
         console.error("Failed to load integrations:", integrationsError);
+        setLoading(false);
         return;
       }
 
