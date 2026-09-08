@@ -75,28 +75,20 @@ function Integrations() {
         return;
       }
 
-      // Get company_id from user metadata or fetch from companies table
-      let companyId = profile.user.user_metadata?.company_id;
-      
-      if (!companyId) {
-        // Try to fetch company by user_id
-        const { data: companyData } = await supabase
-          .from("companies")
-          .select("id")
-          .eq("user_id", profile.user.id)
-          .single();
-        
-        if (companyData) {
-          companyId = companyData.id;
-        }
-      }
+      // Get company_id from profiles table (similar to setup wizard)
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("id", profile.user.id)
+        .single();
 
-      if (!companyId) {
-        console.error("No company_id found");
+      if (profileError || !profileData?.company_id) {
+        console.error("No company_id found in profile:", profileError);
         setLoading(false);
         return;
       }
 
+      const companyId = profileData.company_id;
       setCompanyId(companyId);
 
       // Load company data
