@@ -1320,6 +1320,7 @@ function SetupWizard() {
             {step === "product-type" && renderProductType()}
             {step === "exit-method" && renderExitMethod()}
             {step === "billing-platform" && renderBillingPlatform()}
+            {step === "button-name" && renderButtonName()}
             {step === "recommendation" && renderRecommendation()}
             {step === "connection" && renderConnection()}
             {step === "complete" && renderComplete()}
