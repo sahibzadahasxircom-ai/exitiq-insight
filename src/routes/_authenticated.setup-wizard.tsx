@@ -424,8 +424,8 @@ function SetupWizard() {
         </Button>
         <Button 
           onClick={() => {
-            // Always go to button name selection if not using billing platform
-            if (answers.billingPlatform === "none") {
+            // Always go to button name selection for "All" or if not using billing platform
+            if (answers.exitMethod === "all" || answers.billingPlatform === "none") {
               setStep("button-name");
             } else {
               setStep("recommendation");
@@ -454,7 +454,15 @@ function SetupWizard() {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold mb-2">What's the text on your button?</h2>
-        <p className="text-sm text-muted-foreground">Select the button text that users click to {answers.exitMethod === "cancel-subscription" ? "cancel" : answers.exitMethod === "delete-account" ? "delete" : "sign out"}</p>
+        <p className="text-sm text-muted-foreground">
+          {answers.exitMethod === "all" 
+            ? "Select the button text for Sign Out / Log Out (we'll also track Cancel Subscription and Delete Account)"
+            : answers.exitMethod === "cancel-subscription" 
+            ? "Select the button text that users click to cancel"
+            : answers.exitMethod === "delete-account" 
+            ? "Select the button text that users click to delete"
+            : "Select the button text that users click to sign out"}
+        </p>
       </div>
       <div className="grid grid-cols-1 gap-3">
         {buttonNameOptions.map((option) => (
@@ -491,7 +499,14 @@ function SetupWizard() {
         </div>
       )}
       <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setStep("billing-platform")}>
+        <Button variant="outline" onClick={() => {
+          // Go back to billing-platform if we came from there, otherwise go to exit-method
+          if (answers.exitMethod === "all" || answers.exitMethod === "cancel-subscription") {
+            setStep("billing-platform");
+          } else {
+            setStep("exit-method");
+          }
+        }}>
           Back
         </Button>
         <Button 
@@ -568,6 +583,12 @@ function SetupWizard() {
         "Select cancellation/account deletion events",
         "Send a test event from your platform",
         "Click Verify Connection below",
+      ],
+      both: [
+        "Step 1: Copy the webhook URL and add it to your billing platform",
+        "Step 2: Copy the JavaScript snippet and add it to your website",
+        "Step 3: Test both integrations by clicking buttons on your website",
+        "Step 4: Click Check Status below to verify both are working",
       ],
       api: [
         "Click Generate API Key below",
