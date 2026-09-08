@@ -176,10 +176,10 @@ function SetupWizard() {
   ];
 
   const exitMethods = [
-    { id: "all", label: "All (1,2,3)" },
     { id: "cancel-subscription", label: "Cancel Subscription" },
     { id: "delete-account", label: "Delete Account" },
     { id: "sign-out", label: "Sign Out / Log Out" },
+    { id: "all", label: "All" },
   ];
 
   const billingPlatforms = [
@@ -439,16 +439,39 @@ function SetupWizard() {
     </div>
   );
 
-  const buttonNameOptions = [
-    { id: "sign-out", label: "Sign Out" },
-    { id: "log-out", label: "Log Out" },
-    { id: "cancel-account", label: "Cancel Account" },
-    { id: "remove-account", label: "Remove Account" },
-    { id: "cancel-plan", label: "Cancel Plan" },
-    { id: "cancel-subscription", label: "Cancel Subscription" },
-    { id: "delete-account", label: "Delete Account" },
-    { id: "other", label: "Other (Custom)" },
-  ];
+  const getButtonNameOptions = () => {
+    if (answers.exitMethod === "cancel-subscription") {
+      return [
+        { id: "cancel-subscription", label: "Cancel Subscription" },
+        { id: "delete-account", label: "Delete Account" },
+        { id: "other", label: "Other (Custom)" },
+      ];
+    } else if (answers.exitMethod === "sign-out" || answers.exitMethod === "delete-account") {
+      return [
+        { id: "sign-out", label: "Sign Out" },
+        { id: "log-out", label: "Log Out" },
+        { id: "delete-account", label: "Delete Account" },
+        { id: "other", label: "Other (Custom)" },
+      ];
+    } else if (answers.exitMethod === "all") {
+      // For "all", we'll show two separate selections
+      return [
+        { id: "sign-out", label: "Sign Out / Log Out" },
+        { id: "cancel-subscription", label: "Cancel Subscription" },
+        { id: "other", label: "Other (Custom)" },
+      ];
+    }
+    return [
+      { id: "sign-out", label: "Sign Out" },
+      { id: "log-out", label: "Log Out" },
+      { id: "cancel-account", label: "Cancel Account" },
+      { id: "remove-account", label: "Remove Account" },
+      { id: "cancel-plan", label: "Cancel Plan" },
+      { id: "cancel-subscription", label: "Cancel Subscription" },
+      { id: "delete-account", label: "Delete Account" },
+      { id: "other", label: "Other (Custom)" },
+    ];
+  };
 
   const renderButtonName = () => (
     <div className="space-y-6">
@@ -465,7 +488,7 @@ function SetupWizard() {
         </p>
       </div>
       <div className="grid grid-cols-1 gap-3">
-        {buttonNameOptions.map((option) => (
+        {getButtonNameOptions().map((option) => (
           <button
             key={option.id}
             onClick={() => {
@@ -532,31 +555,15 @@ function SetupWizard() {
           <p className="text-muted-foreground">{recommendation.description}</p>
         </div>
       </div>
-      
-      <div className="space-y-3">
-        <Button 
-          size="lg" 
-          onClick={() => setStep("connection")}
-          className="w-full"
-        >
-          {recommendation.buttonText} <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-        
-        {recommendation.secondaryText && (
-          <Button 
-            variant="outline" 
-            size="lg"
-            onClick={() => {
-              setAnswers({ ...answers, billingPlatform: "none" });
-              setStep("connection");
-            }}
-            className="w-full"
-          >
-            {recommendation.secondaryText}
-          </Button>
-        )}
-      </div>
-      
+
+      <Button 
+        size="lg" 
+        onClick={() => setStep("connection")}
+        className="w-full"
+      >
+        Continue <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
+
       <Button variant="ghost" onClick={() => setStep("exit-method")}>
         Back
       </Button>
@@ -602,22 +609,6 @@ function SetupWizard() {
 
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-bold mb-2">Connect {recommendation.title}</h2>
-          <p className="text-sm text-muted-foreground">Follow these steps to complete the setup</p>
-        </div>
-        
-        <div className="space-y-3">
-          {steps.map((step, index) => (
-            <div key={index} className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0">
-                {index + 1}
-              </div>
-              <div className="flex-1 pt-1">{step}</div>
-            </div>
-          ))}
-        </div>
-        
         {recommendation.type === "stripe" && (
           <Button
             size="lg"
@@ -729,117 +720,15 @@ function SetupWizard() {
             {!profile?.company_id && !fallbackCompanyId && (
               <p className="text-xs text-red-500">Warning: No company ID found. Please refresh the page or contact support.</p>
             )}
-            <Label className="font-semibold">Your Website Domain (for verification)</Label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="https://your-website.com"
-                value={widgetDomain}
-                onChange={(e) => setWidgetDomain(e.target.value)}
-                className="w-full p-3 border rounded-lg text-sm"
-              />
-            </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h4 className="font-semibold text-blue-900 mb-2">How to Verify Your Integration</h4>
               <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
                 <li>Copy the snippet above and paste it into your website's &lt;head&gt; section</li>
                 <li>Save and publish your website changes</li>
                 <li>Go to your website and click the button: <strong>"{answers.buttonName || "Sign Out"}"</strong></li>
-                <li>Come back here and click <strong>"Check Status"</strong> to verify</li>
+                <li>The pre-form modal will appear automatically when the button is clicked</li>
               </ol>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                const companyId = profile?.company_id || fallbackCompanyId;
-                if (!companyId) {
-                  toast.error("No company ID found. Please refresh the page or contact support.");
-                  return;
-                }
-                
-                setLoading(true);
-                
-                // Update company status to waiting_for_verification
-                const { error } = await supabase
-                  .from("companies")
-                  .update({
-                    integration_status: "waiting_for_verification",
-                  })
-                  .eq("id", companyId);
-                
-                if (error) {
-                  toast.error("Failed to start verification");
-                  console.error(error);
-                } else {
-                  toast.success("Verification started. We're waiting for your first event.");
-                }
-                
-                setLoading(false);
-              }}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Start Verification
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={async () => {
-                const companyId = profile?.company_id || fallbackCompanyId;
-                if (!companyId) {
-                  toast.error("No company ID found. Please refresh the page or contact support.");
-                  return;
-                }
-                
-                setLoading(true);
-                
-                // Check if we've received an event
-                const { data: company } = await supabase
-                  .from("companies")
-                  .select("integration_status, last_event_at")
-                  .eq("id", companyId)
-                  .single();
-                
-                if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
-                  // Use upsert to handle both insert and update
-                  const { error } = await supabase
-                    .from("integrations")
-                    .upsert({
-                      company_id: companyId,
-                      integration_type: "javascript",
-                      status: "connected",
-                      config: {
-                        productType: answers.productType,
-                        exitMethod: answers.exitMethod,
-                        buttonName: answers.buttonName,
-                        eventTypes: getEventTypes(),
-                      },
-                      connected_at: new Date().toISOString(),
-                      last_error: null,
-                    }, {
-                      onConflict: "company_id,integration_type",
-                      ignoreDuplicates: false,
-                    });
-
-                  if (error) {
-                    console.error("Failed to store integration:", error);
-                    toast.error("Failed to store integration. Please try again.");
-                  } else {
-                    toast.success("Integration verified successfully! We received your event.");
-                    setStep("complete");
-                  }
-                } else {
-                  toast.info("We haven't received an event yet. Please click the button on your website first.");
-                }
-                
-                setLoading(false);
-              }}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Check Status
-            </Button>
           </div>
         )}
         
@@ -871,101 +760,9 @@ function SetupWizard() {
                 <li>Add the webhook URL to your webhook settings</li>
                 <li>Select "customer.subscription.deleted" or similar cancellation events</li>
                 <li>Test by cancelling a subscription or sending a test event from {answers.billingPlatform}</li>
-                <li>Come back here and click <strong>"Check Status"</strong> to verify</li>
+                <li>The pre-form modal will appear automatically when a cancellation event is received</li>
               </ol>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                const companyId = profile?.company_id || fallbackCompanyId;
-                if (!companyId) {
-                  toast.error("No company ID found. Please refresh the page or contact support.");
-                  return;
-                }
-                
-                setLoading(true);
-                
-                // Update company status to waiting_for_verification
-                const { error } = await supabase
-                  .from("companies")
-                  .update({
-                    integration_status: "waiting_for_verification",
-                  })
-                  .eq("id", companyId);
-                
-                if (error) {
-                  toast.error("Failed to start verification");
-                  console.error(error);
-                } else {
-                  toast.success("Verification started. We're waiting for your first webhook event.");
-                }
-                
-                setLoading(false);
-              }}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Start Verification
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={async () => {
-                const companyId = profile?.company_id || fallbackCompanyId;
-                if (!companyId) {
-                  toast.error("No company ID found. Please refresh the page or contact support.");
-                  return;
-                }
-                
-                setLoading(true);
-                
-                // Check if we've received an event
-                const { data: company } = await supabase
-                  .from("companies")
-                  .select("integration_status, last_event_at")
-                  .eq("id", companyId)
-                  .single();
-                
-                if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
-                  // Use upsert to handle both insert and update
-                  const { error } = await supabase
-                    .from("integrations")
-                    .upsert({
-                      company_id: companyId,
-                      integration_type: "webhook",
-                      status: "connected",
-                      config: {
-                        productType: answers.productType,
-                        exitMethod: answers.exitMethod,
-                        billingPlatform: answers.billingPlatform,
-                        eventTypes: getEventTypes(),
-                      },
-                      connected_at: new Date().toISOString(),
-                      last_error: null,
-                    }, {
-                      onConflict: "company_id,integration_type",
-                      ignoreDuplicates: false,
-                    });
-
-                  if (error) {
-                    console.error("Failed to store integration:", error);
-                    toast.error("Failed to store integration. Please try again.");
-                  } else {
-                    toast.success("Webhook verified successfully! We received your event.");
-                    setStep("complete");
-                  }
-                } else {
-                  toast.info("We haven't received a webhook event yet. Please test from your billing platform first.");
-                }
-                
-                setLoading(false);
-              }}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Check Status
-            </Button>
           </div>
         )}
         
@@ -1079,116 +876,9 @@ function SetupWizard() {
                 <li><strong>Widget:</strong> Copy the snippet above and paste it into your website's &lt;head&gt; section</li>
                 <li>Save and publish your website changes</li>
                 <li>Go to your website and click the button: <strong>"{answers.buttonName || "Sign Out"}"</strong></li>
-                <li>Come back here and click <strong>"Check Status"</strong> to verify both integrations</li>
+                <li>The pre-form modal will appear automatically when events are received</li>
               </ol>
             </div>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                const companyId = profile?.company_id || fallbackCompanyId;
-                if (!companyId) {
-                  toast.error("No company ID found. Please refresh the page or contact support.");
-                  return;
-                }
-                
-                setLoading(true);
-                
-                // Update company status to waiting_for_verification
-                const { error } = await supabase
-                  .from("companies")
-                  .update({
-                    integration_status: "waiting_for_verification",
-                  })
-                  .eq("id", companyId);
-                
-                if (error) {
-                  toast.error("Failed to start verification");
-                  console.error(error);
-                } else {
-                  toast.success("Verification started. We're waiting for your first events.");
-                }
-                
-                setLoading(false);
-              }}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Start Verification
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={async () => {
-                const companyId = profile?.company_id || fallbackCompanyId;
-                if (!companyId) {
-                  toast.error("No company ID found. Please refresh the page or contact support.");
-                  return;
-                }
-                
-                setLoading(true);
-                
-                // Check if we've received events
-                const { data: company } = await supabase
-                  .from("companies")
-                  .select("integration_status, last_event_at")
-                  .eq("id", companyId)
-                  .single();
-                
-                if (company?.integration_status === "listening_for_events" || company?.integration_status === "connected") {
-                  // Use upsert for both integrations
-                  await supabase
-                    .from("integrations")
-                    .upsert({
-                      company_id: companyId,
-                      integration_type: "webhook",
-                      status: "connected",
-                      config: {
-                        productType: answers.productType,
-                        exitMethod: answers.exitMethod,
-                        billingPlatform: answers.billingPlatform,
-                        eventTypes: ["cancel_sub"],
-                      },
-                      connected_at: new Date().toISOString(),
-                      last_error: null,
-                    }, {
-                      onConflict: "company_id,integration_type",
-                      ignoreDuplicates: false,
-                    });
-
-                  await supabase
-                    .from("integrations")
-                    .upsert({
-                      company_id: companyId,
-                      integration_type: "javascript",
-                      status: "connected",
-                      config: {
-                        productType: answers.productType,
-                        exitMethod: answers.exitMethod,
-                        buttonName: answers.buttonName,
-                        eventTypes: ["sign_out", "delete_account"],
-                      },
-                      connected_at: new Date().toISOString(),
-                      last_error: null,
-                    }, {
-                      onConflict: "company_id,integration_type",
-                      ignoreDuplicates: false,
-                    });
-
-                  toast.success("Both integrations verified successfully! We received your events.");
-                  setStep("complete");
-                } else {
-                  toast.info("We haven't received events yet. Please test both integrations first.");
-                }
-                
-                setLoading(false);
-              }}
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Check Status
-            </Button>
           </div>
         )}
         
@@ -1226,54 +916,10 @@ function SetupWizard() {
             </Button>
             <Button 
               size="lg" 
-              onClick={async () => {
-                setLoading(true);
-                try {
-                  let verified = false;
-                  let message = "";
-                  const companyId = profile?.company_id || fallbackCompanyId;
-                  
-                  if (!companyId) {
-                    toast.error("No company ID found. Please refresh the page or contact support.");
-                    setLoading(false);
-                    return;
-                  }
-                  
-                  if (recommendation.type === "widget") {
-                    // Widget verification - to be implemented with local backend
-                    toast.info("Widget verification coming soon. Please skip for now.");
-                  } else {
-                    // Integration verification - to be implemented with local backend
-                    toast.info("Integration verification coming soon. Please skip for now.");
-                  }
-
-                  // Skip verification for now and mark as complete
-                  await supabase
-                    .from("companies")
-                    .update({
-                      integration_type: recommendation.type,
-                      setup_completed: true,
-                    })
-                    .eq("id", companyId);
-
-                  setStep("complete");
-                } catch (error) {
-                  toast.error("Setup failed. Please try again.");
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              disabled={loading}
+              onClick={() => setStep("complete")}
+              className="w-full"
             >
-              {loading ? "Verifying..." : "Verify & Complete Setup"}
-            </Button>
-          </div>
-        )}
-        
-        {recommendation.type === "stripe" && (
-          <div className="flex justify-between pt-4">
-            <Button variant="outline" onClick={() => setStep("recommendation")}>
-              Back
+              Complete Setup
             </Button>
           </div>
         )}
@@ -1293,12 +939,12 @@ function SetupWizard() {
       <div className="space-y-3">
         <Button 
           size="lg" 
-          onClick={() => navigate({ to: "/workspace/pre-form" })}
+          onClick={() => navigate({ to: "/workspace" })}
           className="w-full"
         >
-          Go to Pre-form <ArrowRight className="ml-2 h-4 w-4" />
+          Customize Pre-form <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
-        
+
         <Button 
           variant="outline" 
           size="lg"
