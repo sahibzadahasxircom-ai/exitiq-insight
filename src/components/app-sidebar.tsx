@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Users, Settings, Palette, Plug, BookOpen } from "lucide-react";
+import { LayoutDashboard, Inbox, Settings, Palette, Plug, BookOpen } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -31,7 +31,6 @@ const integrations = [
 
 const workspace = [
   { title: "Workspace", url: "/workspace", icon: Palette },
-  { title: "Team", url: "/team", icon: Users },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

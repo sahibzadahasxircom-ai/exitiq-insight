@@ -322,11 +322,6 @@ Example webhook payload:
         <p className="text-sm text-muted-foreground mt-1">
           Manage your connected platforms and services
         </p>
-        {company?.company_name && (
-          <p className="text-xs text-muted-foreground mt-2">
-            These integrations are configured for <span className="font-medium">{company.company_name}</span> only
-          </p>
-        )}
       </div>
 
       {connectedIntegrations.length > 0 && (
@@ -347,11 +342,6 @@ Example webhook payload:
                         {integration.config?.eventTypes && integration.config.eventTypes.length > 0 && (
                           <p className="text-xs text-muted-foreground mt-1">
                             Tracking: {integration.config.eventTypes.map((t: string) => t.replace('_', ' ')).join(', ')}
-                          </p>
-                        )}
-                        {integration.last_event_at && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Last event: {new Date(integration.last_event_at).toLocaleString()}
                           </p>
                         )}
                       </div>
@@ -381,6 +371,14 @@ Example webhook payload:
               </Card>
             ))}
           </div>
+        </div>
+      )}
+
+      {company?.company_name && (
+        <div className="mb-8">
+          <p className="text-xs text-red-500">
+            These integrations are configured for <span className="font-medium">{company.company_name}</span> only
+          </p>
         </div>
       )}
 
