@@ -130,6 +130,20 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
         if (updateError) {
           console.error("Failed to update company integration status:", updateError);
         }
+
+        // Also update the widget integration status in integrations table
+        const { error: integrationUpdateError } = await supabase
+          .from("integrations")
+          .update({
+            status: "listening_for_events",
+            last_event_at: new Date().toISOString(),
+          })
+          .eq("company_id", body.company_id)
+          .eq("integration_type", "javascript");
+
+        if (integrationUpdateError) {
+          console.error("Failed to update widget integration status:", integrationUpdateError);
+        }
         
         console.log("Returning response with interviewSessionId:", interviewSessionId);
         return new Response(JSON.stringify({ 
@@ -240,6 +254,20 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
 
         if (updateError) {
           console.error("Failed to update company integration status:", updateError);
+        }
+
+        // Also update the webhook integration status in integrations table
+        const { error: integrationUpdateError } = await supabase
+          .from("integrations")
+          .update({
+            status: "listening_for_events",
+            last_event_at: new Date().toISOString(),
+          })
+          .eq("company_id", companyId)
+          .eq("integration_type", "webhook");
+
+        if (integrationUpdateError) {
+          console.error("Failed to update webhook integration status:", integrationUpdateError);
         }
 
         return new Response(JSON.stringify({ 
