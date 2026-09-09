@@ -52,6 +52,8 @@ function Integrations() {
   const [modalIntegrationId, setModalIntegrationId] = useState<string | null>(null);
   const [showSnippetModal, setShowSnippetModal] = useState(false);
   const [snippetContent, setSnippetContent] = useState<string>("");
+  const [connectingIntegration, setConnectingIntegration] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     loadIntegrations();
@@ -231,8 +233,54 @@ function Integrations() {
   };
 
   const handleConnect = (type: string) => {
-    // Redirect to setup wizard for new connection
-    router.push("/setup-wizard");
+    // Set the connecting integration and show snippet modal
+    setConnectingIntegration(type);
+    const integration = { integration_type: type, company_id: company?.id || '', config: {} } as IntegrationData;
+    handleViewSnippet(integration);
+  };
+
+  const handleStartVerification = async (type: string) => {
+    if (!companyId) return;
+
+    setVerifying(true);
+    try {
+      // Create integration record with waiting_for_verification status
+      const { data: newIntegration, error: createError } = await supabase
+        .from("integrations")
+        .insert({
+          company_id: companyId,
+          integration_type: type,
+          status: "waiting_for_verification",
+          config: {},
+        })
+        .select()
+        .single();
+
+      if (createError) throw createError;
+
+      toast.success("Integration created. Waiting for verification...");
+      loadIntegrations();
+      setShowSnippetModal(false);
+      setConnectingIntegration(null);
+    } catch (error) {
+      console.error("Error starting verification:", error);
+      toast.error("Failed to start verification");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleCheckStatus = async () => {
+    if (!companyId) return;
+
+    try {
+      // Refresh integrations to check status
+      await loadIntegrations();
+      toast.success("Status checked successfully");
+    } catch (error) {
+      console.error("Error checking status:", error);
+      toast.error("Failed to check status");
+    }
   };
 
   const handleViewSnippet = (integration: IntegrationData) => {
@@ -430,15 +478,6 @@ Example webhook payload:
                     Not Connected
                   </span>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => handleViewSnippet({ integration_type: available.id, company_id: company?.id || '', config: {} } as IntegrationData)}
-                    title="View Snippet"
-                  >
-                    <Code className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                  <Button
                     variant="outline"
                     size="sm"
                     className="h-8"
@@ -466,30 +505,80 @@ Example webhook payload:
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
             <div className="p-4 border-b flex justify-between items-center">
-              <h3 className="font-semibold">Integration Snippet</h3>
+              <h3 className="font-semibold">Integration Setup</h3>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setShowSnippetModal(false)}
+                onClick={() => {
+                  setShowSnippetModal(false);
+                  setConnectingIntegration(null);
+                }}
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="p-4 overflow-y-auto max-h-[60vh]">
-              <pre className="bg-muted p-4 rounded-lg text-sm font-mono whitespace-pre-wrap break-all">
-                {snippetContent}
-              </pre>
+            <div className="p-4 overflow-y-auto max-h-[60vh] space-y-4">
+              {connectingIntegration === "javascript" && (
+                <div className="space-y-3">
+                  <h4 className="font-medium">JavaScript Widget Setup Steps:</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Copy the snippet below</li>
+                    <li>Paste it in your website's <code className="bg-muted px-1 rounded">&lt;head&gt;</code> section</li>
+                    <li>Make sure your sign out button has text like "Sign Out", "Log Out", or "Delete Account"</li>
+                    <li>Click "Start Verification" below after adding the snippet</li>
+                    <li>Test by clicking your sign out button on your website</li>
+                    <li>Click "Check Status" to verify the connection</li>
+                  </ol>
+                </div>
+              )}
+              {connectingIntegration === "webhook" && (
+                <div className="space-y-3">
+                  <h4 className="font-medium">Webhook Setup Steps:</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Copy the webhook URL below</li>
+                    <li>Add it to your billing platform's webhook settings</li>
+                    <li>Select cancellation events to send to this endpoint</li>
+                    <li>Click "Start Verification" below after configuring</li>
+                    <li>Trigger a test cancellation event</li>
+                    <li>Click "Check Status" to verify the connection</li>
+                  </ol>
+                </div>
+              )}
+              <div>
+                <pre className="bg-muted p-4 rounded-lg text-sm font-mono whitespace-pre-wrap break-all">
+                  {snippetContent}
+                </pre>
+              </div>
             </div>
-            <div className="p-4 border-t">
+            <div className="p-4 border-t space-y-2">
               <Button
                 onClick={() => {
                   navigator.clipboard.writeText(snippetContent);
                   toast.success("Snippet copied to clipboard");
                 }}
                 className="w-full"
+                variant="outline"
               >
                 Copy Snippet
               </Button>
+              {connectingIntegration && (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleStartVerification(connectingIntegration)}
+                    disabled={verifying}
+                    className="flex-1"
+                  >
+                    {verifying ? "Starting..." : "Start Verification"}
+                  </Button>
+                  <Button
+                    onClick={handleCheckStatus}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Check Status
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

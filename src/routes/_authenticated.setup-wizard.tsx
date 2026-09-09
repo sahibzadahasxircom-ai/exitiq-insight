@@ -54,8 +54,8 @@ function SetupWizard() {
           );
 
           if (hasConnectedIntegration) {
-            // User already has verified integrations, redirect to integrations page
-            navigate({ to: "/integrations" });
+            // User already has verified integrations, redirect to dashboard overview
+            navigate({ to: "/" });
           }
         } catch (error) {
           console.error("Error checking existing integrations:", error);
