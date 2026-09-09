@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { useTheme } from "next-themes";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -21,7 +20,6 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 function Settings() {
   const { company, role, refresh } = useAuth();
-  const { theme, setTheme } = useTheme();
   const isOwner = role === "owner";
   const [companyName, setCompanyName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -46,14 +44,6 @@ function Settings() {
           <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
           <p className="mt-1 text-sm text-muted-foreground">Workspace, integrations, and notifications.</p>
         </div>
-
-        <Section title="Appearance" description="Customize how leaveesy looks for you.">
-          <ToggleRow
-            label="Dark mode"
-            desc="Switch between light and dark theme."
-            checked={theme === "dark"} onChange={(checked) => setTheme(checked ? "dark" : "light")}
-          />
-        </Section>
 
         <Section title="Company" description="How your workspace appears across leaveesy.">
           <div className="grid gap-2">

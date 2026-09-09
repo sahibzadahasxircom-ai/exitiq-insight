@@ -376,7 +376,7 @@ Example webhook payload:
 
       {company?.company_name && (
         <div className="mb-8">
-          <p className="text-xs text-red-500">
+          <p className="text-xs text-muted-foreground">
             These integrations are configured for <span className="font-medium">{company.company_name}</span> only
           </p>
         </div>

@@ -50,7 +50,11 @@ function Workspace() {
   const [buttonTextColor, setButtonTextColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("#000000");
   const [solidBackgroundColor, setSolidBackgroundColor] = useState("");
-  
+  const [requireName, setRequireName] = useState(true);
+  const [requireEmail, setRequireEmail] = useState(true);
+  const [showNameField, setShowNameField] = useState(true);
+  const [showEmailField, setShowEmailField] = useState(true);
+
   console.log("Background style state:", backgroundStyle);
 
   // Load existing company pre-form settings
@@ -59,10 +63,10 @@ function Workspace() {
       const loadCompanySettings = async () => {
         const { data } = await supabase
           .from("companies")
-          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name, background_style, button_color, button_text_color, text_color, solid_background_color")
+          .select("pre_form_style, pre_form_title, pre_form_description, brand_color, company_logo, company_name, background_style, button_color, button_text_color, text_color, solid_background_color, require_name, require_email, show_name_field, show_email_field")
           .eq("id", company.id)
           .single();
-        
+
         if (data) {
           if (data.pre_form_style) setPreFormStyle(data.pre_form_style);
           if (data.pre_form_title) setPreFormTitle(data.pre_form_title);
@@ -75,6 +79,10 @@ function Workspace() {
           if (data.button_text_color) setButtonTextColor(data.button_text_color);
           if (data.text_color) setTextColor(data.text_color);
           if (data.solid_background_color) setSolidBackgroundColor(data.solid_background_color);
+          if (data.require_name !== undefined) setRequireName(data.require_name);
+          if (data.require_email !== undefined) setRequireEmail(data.require_email);
+          if (data.show_name_field !== undefined) setShowNameField(data.show_name_field);
+          if (data.show_email_field !== undefined) setShowEmailField(data.show_email_field);
         }
       };
       loadCompanySettings();
@@ -171,6 +179,10 @@ function Workspace() {
           button_text_color: buttonTextColor,
           text_color: textColor,
           solid_background_color: solidBackgroundColor,
+          require_name: requireName,
+          require_email: requireEmail,
+          show_name_field: showNameField,
+          show_email_field: showEmailField,
         })
         .eq("id", company.id);
 
@@ -224,127 +236,46 @@ function Workspace() {
         </TabsList>
 
         <TabsContent value="pre-form" className="space-y-8">
-          <Card className="border-2">
-            <CardHeader className="bg-muted/30">
-              <CardTitle className="text-xl">Brand Identity</CardTitle>
-              <CardDescription>
-                Customize your company logo, name, and brand color.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-8 pt-6">
-              <div className="space-y-3">
-                <Label htmlFor="company-name" className="text-base font-semibold">Company Name</Label>
-                <Input
-                  id="company-name"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Your company name"
-                  className="h-11 text-base"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="logo-upload" className="text-base font-semibold">Company Logo</Label>
-                <div className="flex items-start gap-4">
-                  <div className="flex-1">
-                    <Input
-                      id="logo-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      ref={fileInputRef}
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Logo
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      PNG, JPG, or SVG up to 2MB
-                    </p>
-                  </div>
-                  {(logoPreview || logo) && (
-                    <div className="h-16 w-16 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
-                      <img
-                        src={logoPreview || logo}
-                        alt="Logo preview"
-                        className="h-full w-full object-contain"
-                      />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Live Preview */}
+            <Card className="border-2 sticky top-6">
+              <CardHeader className="bg-muted/30">
+                <CardTitle className="text-xl">Live Preview</CardTitle>
+                <CardDescription>
+                  See how your pre-form will look to customers in real-time.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-semibold">Device Preview</Label>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`h-10 w-10 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
+                        onClick={() => setPreviewDevice("desktop")}
+                      >
+                        <Monitor className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`h-10 w-10 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
+                        onClick={() => setPreviewDevice("tablet")}
+                      >
+                        <Tablet className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`h-10 w-10 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
+                        onClick={() => setPreviewDevice("mobile")}
+                      >
+                        <Smartphone className="h-5 w-5" />
+                      </Button>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="brand-color" className="text-base font-semibold">Brand Color</Label>
-                <div className="flex gap-3">
-                  <Input
-                    id="brand-color"
-                    type="color"
-                    value={brandColor}
-                    onChange={(e) => setBrandColor(e.target.value)}
-                    className="w-20 h-11 p-1"
-                  />
-                  <Input
-                    value={brandColor}
-                    onChange={(e) => setBrandColor(e.target.value)}
-                    placeholder="#2563eb"
-                    className="flex-1 h-11"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-6">
-                <Button onClick={handleSave} disabled={saving} size="lg" className="w-full">
-                  {saving ? "Saving..." : "Save Branding"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2">
-            <CardHeader className="bg-muted/30">
-              <CardTitle className="text-xl">Live Preview</CardTitle>
-              <CardDescription>
-                See how your pre-form will look to customers in real-time.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <Label className="text-base font-semibold">Device Preview</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={`h-10 w-10 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
-                      onClick={() => setPreviewDevice("desktop")}
-                    >
-                      <Monitor className="h-5 w-5" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={`h-10 w-10 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
-                      onClick={() => setPreviewDevice("tablet")}
-                    >
-                      <Tablet className="h-5 w-5" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={`h-10 w-10 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
-                      onClick={() => setPreviewDevice("mobile")}
-                    >
-                      <Smartphone className="h-5 w-5" />
-                    </Button>
                   </div>
-                </div>
                 <div
                   className={`mx-auto border rounded-xl overflow-hidden relative ${
                     previewDevice === "desktop"
@@ -420,6 +351,22 @@ function Workspace() {
                     />
                   )}
 
+                  {/* Logo and Company Name in corner */}
+                  {(logo || companyName) && (
+                    <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 ${
+                      preFormStyle === "minimal" ? "hidden" : ""
+                    }`}>
+                      {logo && (
+                        <img src={logo} alt="Logo" className="h-8 w-8 object-contain" />
+                      )}
+                      {companyName && (
+                        <span className="text-sm font-semiboldtruncate" style={{ color: textColor }}>
+                          {companyName}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   <div className={`p-6 space-y-4 relative z-10 ${
                     preFormStyle === "minimal" ? "text-center" : ""
                   }`} style={{ color: textColor }}>
@@ -439,6 +386,36 @@ function Workspace() {
                         {preFormDescription}
                       </p>
                     </div>
+
+                    {/* Form Fields */}
+                    <div className="space-y-3">
+                      {showNameField && (
+                        <div className="space-y-1">
+                          <Label className="text-xs" style={{ color: textColor }}>
+                            Your name{requireName ? " *" : " (optional)"}
+                          </Label>
+                          <Input 
+                            placeholder="John Doe"
+                            disabled
+                            className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                          />
+                        </div>
+                      )}
+                      {showEmailField && (
+                        <div className="space-y-1">
+                          <Label className="text-xs" style={{ color: textColor }}>
+                            Your email{requireEmail ? " *" : " (optional)"}
+                          </Label>
+                          <Input 
+                            type="email"
+                            placeholder="john@example.com"
+                            disabled
+                            className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                          />
+                        </div>
+                      )}
+                    </div>
+
                     <div className="pt-2">
                       <button
                         className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
@@ -456,233 +433,359 @@ function Workspace() {
             </CardContent>
           </Card>
 
-          <Card className="border-2">
-            <CardHeader className="bg-muted/30">
-              <CardTitle className="text-xl">Form Style & Content</CardTitle>
-              <CardDescription>
-                Customize the form customers see before starting their conversation.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-8 pt-6">
-              {/* Template Selection */}
-              <div>
-                <Label className="text-base font-semibold mb-4 block">Form Style</Label>
-                <div className="grid grid-cols-3 gap-4">
-                  {preFormTemplates.map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => setPreFormStyle(template.id)}
-                      className={`p-4 rounded-xl border-2 text-left transition-all group ${
-                        preFormStyle === template.id
-                          ? "border-primary bg-primary/10 ring-2 ring-primary/30"
-                          : "border-border hover:border-primary/50 hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className="font-semibold text-base mb-1">{template.name}</div>
-                      <div className="text-sm text-muted-foreground">{template.description}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Background Effect */}
-              <div>
-                <Label className="text-base font-semibold mb-4 block">Form Background Effect</Label>
-                <Select value={backgroundStyle} onValueChange={(value) => {
-                  console.log("Background style changed to:", value);
-                  setBackgroundStyle(value);
-                }}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select background effect" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="gradient">Gradient</SelectItem>
-                    <SelectItem value="mesh">Mesh Gradient</SelectItem>
-                    <SelectItem value="aurora">Aurora</SelectItem>
-                    <SelectItem value="dots">Dots Pattern</SelectItem>
-                    <SelectItem value="layers">Layers</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Choose the background effect for the pre-form card using your brand color
-                </p>
-              </div>
-
-              {/* Button Colors - Side by Side */}
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <Label className="text-base font-semibold mb-3 block">Button Color</Label>
-                  <div className="flex gap-3">
+            {/* Right Column - Settings */}
+            <div className="space-y-8">
+              <Card className="border-2">
+                <CardHeader className="bg-muted/30">
+                  <CardTitle className="text-xl">Brand Identity</CardTitle>
+                  <CardDescription>
+                    Customize your company logo, name, and brand color.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8 pt-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="company-name" className="text-base font-semibold">Company Name</Label>
                     <Input
-                      type="color"
-                      value={buttonColor}
-                      onChange={(e) => setButtonColor(e.target.value)}
-                      className="w-20 h-11 p-1"
-                    />
-                    <Input
-                      value={buttonColor}
-                      onChange={(e) => setButtonColor(e.target.value)}
-                      placeholder="#2563eb"
-                      className="flex-1 h-11"
+                      id="company-name"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="Your company name"
+                      className="h-11 text-base"
                     />
                   </div>
-                </div>
-                <div>
-                  <Label className="text-base font-semibold mb-3 block">Button Text Color</Label>
-                  <div className="flex gap-3">
-                    <Input
-                      type="color"
-                      value={buttonTextColor}
-                      onChange={(e) => setButtonTextColor(e.target.value)}
-                      className="w-20 h-11 p-1"
-                    />
-                    <Input
-                      value={buttonTextColor}
-                      onChange={(e) => setButtonTextColor(e.target.value)}
-                      placeholder="#ffffff"
-                      className="flex-1 h-11"
-                    />
-                  </div>
-                </div>
-              </div>
 
-              {/* Text Color */}
-              <div>
-                <Label className="text-base font-semibold mb-3 block">Pre-Form Text Color</Label>
-                <div className="flex gap-3">
-                  <Input
-                    type="color"
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    className="w-20 h-11 p-1"
-                  />
-                  <Input
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    placeholder="#000000"
-                    className="flex-1 h-11"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Color of the title and description text
-                </p>
-              </div>
-
-              {/* Solid Background Color */}
-              <div>
-                <Label className="text-base font-semibold mb-3 block">Solid Background Color</Label>
-                <div className="flex gap-3">
-                  <Input
-                    type="color"
-                    value={solidBackgroundColor}
-                    onChange={(e) => setSolidBackgroundColor(e.target.value)}
-                    className="w-20 h-11 p-1"
-                  />
-                  <Input
-                    value={solidBackgroundColor}
-                    onChange={(e) => setSolidBackgroundColor(e.target.value)}
-                    placeholder="#000000"
-                    className="flex-1 h-11"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Solid background color for the pre-form card (gradients will overlay on top)
-                </p>
-              </div>
-
-              {/* Content Customization */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div>
-                    <Label htmlFor="pre-form-title" className="text-base font-semibold mb-3 block">
-                      Form Title
-                    </Label>
-                    <Input
-                      id="pre-form-title"
-                      value={preFormTitle}
-                      onChange={(e) => setPreFormTitle(e.target.value)}
-                      placeholder="We're sorry to see you go"
-                      className="text-base h-11"
-                    />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      The main heading displayed on the pre-form page.
-                    </p>
-                  </div>
-                  <div>
-                    <Label htmlFor="pre-form-description" className="text-base font-semibold mb-3 block">
-                      Form Description
-                    </Label>
-                    <Textarea
-                      id="pre-form-description"
-                      value={preFormDescription}
-                      onChange={(e) => setPreFormDescription(e.target.value)}
-                      placeholder="Help us improve by sharing your feedback"
-                      rows={4}
-                      className="text-base resize-none"
-                    />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      The subtitle text explaining the purpose of the form.
-                    </p>
-                  </div>
-
-                  {/* Copy Examples */}
-                  <div className="pt-4 border-t">
-                    <Label className="text-base font-semibold mb-4 block">Copy Examples</Label>
-                    <div className="space-y-3">
-                      <button
-                        onClick={() => {
-                          setPreFormTitle("One last thing before you go.");
-                          setPreFormDescription("We'd genuinely like to understand what made you leave. No long survey — just a quick conversation.");
-                        }}
-                        className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
-                      >
-                        <div className="font-semibold text-sm mb-1">More Emotional</div>
-                        <div className="text-sm text-muted-foreground">
-                          "One last thing before you go. We'd genuinely like to understand what made you leave. No long survey — just a quick conversation."
+                  <div className="space-y-3">
+                    <Label htmlFor="logo-upload" className="text-base font-semibold">Company Logo</Label>
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1">
+                        <Input
+                          id="logo-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          ref={fileInputRef}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Logo
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          PNG, JPG, or SVG up to 2MB
+                        </p>
+                      </div>
+                      {(logoPreview || logo) && (
+                        <div className="h-16 w-16 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
+                          <img
+                            src={logoPreview || logo}
+                            alt="Logo preview"
+                            className="h-full w-full object-contain"
+                          />
                         </div>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setPreFormTitle("Before you leave, can we ask why?");
-                          setPreFormDescription("This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters.");
-                        }}
-                        className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
-                      >
-                        <div className="font-semibold text-sm mb-1">Curiosity-Driven</div>
-                        <div className="text-sm text-muted-foreground">
-                          "Before you leave, can we ask why? This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters."
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setPreFormTitle("Before you go — one quick conversation?");
-                          setPreFormDescription("We'd love to understand what happened. It takes less than 60 seconds.");
-                        }}
-                        className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
-                      >
-                        <div className="font-semibold text-sm mb-1">Tight & Direct</div>
-                        <div className="text-sm text-muted-foreground">
-                          "Before you go — one quick conversation? We'd love to understand what happened. It takes less than 60 seconds."
-                        </div>
-                      </button>
+                      )}
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="flex justify-end pt-6 border-t">
-                <Button
-                  onClick={handleSave}
-                  disabled={saving}
-                  size="lg"
-                  className="gap-2 px-8"
-                >
-                  <Save className="h-5 w-5" />
-                  {saving ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="space-y-3">
+                    <Label htmlFor="brand-color" className="text-base font-semibold">Brand Color</Label>
+                    <div className="flex gap-3">
+                      <Input
+                        id="brand-color"
+                        type="color"
+                        value={brandColor}
+                        onChange={(e) => setBrandColor(e.target.value)}
+                        className="w-20 h-11 p-1"
+                      />
+                      <Input
+                        value={brandColor}
+                        onChange={(e) => setBrandColor(e.target.value)}
+                        placeholder="#2563eb"
+                        className="flex-1 h-11"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-6">
+                    <Button onClick={handleSave} disabled={saving} size="lg" className="w-full">
+                      {saving ? "Saving..." : "Save Branding"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2">
+                <CardHeader className="bg-muted/30">
+                  <CardTitle className="text-xl">Form Style & Content</CardTitle>
+                  <CardDescription>
+                    Customize the form customers see before starting their conversation.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8 pt-6">
+                  {/* Template Selection */}
+                  <div>
+                    <Label className="text-base font-semibold mb-4 block">Form Style</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {preFormTemplates.map((template) => (
+                        <button
+                          key={template.id}
+                          onClick={() => setPreFormStyle(template.id)}
+                          className={`p-4 rounded-xl border-2 text-left transition-all group ${
+                            preFormStyle === template.id
+                              ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                          }`}
+                        >
+                          <div className="font-semibold text-base mb-1">{template.name}</div>
+                          <div className="text-sm text-muted-foreground">{template.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Background Effect */}
+                  <div>
+                    <Label className="text-base font-semibold mb-4 block">Form Background Effect</Label>
+                    <Select value={backgroundStyle} onValueChange={(value) => {
+                      console.log("Background style changed to:", value);
+                      setBackgroundStyle(value);
+                    }}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select background effect" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gradient">Gradient</SelectItem>
+                        <SelectItem value="mesh">Mesh Gradient</SelectItem>
+                        <SelectItem value="aurora">Aurora</SelectItem>
+                        <SelectItem value="dots">Dots Pattern</SelectItem>
+                        <SelectItem value="layers">Layers</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Choose the background effect for the pre-form card using your brand color
+                    </p>
+                  </div>
+
+                  {/* Button Colors - Side by Side */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-base font-semibold mb-3 block">Button Color</Label>
+                      <div className="flex gap-3">
+                        <Input
+                          type="color"
+                          value={buttonColor}
+                          onChange={(e) => setButtonColor(e.target.value)}
+                          className="w-20 h-11 p-1"
+                        />
+                        <Input
+                          value={buttonColor}
+                          onChange={(e) => setButtonColor(e.target.value)}
+                          placeholder="#2563eb"
+                          className="flex-1 h-11"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-base font-semibold mb-3 block">Button Text Color</Label>
+                      <div className="flex gap-3">
+                        <Input
+                          type="color"
+                          value={buttonTextColor}
+                          onChange={(e) => setButtonTextColor(e.target.value)}
+                          className="w-20 h-11 p-1"
+                        />
+                        <Input
+                          value={buttonTextColor}
+                          onChange={(e) => setButtonTextColor(e.target.value)}
+                          placeholder="#ffffff"
+                          className="flex-1 h-11"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Text Color */}
+                  <div>
+                    <Label className="text-base font-semibold mb-3 block">Pre-Form Text Color</Label>
+                    <div className="flex gap-3">
+                      <Input
+                        type="color"
+                        value={textColor}
+                        onChange={(e) => setTextColor(e.target.value)}
+                        className="w-20 h-11 p-1"
+                      />
+                      <Input
+                        value={textColor}
+                        onChange={(e) => setTextColor(e.target.value)}
+                        placeholder="#000000"
+                        className="flex-1 h-11"
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Color of the title and description text
+                    </p>
+                  </div>
+
+                  {/* Solid Background Color */}
+                  <div>
+                    <Label className="text-base font-semibold mb-3 block">Solid Background Color</Label>
+                    <div className="flex gap-3">
+                      <Input
+                        type="color"
+                        value={solidBackgroundColor}
+                        onChange={(e) => setSolidBackgroundColor(e.target.value)}
+                        className="w-20 h-11 p-1"
+                      />
+                      <Input
+                        value={solidBackgroundColor}
+                        onChange={(e) => setSolidBackgroundColor(e.target.value)}
+                        placeholder="#000000"
+                        className="flex-1 h-11"
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Solid background color for the pre-form card (gradients will overlay on top)
+                    </p>
+                  </div>
+
+                  {/* Content Customization */}
+                  <div className="space-y-6">
+                    <div>
+                      <Label htmlFor="pre-form-title" className="text-base font-semibold mb-3 block">
+                        Form Title
+                      </Label>
+                      <Input
+                        id="pre-form-title"
+                        value={preFormTitle}
+                        onChange={(e) => setPreFormTitle(e.target.value)}
+                        placeholder="We're sorry to see you go"
+                        className="text-base h-11"
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        The main heading displayed on the pre-form page.
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="pre-form-description" className="text-base font-semibold mb-3 block">
+                        Form Description
+                      </Label>
+                      <Textarea
+                        id="pre-form-description"
+                        value={preFormDescription}
+                        onChange={(e) => setPreFormDescription(e.target.value)}
+                        placeholder="Help us improve by sharing your feedback"
+                        rows={4}
+                        className="text-base resize-none"
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        The subtitle text explaining the purpose of the form.
+                      </p>
+                    </div>
+
+                    {/* Copy Examples */}
+                    <div className="pt-4 border-t">
+                      <Label className="text-base font-semibold mb-4 block">Copy Examples</Label>
+                      <div className="space-y-3">
+                        <button
+                          onClick={() => {
+                            setPreFormTitle("One last thing before you go.");
+                            setPreFormDescription("We'd genuinely like to understand what made you leave. No long survey — just a quick conversation.");
+                          }}
+                          className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                        >
+                          <div className="font-semibold text-sm mb-1">More Emotional</div>
+                          <div className="text-sm text-muted-foreground">
+                            "One last thing before you go. We'd genuinely like to understand what made you leave. No long survey — just a quick conversation."
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPreFormTitle("Before you leave, can we ask why?");
+                            setPreFormDescription("This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters.");
+                          }}
+                          className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                        >
+                          <div className="font-semibold text-sm mb-1">Curiosity-Driven</div>
+                          <div className="text-sm text-muted-foreground">
+                            "Before you leave, can we ask why? This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters."
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPreFormTitle("Before you go — one quick conversation?");
+                            setPreFormDescription("We'd love to understand what happened. It takes less than 60 seconds.");
+                          }}
+                          className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
+                        >
+                          <div className="font-semibold text-sm mb-1">Tight & Direct</div>
+                          <div className="text-sm text-muted-foreground">
+                            "Before you go — one quick conversation? We'd love to understand what happened. It takes less than 60 seconds."
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form Fields Settings */}
+                  <div className="pt-4 border-t space-y-6">
+                    <Label className="text-base font-semibold mb-4 block">Form Fields</Label>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-xl">
+                        <div>
+                          <Label className="font-semibold">Show Name Field</Label>
+                          <p className="text-sm text-muted-foreground">Display the name input field in the pre-form</p>
+                        </div>
+                        <Switch checked={showNameField} onCheckedChange={setShowNameField} />
+                      </div>
+                      
+                      {showNameField && (
+                        <div className="p-4 border rounded-xl bg-muted/30">
+                          <div className="flex items-center justify-between">
+                            <Label className="font-semibold">Require Name</Label>
+                            <Switch checked={requireName} onCheckedChange={setRequireName} />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between p-4 border rounded-xl">
+                        <div>
+                          <Label className="font-semibold">Show Email Field</Label>
+                          <p className="text-sm text-muted-foreground">Display the email input field in the pre-form</p>
+                        </div>
+                        <Switch checked={showEmailField} onCheckedChange={setShowEmailField} />
+                      </div>
+                      
+                      {showEmailField && (
+                        <div className="p-4 border rounded-xl bg-muted/30">
+                          <div className="flex items-center justify-between">
+                            <Label className="font-semibold">Require Email</Label>
+                            <Switch checked={requireEmail} onCheckedChange={setRequireEmail} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-6 border-t">
+                    <Button
+                      onClick={handleSave}
+                      disabled={saving}
+                      size="lg"
+                      className="gap-2 px-8"
+                    >
+                      <Save className="h-5 w-5" />
+                      {saving ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
