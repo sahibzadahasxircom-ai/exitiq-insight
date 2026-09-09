@@ -159,7 +159,7 @@ function PreForm() {
   }
 
   return (
-    <div className={`min-h-screen bg-background relative overflow-hidden ${isModal ? 'p-4' : ''}`}>
+    <div className={`min-h-screen bg-background relative ${isModal ? 'p-4' : ''}`}>
       {/* Header with company branding */}
       <header className={`border-b border-border bg-background/90 backdrop-blur relative z-10 ${isModal ? 'rounded-t-lg' : ''}`}>
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
@@ -167,7 +167,7 @@ function PreForm() {
             {companyLogo ? (
               <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain rounded-full" />
             ) : (
-              <div 
+              <div
                 className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
                 style={{ backgroundColor: brandColor }}
               >
@@ -187,10 +187,10 @@ function PreForm() {
       </header>
 
       {/* Main Content */}
-      <div className={`flex items-center justify-center px-6 py-12 relative z-10 overflow-hidden ${isModal ? 'min-h-[500px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
-        <Card 
-          className={`w-full max-w-md shadow-soft relative overflow-hidden ${
-            formStyle === "casual" ? "rounded-2xl border-2" : 
+      <div className={`flex items-center justify-center px-6 py-12 relative z-10 ${isModal ? 'min-h-[500px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
+        <Card
+          className={`w-full max-w-md shadow-soft relative ${
+            formStyle === "casual" ? "rounded-2xl border-2" :
             formStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
           }`}
           style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}

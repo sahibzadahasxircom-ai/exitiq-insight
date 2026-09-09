@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Settings as SettingsIcon, Users } from "lucide-react";
+import { LogOut, Settings as SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -47,9 +47,6 @@ export function UserMenu() {
           <span className="text-xs font-normal text-muted-foreground">{profile?.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/team"><Users className="mr-2 h-4 w-4" />Team</Link>
-        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/settings"><SettingsIcon className="mr-2 h-4 w-4" />Settings</Link>
         </DropdownMenuItem>

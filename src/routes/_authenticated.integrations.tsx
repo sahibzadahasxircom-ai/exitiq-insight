@@ -352,15 +352,6 @@ Example webhook payload:
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => handleViewSnippet(integration)}
-                        title="View Snippet"
-                      >
-                        <Code className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
                         onClick={() => handleDisconnect(integration.id, integration.integration_type)}
                       >
                         <Trash2 className="h-4 w-4 text-muted-foreground" />
@@ -438,6 +429,15 @@ Example webhook payload:
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
                     Not Connected
                   </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleViewSnippet({ integration_type: available.id, company_id: company?.id || '', config: {} } as IntegrationData)}
+                    title="View Snippet"
+                  >
+                    <Code className="h-4 w-4 text-muted-foreground" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
