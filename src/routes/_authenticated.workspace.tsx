@@ -238,45 +238,46 @@ function Workspace() {
 
         <TabsContent value="pre-form" className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Live Preview */}
-            <Card className="border-2 sticky top-6">
-              <CardHeader className="bg-muted/30">
-                <CardTitle className="text-xl">Live Preview</CardTitle>
-                <CardDescription>
-                  See how your pre-form will look to customers in real-time.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-base font-semibold">Device Preview</Label>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-10 w-10 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
-                        onClick={() => setPreviewDevice("desktop")}
-                      >
-                        <Monitor className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-10 w-10 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
-                        onClick={() => setPreviewDevice("tablet")}
-                      >
-                        <Tablet className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-10 w-10 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
-                        onClick={() => setPreviewDevice("mobile")}
-                      >
-                        <Smartphone className="h-5 w-5" />
-                      </Button>
+            {/* Left Column - Live Preview + Quick Settings */}
+            <div className="space-y-8">
+              <Card className="border-2 sticky top-6">
+                <CardHeader className="bg-muted/30">
+                  <CardTitle className="text-xl">Live Preview</CardTitle>
+                  <CardDescription>
+                    See how your pre-form will look to customers in real-time.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-base font-semibold">Device Preview</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className={`h-10 w-10 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
+                          onClick={() => setPreviewDevice("desktop")}
+                        >
+                          <Monitor className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className={`h-10 w-10 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
+                          onClick={() => setPreviewDevice("tablet")}
+                        >
+                          <Tablet className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className={`h-10 w-10 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
+                          onClick={() => setPreviewDevice("mobile")}
+                        >
+                          <Smartphone className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
                 <div
                   className={`mx-auto border rounded-xl overflow-hidden relative ${
                     previewDevice === "desktop"
@@ -353,15 +354,15 @@ function Workspace() {
                   )}
 
                   {/* Logo and Company Name in corner */}
-                  {(logo || companyName) && (
-                    <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 ${
+                  {(logoPreview || logo || companyName) && (
+                    <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 bg-white/80 backdrop-blur-sm p-2 rounded-lg ${
                       preFormStyle === "minimal" ? "hidden" : ""
                     }`}>
-                      {logo && (
-                        <img src={logo} alt="Logo" className="h-8 w-8 object-contain" />
+                      {(logoPreview || logo) && (
+                        <img src={logoPreview || logo} alt="Logo" className="h-8 w-8 object-contain" />
                       )}
                       {companyName && (
-                        <span className="text-sm font-semiboldtruncate" style={{ color: textColor }}>
+                        <span className="text-sm font-semibold truncate max-w-[150px]" style={{ color: textColor }}>
                           {companyName}
                         </span>
                       )}
@@ -434,7 +435,89 @@ function Workspace() {
             </CardContent>
           </Card>
 
-            {/* Right Column - Settings */}
+              {/* Quick Settings Below Preview */}
+              <Card className="border-2">
+                <CardHeader className="bg-muted/30">
+                  <CardTitle className="text-xl">Quick Settings</CardTitle>
+                  <CardDescription>
+                    Common customizations for your pre-form.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-6">
+                  {/* Form Style */}
+                  <div>
+                    <Label className="text-base font-semibold mb-4 block">Form Style</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {preFormTemplates.map((template) => (
+                        <button
+                          key={template.id}
+                          onClick={() => setPreFormStyle(template.id)}
+                          className={`p-4 rounded-xl border-2 text-left transition-all group ${
+                            preFormStyle === template.id
+                              ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                          }`}
+                        >
+                          <div className="font-semibold text-base mb-1">{template.name}</div>
+                          <div className="text-sm text-muted-foreground">{template.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Background Effect */}
+                  <div>
+                    <Label className="text-base font-semibold mb-4 block">Form Background Effect</Label>
+                    <Select value={backgroundStyle} onValueChange={(value) => {
+                      console.log("Background style changed to:", value);
+                      setBackgroundStyle(value);
+                    }}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select background effect" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gradient">Gradient</SelectItem>
+                        <SelectItem value="mesh">Mesh Gradient</SelectItem>
+                        <SelectItem value="aurora">Aurora</SelectItem>
+                        <SelectItem value="dots">Dots Pattern</SelectItem>
+                        <SelectItem value="layers">Layers</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Content Customization */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="pre-form-title" className="text-base font-semibold mb-3 block">
+                        Form Title
+                      </Label>
+                      <Input
+                        id="pre-form-title"
+                        value={preFormTitle}
+                        onChange={(e) => setPreFormTitle(e.target.value)}
+                        placeholder="We're sorry to see you go"
+                        className="text-base h-11"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="pre-form-description" className="text-base font-semibold mb-3 block">
+                        Form Description
+                      </Label>
+                      <Textarea
+                        id="pre-form-description"
+                        value={preFormDescription}
+                        onChange={(e) => setPreFormDescription(e.target.value)}
+                        placeholder="Help us improve by sharing your feedback"
+                        rows={3}
+                        className="text-base resize-none"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column - Detailed Settings */}
             <div className="space-y-8">
               <Card className="border-2">
                 <CardHeader className="bg-muted/30">
@@ -521,56 +604,12 @@ function Workspace() {
 
               <Card className="border-2">
                 <CardHeader className="bg-muted/30">
-                  <CardTitle className="text-xl">Form Style & Content</CardTitle>
+                  <CardTitle className="text-xl">Colors & Advanced Settings</CardTitle>
                   <CardDescription>
-                    Customize the form customers see before starting their conversation.
+                    Customize colors and advanced form options.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8 pt-6">
-                  {/* Template Selection */}
-                  <div>
-                    <Label className="text-base font-semibold mb-4 block">Form Style</Label>
-                    <div className="grid grid-cols-3 gap-4">
-                      {preFormTemplates.map((template) => (
-                        <button
-                          key={template.id}
-                          onClick={() => setPreFormStyle(template.id)}
-                          className={`p-4 rounded-xl border-2 text-left transition-all group ${
-                            preFormStyle === template.id
-                              ? "border-primary bg-primary/10 ring-2 ring-primary/30"
-                              : "border-border hover:border-primary/50 hover:bg-muted/50"
-                          }`}
-                        >
-                          <div className="font-semibold text-base mb-1">{template.name}</div>
-                          <div className="text-sm text-muted-foreground">{template.description}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Background Effect */}
-                  <div>
-                    <Label className="text-base font-semibold mb-4 block">Form Background Effect</Label>
-                    <Select value={backgroundStyle} onValueChange={(value) => {
-                      console.log("Background style changed to:", value);
-                      setBackgroundStyle(value);
-                    }}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select background effect" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gradient">Gradient</SelectItem>
-                        <SelectItem value="mesh">Mesh Gradient</SelectItem>
-                        <SelectItem value="aurora">Aurora</SelectItem>
-                        <SelectItem value="dots">Dots Pattern</SelectItem>
-                        <SelectItem value="layers">Layers</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Choose the background effect for the pre-form card using your brand color
-                    </p>
-                  </div>
-
                   {/* Button Colors - Side by Side */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
@@ -653,88 +692,10 @@ function Workspace() {
                     </p>
                   </div>
 
-                  {/* Content Customization */}
-                  <div className="space-y-6">
-                    <div>
-                      <Label htmlFor="pre-form-title" className="text-base font-semibold mb-3 block">
-                        Form Title
-                      </Label>
-                      <Input
-                        id="pre-form-title"
-                        value={preFormTitle}
-                        onChange={(e) => setPreFormTitle(e.target.value)}
-                        placeholder="We're sorry to see you go"
-                        className="text-base h-11"
-                      />
-                      <p className="text-sm text-muted-foreground mt-2">
-                        The main heading displayed on the pre-form page.
-                      </p>
-                    </div>
-                    <div>
-                      <Label htmlFor="pre-form-description" className="text-base font-semibold mb-3 block">
-                        Form Description
-                      </Label>
-                      <Textarea
-                        id="pre-form-description"
-                        value={preFormDescription}
-                        onChange={(e) => setPreFormDescription(e.target.value)}
-                        placeholder="Help us improve by sharing your feedback"
-                        rows={4}
-                        className="text-base resize-none"
-                      />
-                      <p className="text-sm text-muted-foreground mt-2">
-                        The subtitle text explaining the purpose of the form.
-                      </p>
-                    </div>
-
-                    {/* Copy Examples */}
-                    <div className="pt-4 border-t">
-                      <Label className="text-base font-semibold mb-4 block">Copy Examples</Label>
-                      <div className="space-y-3">
-                        <button
-                          onClick={() => {
-                            setPreFormTitle("One last thing before you go.");
-                            setPreFormDescription("We'd genuinely like to understand what made you leave. No long survey — just a quick conversation.");
-                          }}
-                          className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
-                        >
-                          <div className="font-semibold text-sm mb-1">More Emotional</div>
-                          <div className="text-sm text-muted-foreground">
-                            "One last thing before you go. We'd genuinely like to understand what made you leave. No long survey — just a quick conversation."
-                          </div>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setPreFormTitle("Before you leave, can we ask why?");
-                            setPreFormDescription("This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters.");
-                          }}
-                          className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
-                        >
-                          <div className="font-semibold text-sm mb-1">Curiosity-Driven</div>
-                          <div className="text-sm text-muted-foreground">
-                            "Before you leave, can we ask why? This isn't a survey. Just tell us what happened in a quick conversation — your feedback matters."
-                          </div>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setPreFormTitle("Before you go — one quick conversation?");
-                            setPreFormDescription("We'd love to understand what happened. It takes less than 60 seconds.");
-                          }}
-                          className="w-full text-left p-4 rounded-xl border-2 border-border hover:border-primary/50 hover:bg-muted/50 transition-all"
-                        >
-                          <div className="font-semibold text-sm mb-1">Tight & Direct</div>
-                          <div className="text-sm text-muted-foreground">
-                            "Before you go — one quick conversation? We'd love to understand what happened. It takes less than 60 seconds."
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Form Fields Settings */}
                   <div className="pt-4 border-t space-y-6">
                     <Label className="text-base font-semibold mb-4 block">Form Fields</Label>
-                    
+
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-4 border rounded-xl">
                         <div>
