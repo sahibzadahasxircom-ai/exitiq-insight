@@ -32,27 +32,29 @@ function AuthPage() {
 
   useEffect(() => {
     const checkCompanyDetails = async () => {
-      if (!loading && session && profile?.company_id) {
-        // Check if user has verified integrations
-        const { data: integrations } = await supabase
-          .from("integrations")
-          .select("*")
-          .eq("company_id", profile.company_id);
+      if (!loading && session && profile) {
+        if (profile.company_id) {
+          // Check if user has verified integrations
+          const { data: integrations } = await supabase
+            .from("integrations")
+            .select("*")
+            .eq("company_id", profile.company_id);
 
-        const hasConnectedIntegration = integrations?.some(
-          (i) => i.status === "connected" || i.status === "listening_for_events"
-        );
+          const hasConnectedIntegration = integrations?.some(
+            (i) => i.status === "connected" || i.status === "listening_for_events"
+          );
 
-        if (hasConnectedIntegration) {
-          // User has verified integrations, go to dashboard
-          navigate({ to: search.redirect ?? "/_authenticated/dashboard", replace: true });
+          if (hasConnectedIntegration) {
+            // User has verified integrations, go to dashboard
+            navigate({ to: search.redirect ?? "/_authenticated/dashboard", replace: true });
+          } else {
+            // User has company but no verified integrations, go to setup-wizard
+            navigate({ to: search.redirect ?? "/setup-wizard", replace: true });
+          }
         } else {
-          // User has company but no verified integrations, go to setup-wizard
-          navigate({ to: search.redirect ?? "/setup-wizard", replace: true });
+          // No company_id, go to setup-wizard (company should be created during sign-up)
+          navigate({ to: "/setup-wizard", replace: true });
         }
-      } else if (!loading && session) {
-        // No company_id, go to setup-wizard (company should be created during sign-up)
-        navigate({ to: "/setup-wizard", replace: true });
       }
       setCheckingCompany(false);
     };
