@@ -9,46 +9,36 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TestInterviewRouteImport } from './routes/test-interview'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as ExitInterviewRouteImport } from './routes/exit-interview'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as InterviewSessionIdRouteImport } from './routes/interview.$sessionId'
-import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated.workspace'
-import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated.team'
-import { Route as AuthenticatedSetupWizardRouteImport } from './routes/_authenticated.setup-wizard'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
-import { Route as AuthenticatedProductKnowledgeRouteImport } from './routes/_authenticated.product-knowledge'
-import { Route as AuthenticatedInterviewsRouteImport } from './routes/_authenticated.interviews'
-import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated.integrations'
-import { Route as AuthenticatedInstallRouteImport } from './routes/_authenticated.install'
-import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated.insights'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
-import { Route as AuthenticatedCompetitorsRouteImport } from './routes/_authenticated.competitors'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ExitInterviewRouteImport } from './routes/exit-interview'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TestInterviewRouteImport } from './routes/test-interview'
 import { Route as AuthenticatedCompanyDetailsRouteImport } from './routes/_authenticated.company-details'
+import { Route as AuthenticatedCompetitorsRouteImport } from './routes/_authenticated.competitors'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated.insights'
+import { Route as AuthenticatedInstallRouteImport } from './routes/_authenticated.install'
+import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated.integrations'
+import { Route as AuthenticatedInterviewsRouteImport } from './routes/_authenticated.interviews'
+import { Route as AuthenticatedProductKnowledgeRouteImport } from './routes/_authenticated.product-knowledge'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as AuthenticatedSetupWizardRouteImport } from './routes/_authenticated.setup-wizard'
+import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated.team'
+import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated.workspace'
+import { Route as InterviewSessionIdRouteImport } from './routes/interview.$sessionId'
+import { Route as PreFormSessionIdRouteImport } from './routes/pre-form.$sessionId'
 import { Route as AuthenticatedInterviewsIdRouteImport } from './routes/_authenticated.interviews.$id'
 
-const TestInterviewRoute = TestInterviewRouteImport.update({
-  id: '/test-interview',
-  path: '/test-interview',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExitInterviewRoute = ExitInterviewRouteImport.update({
-  id: '/exit-interview',
-  path: '/exit-interview',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -56,50 +46,51 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const ExitInterviewRoute = ExitInterviewRouteImport.update({
+  id: '/exit-interview',
+  path: '/exit-interview',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InterviewSessionIdRoute = InterviewSessionIdRouteImport.update({
-  id: '/interview/$sessionId',
-  path: '/interview/$sessionId',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
-  id: '/workspace',
-  path: '/workspace',
-  getParentRoute: () => AuthenticatedRoute,
+const TestInterviewRoute = TestInterviewRouteImport.update({
+  id: '/test-interview',
+  path: '/test-interview',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedSetupWizardRoute =
-  AuthenticatedSetupWizardRouteImport.update({
-    id: '/setup-wizard',
-    path: '/setup-wizard',
+const AuthenticatedCompanyDetailsRoute =
+  AuthenticatedCompanyDetailsRouteImport.update({
+    id: '/company-details',
+    path: '/company-details',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedProductKnowledgeRoute =
-  AuthenticatedProductKnowledgeRouteImport.update({
-    id: '/product-knowledge',
-    path: '/product-knowledge',
+const AuthenticatedCompetitorsRoute =
+  AuthenticatedCompetitorsRouteImport.update({
+    id: '/competitors',
+    path: '/competitors',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedInterviewsRoute = AuthenticatedInterviewsRouteImport.update({
-  id: '/interviews',
-  path: '/interviews',
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedInstallRoute = AuthenticatedInstallRouteImport.update({
+  id: '/install',
+  path: '/install',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedIntegrationsRoute =
@@ -108,33 +99,48 @@ const AuthenticatedIntegrationsRoute =
     path: '/integrations',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedInstallRoute = AuthenticatedInstallRouteImport.update({
-  id: '/install',
-  path: '/install',
+const AuthenticatedInterviewsRoute = AuthenticatedInterviewsRouteImport.update({
+  id: '/interviews',
+  path: '/interviews',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedCompetitorsRoute =
-  AuthenticatedCompetitorsRouteImport.update({
-    id: '/competitors',
-    path: '/competitors',
+const AuthenticatedProductKnowledgeRoute =
+  AuthenticatedProductKnowledgeRouteImport.update({
+    id: '/product-knowledge',
+    path: '/product-knowledge',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedCompanyDetailsRoute =
-  AuthenticatedCompanyDetailsRouteImport.update({
-    id: '/company-details',
-    path: '/company-details',
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSetupWizardRoute =
+  AuthenticatedSetupWizardRouteImport.update({
+    id: '/setup-wizard',
+    path: '/setup-wizard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
+  id: '/workspace',
+  path: '/workspace',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const InterviewSessionIdRoute = InterviewSessionIdRouteImport.update({
+  id: '/interview/$sessionId',
+  path: '/interview/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreFormSessionIdRoute = PreFormSessionIdRouteImport.update({
+  id: '/pre-form/$sessionId',
+  path: '/pre-form/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInterviewsIdRoute =
   AuthenticatedInterviewsIdRouteImport.update({
     id: '/$id',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/team': typeof AuthenticatedTeamRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
+  '/pre-form/$sessionId': typeof PreFormSessionIdRoute
   '/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRoutesByTo {
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/team': typeof AuthenticatedTeamRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
+  '/pre-form/$sessionId': typeof PreFormSessionIdRoute
   '/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRoutesById {
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
+  '/pre-form/$sessionId': typeof PreFormSessionIdRoute
   '/_authenticated/interviews/$id': typeof AuthenticatedInterviewsIdRoute
 }
 export interface FileRouteTypes {
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/workspace'
     | '/interview/$sessionId'
+    | '/pre-form/$sessionId'
     | '/interviews/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/workspace'
     | '/interview/$sessionId'
+    | '/pre-form/$sessionId'
     | '/interviews/$id'
   id:
     | '__root__'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/_authenticated/team'
     | '/_authenticated/workspace'
     | '/interview/$sessionId'
+    | '/pre-form/$sessionId'
     | '/_authenticated/interviews/$id'
   fileRoutesById: FileRoutesById
 }
@@ -289,43 +301,16 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   TestInterviewRoute: typeof TestInterviewRoute
   InterviewSessionIdRoute: typeof InterviewSessionIdRoute
+  PreFormSessionIdRoute: typeof PreFormSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/test-interview': {
-      id: '/test-interview'
-      path: '/test-interview'
-      fullPath: '/test-interview'
-      preLoaderRoute: typeof TestInterviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/exit-interview': {
-      id: '/exit-interview'
-      path: '/exit-interview'
-      fullPath: '/exit-interview'
-      preLoaderRoute: typeof ExitInterviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -335,88 +320,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/interview/$sessionId': {
-      id: '/interview/$sessionId'
-      path: '/interview/$sessionId'
-      fullPath: '/interview/$sessionId'
-      preLoaderRoute: typeof InterviewSessionIdRouteImport
+    '/exit-interview': {
+      id: '/exit-interview'
+      path: '/exit-interview'
+      fullPath: '/exit-interview'
+      preLoaderRoute: typeof ExitInterviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/workspace': {
-      id: '/_authenticated/workspace'
-      path: '/workspace'
-      fullPath: '/workspace'
-      preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/team': {
-      id: '/_authenticated/team'
-      path: '/team'
-      fullPath: '/team'
-      preLoaderRoute: typeof AuthenticatedTeamRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/setup-wizard': {
-      id: '/_authenticated/setup-wizard'
-      path: '/setup-wizard'
-      fullPath: '/setup-wizard'
-      preLoaderRoute: typeof AuthenticatedSetupWizardRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/test-interview': {
+      id: '/test-interview'
+      path: '/test-interview'
+      fullPath: '/test-interview'
+      preLoaderRoute: typeof TestInterviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/product-knowledge': {
-      id: '/_authenticated/product-knowledge'
-      path: '/product-knowledge'
-      fullPath: '/product-knowledge'
-      preLoaderRoute: typeof AuthenticatedProductKnowledgeRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/interviews': {
-      id: '/_authenticated/interviews'
-      path: '/interviews'
-      fullPath: '/interviews'
-      preLoaderRoute: typeof AuthenticatedInterviewsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/integrations': {
-      id: '/_authenticated/integrations'
-      path: '/integrations'
-      fullPath: '/integrations'
-      preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/install': {
-      id: '/_authenticated/install'
-      path: '/install'
-      fullPath: '/install'
-      preLoaderRoute: typeof AuthenticatedInstallRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/insights': {
-      id: '/_authenticated/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof AuthenticatedInsightsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+    '/_authenticated/company-details': {
+      id: '/_authenticated/company-details'
+      path: '/company-details'
+      fullPath: '/company-details'
+      preLoaderRoute: typeof AuthenticatedCompanyDetailsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/competitors': {
@@ -426,12 +369,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompetitorsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/company-details': {
-      id: '/_authenticated/company-details'
-      path: '/company-details'
-      fullPath: '/company-details'
-      preLoaderRoute: typeof AuthenticatedCompanyDetailsRouteImport
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/insights': {
+      id: '/_authenticated/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof AuthenticatedInsightsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/install': {
+      id: '/_authenticated/install'
+      path: '/install'
+      fullPath: '/install'
+      preLoaderRoute: typeof AuthenticatedInstallRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/integrations': {
+      id: '/_authenticated/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/interviews': {
+      id: '/_authenticated/interviews'
+      path: '/interviews'
+      fullPath: '/interviews'
+      preLoaderRoute: typeof AuthenticatedInterviewsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/product-knowledge': {
+      id: '/_authenticated/product-knowledge'
+      path: '/product-knowledge'
+      fullPath: '/product-knowledge'
+      preLoaderRoute: typeof AuthenticatedProductKnowledgeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/setup-wizard': {
+      id: '/_authenticated/setup-wizard'
+      path: '/setup-wizard'
+      fullPath: '/setup-wizard'
+      preLoaderRoute: typeof AuthenticatedSetupWizardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/team': {
+      id: '/_authenticated/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AuthenticatedTeamRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/workspace': {
+      id: '/_authenticated/workspace'
+      path: '/workspace'
+      fullPath: '/workspace'
+      preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/interview/$sessionId': {
+      id: '/interview/$sessionId'
+      path: '/interview/$sessionId'
+      fullPath: '/interview/$sessionId'
+      preLoaderRoute: typeof InterviewSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pre-form/$sessionId': {
+      id: '/pre-form/$sessionId'
+      path: '/pre-form/$sessionId'
+      fullPath: '/pre-form/$sessionId'
+      preLoaderRoute: typeof PreFormSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/interviews/$id': {
       id: '/_authenticated/interviews/$id'
@@ -500,6 +520,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   TestInterviewRoute: TestInterviewRoute,
   InterviewSessionIdRoute: InterviewSessionIdRoute,
+  PreFormSessionIdRoute: PreFormSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

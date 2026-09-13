@@ -12,11 +12,4 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  vite: {
-    build: {
-      // Use traditional rollup instead of rolldown to avoid binding errors
-      minify: "esbuild",
-      target: "esnext",
-    },
-  },
 });
