@@ -98,7 +98,7 @@ function GoogleButton() {
         setBusy(true);
         try {
           const result = await lovable.auth.signInWithOAuth("google", {
-            redirect_uri: window.location.origin + "/setup-wizard",
+            redirect_uri: window.location.origin + "/auth",
           });
           if (result.error) {
             toast.error("Google sign-in failed");
@@ -148,7 +148,7 @@ function SignInForm() {
       return;
     }
     toast.success("Welcome back");
-    navigate({ to: "/", replace: true });
+    // Let AuthPage useEffect handle redirect based on integration status
   }
 
   return (
