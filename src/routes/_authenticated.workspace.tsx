@@ -240,7 +240,7 @@ function Workspace() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Live Preview + Quick Settings */}
             <div className="space-y-8">
-              <Card className="border-2 sticky top-6">
+              <Card className="border-2">
                 <CardHeader className="bg-muted/30">
                   <CardTitle className="text-xl">Live Preview</CardTitle>
                   <CardDescription>
@@ -355,21 +355,21 @@ function Workspace() {
 
                   {/* Logo and Company Name in corner */}
                   {(logoPreview || logo || companyName) && (
-                    <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 bg-white/80 backdrop-blur-sm p-2 rounded-lg ${
+                    <div className={`absolute top-4 left-4 flex items-center gap-3 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm ${
                       preFormStyle === "minimal" ? "hidden" : ""
                     }`}>
                       {(logoPreview || logo) && (
-                        <img src={logoPreview || logo} alt="Logo" className="h-8 w-8 object-contain" />
+                        <img src={logoPreview || logo} alt="Logo" className="h-10 w-10 object-contain flex-shrink-0" />
                       )}
                       {companyName && (
-                        <span className="text-sm font-semibold truncate max-w-[150px]" style={{ color: textColor }}>
+                        <span className="text-sm font-semibold truncate max-w-[180px]" style={{ color: textColor }}>
                           {companyName}
                         </span>
                       )}
                     </div>
                   )}
 
-                  <div className={`p-6 space-y-4 relative z-10 ${
+                  <div className={`p-8 pt-16 space-y-6 relative z-10 ${
                     preFormStyle === "minimal" ? "text-center" : ""
                   }`} style={{ color: textColor }}>
                     <div className={`space-y-1 ${
