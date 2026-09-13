@@ -45,7 +45,7 @@ function AuthPage() {
 
         if (hasConnectedIntegration) {
           // User has verified integrations, go to dashboard
-          navigate({ to: search.redirect ?? "/", replace: true });
+          navigate({ to: search.redirect ?? "/_authenticated/dashboard", replace: true });
         } else {
           // User has company but no verified integrations, go to setup-wizard
           navigate({ to: search.redirect ?? "/setup-wizard", replace: true });
