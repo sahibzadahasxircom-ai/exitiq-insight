@@ -40,14 +40,14 @@ function AuthenticatedLayout() {
 
           if (hasConnectedIntegration) {
             // User has verified integrations, go to dashboard
-            navigate({ to: "/_authenticated/dashboard", replace: true });
+            navigate({ to: "/dashboard", replace: true });
           } else {
             // User has company but no verified integrations, go to setup-wizard
-            navigate({ to: "/_authenticated/setup-wizard", replace: true });
+            navigate({ to: "/setup-wizard", replace: true });
           }
         } else {
           // No company_id, go to setup-wizard
-          navigate({ to: "/_authenticated/setup-wizard", replace: true });
+          navigate({ to: "/setup-wizard", replace: true });
         }
       }
     };

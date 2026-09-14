@@ -58,14 +58,14 @@ function AuthPage() {
 
         if (hasConnectedIntegration) {
           // User has verified integrations, go to dashboard
-          navigate({ to: "/_authenticated/dashboard", replace: true });
+          navigate({ to: "/dashboard", replace: true });
         } else {
           // User has company but no verified integrations, go to setup-wizard
-          navigate({ to: "/_authenticated/setup-wizard", replace: true });
+          navigate({ to: "/setup-wizard", replace: true });
         }
       } else {
         // No company_id, go to setup-wizard (company should be created during sign-up)
-        navigate({ to: "/_authenticated/setup-wizard", replace: true });
+        navigate({ to: "/setup-wizard", replace: true });
       }
       setCheckingCompany(false);
     };
@@ -208,7 +208,7 @@ function SignUpForm() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin + "/_authenticated/setup-wizard",
+        emailRedirectTo: window.location.origin + "/setup-wizard",
         data: { 
           first_name: firstName, 
           last_name: lastName, 
@@ -281,19 +281,19 @@ function SignUpForm() {
         // Company was created but linking failed - still proceed to setup wizard
         // The setup wizard will handle linking the company
         toast.success(`Account created for "${company}"`);
-        navigate({ to: "/_authenticated/setup-wizard", replace: true });
+        navigate({ to: "/setup-wizard", replace: true });
         return;
       }
 
       toast.success(`Account created for "${company}"`);
       
       // Navigate to setup wizard
-      navigate({ to: "/_authenticated/setup-wizard", replace: true });
+      navigate({ to: "/setup-wizard", replace: true });
     } catch (error) {
       console.error("Error creating company during sign-up:", error);
       toast.error("Account created but failed to create company. Please try again.");
       // Still navigate to setup wizard, they can try again later
-      navigate({ to: "/_authenticated/setup-wizard", replace: true });
+      navigate({ to: "/setup-wizard", replace: true });
     }
   }
 
