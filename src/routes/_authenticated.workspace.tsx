@@ -570,7 +570,7 @@ function Workspace() {
 
                   <div className="pt-6">
                     <Button onClick={handleSave} disabled={saving} size="lg" className="w-full">
-                      {saving ? "Saving..." : "Save All Settings"}
+                      {saving ? "Saving..." : "Save Branding"}
                     </Button>
                   </div>
                 </CardContent>
