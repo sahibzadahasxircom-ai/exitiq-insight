@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { UserMenu } from "@/components/user-menu";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthenticatedLayout() {
-  const { loading, session } = useAuth();
+  const { loading, session, profile } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,6 +20,40 @@ function AuthenticatedLayout() {
       navigate({ to: "/auth", search: { redirect: window.location.pathname } as never, replace: true });
     }
   }, [loading, session, navigate]);
+
+  useEffect(() => {
+    const handleRouting = async () => {
+      if (loading || !session || !profile) return;
+
+      // Only redirect if we're on the base authenticated path
+      if (window.location.pathname === "/_authenticated" || window.location.pathname === "/") {
+        if (profile.company_id) {
+          // Check if user has verified integrations
+          const { data: integrations } = await supabase
+            .from("integrations")
+            .select("*")
+            .eq("company_id", profile.company_id);
+
+          const hasConnectedIntegration = integrations?.some(
+            (i) => i.status === "connected" || i.status === "listening_for_events"
+          );
+
+          if (hasConnectedIntegration) {
+            // User has verified integrations, go to dashboard
+            navigate({ to: "/_authenticated/dashboard", replace: true });
+          } else {
+            // User has company but no verified integrations, go to setup-wizard
+            navigate({ to: "/_authenticated/setup-wizard", replace: true });
+          }
+        } else {
+          // No company_id, go to setup-wizard
+          navigate({ to: "/_authenticated/setup-wizard", replace: true });
+        }
+      }
+    };
+
+    handleRouting();
+  }, [loading, session, profile, navigate]);
 
   if (loading) {
     return (

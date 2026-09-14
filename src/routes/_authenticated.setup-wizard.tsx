@@ -55,7 +55,7 @@ function SetupWizard() {
 
           if (hasConnectedIntegration) {
             // User already has verified integrations, redirect to dashboard overview
-            navigate({ to: "/" });
+            navigate({ to: "/_authenticated/dashboard" });
           }
         } catch (error) {
           console.error("Error checking existing integrations:", error);

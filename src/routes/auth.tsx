@@ -208,7 +208,7 @@ function SignUpForm() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin + "/setup-wizard",
+        emailRedirectTo: window.location.origin + "/_authenticated/setup-wizard",
         data: { 
           first_name: firstName, 
           last_name: lastName, 
@@ -281,19 +281,19 @@ function SignUpForm() {
         // Company was created but linking failed - still proceed to setup wizard
         // The setup wizard will handle linking the company
         toast.success(`Account created for "${company}"`);
-        navigate({ to: "/setup-wizard", replace: true });
+        navigate({ to: "/_authenticated/setup-wizard", replace: true });
         return;
       }
 
       toast.success(`Account created for "${company}"`);
       
       // Navigate to setup wizard
-      navigate({ to: "/setup-wizard", replace: true });
+      navigate({ to: "/_authenticated/setup-wizard", replace: true });
     } catch (error) {
       console.error("Error creating company during sign-up:", error);
       toast.error("Account created but failed to create company. Please try again.");
       // Still navigate to setup wizard, they can try again later
-      navigate({ to: "/setup-wizard", replace: true });
+      navigate({ to: "/_authenticated/setup-wizard", replace: true });
     }
   }
 
