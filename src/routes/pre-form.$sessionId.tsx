@@ -32,14 +32,15 @@ function PreForm() {
   const getCompanyFn = useServerFn(getCompanyBySessionId);
 
   // Fetch company customization using server function
-  console.log("Pre-form: About to call useQuery");
+  console.log("Pre-form: About to call useQuery for sessionId:", sessionId);
   
-  const { data: company, isLoading: isLoadingCompany } = useQuery({
+  const { data: company, isLoading: isLoadingCompany, error: companyError } = useQuery({
     queryKey: ["company", sessionId],
     queryFn: () => getCompanyFn({ data: { sessionId } }),
+    retry: 2,
   });
   
-  console.log("Pre-form: useQuery called, isLoading:", isLoadingCompany, "company data:", company);
+  console.log("Pre-form: useQuery called, isLoading:", isLoadingCompany, "company data:", company, "error:", companyError);
 
   // Default values if company customization not set
   const formStyle = company?.pre_form_style || "professional";
@@ -53,6 +54,20 @@ function PreForm() {
   const buttonTextColor = company?.button_text_color || "#ffffff";
   const textColor = company?.text_color || "#000000";
   const solidBackgroundColor = company?.solid_background_color || "";
+
+  console.log("Pre-form: Company branding loaded:", {
+    formStyle,
+    formTitle,
+    formDescription,
+    brandColor,
+    companyName,
+    companyLogo,
+    backgroundStyle,
+    buttonColor,
+    buttonTextColor,
+    textColor,
+    solidBackgroundColor
+  });
 
   // Render background based on style
   const renderBackground = () => {
@@ -152,39 +167,47 @@ function PreForm() {
 
   if (isLoadingCompany) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className={`min-h-screen bg-background flex items-center justify-center ${isModal ? 'p-4' : ''}`}>
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading your experience...</p>
+        </div>
       </div>
     );
   }
 
+  if (companyError) {
+    console.error("Failed to load company data:", companyError);
+    // Still show the form with defaults even if company data fails to load
+  }
+
   return (
     <div className={`min-h-screen bg-background relative ${isModal ? 'p-4' : ''}`}>
-      {/* Header with company branding */}
-      <header className={`border-b border-border bg-background/90 backdrop-blur relative z-10 ${isModal ? 'rounded-t-lg' : ''}`}>
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            {companyLogo ? (
-              <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain rounded-full" />
-            ) : (
-              <div
-                className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                style={{ backgroundColor: brandColor }}
-              >
-                {companyName?.charAt(0).toUpperCase() || "E"}
-              </div>
-            )}
-            <span className="font-semibold">{companyName}</span>
-          </div>
-          {!isModal && (
+      {/* Header with company branding - only show if not modal */}
+      {!isModal && (
+        <header className="border-b border-border bg-background/90 backdrop-blur relative z-10">
+          <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
+            <div className="flex items-center gap-3">
+              {companyLogo ? (
+                <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain rounded-full" />
+              ) : (
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                  style={{ backgroundColor: brandColor }}
+                >
+                  {companyName?.charAt(0).toUpperCase() || "E"}
+                </div>
+              )}
+              <span className="font-semibold">{companyName}</span>
+            </div>
             <Link to="/">
               <Button variant="ghost" size="sm" className="gap-1.5">
                 <ArrowLeft className="h-3.5 w-3.5" /> Back
               </Button>
             </Link>
-          )}
-        </div>
-      </header>
+          </div>
+        </header>
+      )}
 
       {/* Main Content */}
       <div className={`flex items-center justify-center px-6 py-12 relative z-10 ${isModal ? 'min-h-[500px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
@@ -195,6 +218,28 @@ function PreForm() {
           }`}
           style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
         >
+          {/* Company Logo and Name - shown in modal */}
+          {isModal && (companyLogo || companyName) && (
+            <div className={`absolute top-4 left-4 flex items-center gap-3 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm ${
+              formStyle === "minimal" ? "hidden" : ""
+            }`}>
+              {companyLogo ? (
+                <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain flex-shrink-0" />
+              ) : (
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                  style={{ backgroundColor: brandColor }}
+                >
+                  {companyName?.charAt(0).toUpperCase() || "E"}
+                </div>
+              )}
+              {companyName && (
+                <span className="text-sm font-semibold truncate max-w-[180px]" style={{ color: textColor }}>
+                  {companyName}
+                </span>
+              )}
+            </div>
+          )}
           {/* Background effect for the card - overlays on solid background if set */}
           {backgroundStyle === "mesh" && (
             <div 
@@ -256,7 +301,7 @@ function PreForm() {
               }}
             />
           )}
-          
+
           <div className="relative z-10" style={{ color: textColor }}>
           <CardHeader className={`space-y-1 ${formStyle === "minimal" ? "text-center" : ""}`}>
             <CardTitle className={`${

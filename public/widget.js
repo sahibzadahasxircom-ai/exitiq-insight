@@ -86,7 +86,7 @@
       // Create iframe
       var iframe = document.createElement('iframe');
       iframe.src = url;
-      iframe.style.cssText = 'width:100%;height:500px;border:none;border-radius:12px;overflow:hidden;';
+      iframe.style.cssText = 'width:100%;height:600px;border:none;border-radius:12px;overflow:hidden;';
       
       // Assemble modal
       container.appendChild(closeBtn);
