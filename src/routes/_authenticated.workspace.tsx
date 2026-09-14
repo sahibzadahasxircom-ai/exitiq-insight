@@ -147,35 +147,9 @@ function Workspace() {
           company_logo: logoUrl,
           company_name: companyName,
           background_style: backgroundStyle,
-        })
-        .eq("id", company.id);
-
-      if (error) {
-        console.error("Database update error:", error);
-        throw error;
-      }
-
-      console.log("Branding saved successfully");
-    } catch (error) {
-      console.error("Failed to save branding:", error);
-      alert("Failed to save branding. Check console for details.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSavePreForm = async () => {
-    if (!company?.id) return;
-
-    setSaving(true);
-    try {
-      const { error } = await (supabase as any)
-        .from("companies")
-        .update({
           pre_form_style: preFormStyle,
           pre_form_title: preFormTitle,
           pre_form_description: preFormDescription,
-          background_style: backgroundStyle,
           button_color: buttonColor,
           button_text_color: buttonTextColor,
           text_color: textColor,
@@ -188,14 +162,14 @@ function Workspace() {
         .eq("id", company.id);
 
       if (error) {
-        console.error("Failed to save pre-form settings:", error);
+        console.error("Database update error:", error);
         throw error;
       }
 
-      console.log("Pre-form settings saved successfully");
+      console.log("Branding saved successfully");
     } catch (error) {
-      console.error("Failed to save pre-form settings:", error);
-      alert("Failed to save pre-form settings. Check console for details.");
+      console.error("Failed to save branding:", error);
+      alert("Failed to save branding. Check console for details.");
     } finally {
       setSaving(false);
     }
@@ -596,7 +570,7 @@ function Workspace() {
 
                   <div className="pt-6">
                     <Button onClick={handleSave} disabled={saving} size="lg" className="w-full">
-                      {saving ? "Saving..." : "Save Branding"}
+                      {saving ? "Saving..." : "Save All Settings"}
                     </Button>
                   </div>
                 </CardContent>
@@ -741,9 +715,10 @@ function Workspace() {
                       className="gap-2 px-8"
                     >
                       <Save className="h-5 w-5" />
-                      {saving ? "Saving..." : "Save Changes"}
+                      {saving ? "Saving..." : "Save All Settings"}
                     </Button>
                   </div>
+
                 </CardContent>
               </Card>
             </div>

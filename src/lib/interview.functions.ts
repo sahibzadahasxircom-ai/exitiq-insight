@@ -9,20 +9,38 @@ export const getCompanyBySessionId = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     
-    const { data: session } = await supabaseAdmin
+    console.log("getCompanyBySessionId called with sessionId:", data.sessionId);
+    
+    const { data: session, error: sessionError } = await supabaseAdmin
       .from("interview_sessions")
       .select("company_id")
       .eq("id", data.sessionId)
       .single();
 
-    if (!session?.company_id) return null;
+    if (sessionError) {
+      console.error("Failed to fetch session:", sessionError);
+      return null;
+    }
 
-    const { data: company } = await supabaseAdmin
+    if (!session?.company_id) {
+      console.error("No company_id found for session:", data.sessionId);
+      return null;
+    }
+
+    console.log("Fetching company data for company_id:", session.company_id);
+
+    const { data: company, error: companyError } = await supabaseAdmin
       .from("companies")
       .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color, background_style, button_color, button_text_color, text_color, solid_background_color")
       .eq("id", session.company_id)
       .single();
 
+    if (companyError) {
+      console.error("Failed to fetch company:", companyError);
+      return null;
+    }
+
+    console.log("Company data fetched:", company);
     return company;
   });
 

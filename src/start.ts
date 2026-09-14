@@ -96,6 +96,27 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
           
           // Always create a new interview session for each event
           console.log("Creating new interview session for company:", body.company_id);
+          
+          // First, verify the company exists and get its name
+          const { data: companyData, error: companyCheckError } = await supabase
+            .from("companies")
+            .select("id, company_name")
+            .eq("id", body.company_id)
+            .single();
+          
+          if (companyCheckError || !companyData) {
+            console.error("Company not found:", companyCheckError);
+            return new Response(JSON.stringify({ success: false, error: "Company not found" }), {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+              },
+            });
+          }
+          
+          console.log("Company verified:", companyData);
+          
           const { data: newSession, error: sessionError } = await supabase
             .from("interview_sessions")
             .insert({

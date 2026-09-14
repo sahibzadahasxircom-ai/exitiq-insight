@@ -66,7 +66,9 @@ function PreForm() {
     buttonColor,
     buttonTextColor,
     textColor,
-    solidBackgroundColor
+    solidBackgroundColor,
+    company: company,
+    hasCompany: !!company
   });
 
   // Render background based on style
@@ -220,21 +222,21 @@ function PreForm() {
         >
           {/* Company Logo and Name - shown in modal */}
           {isModal && (companyLogo || companyName) && (
-            <div className={`absolute top-4 left-4 flex items-center gap-3 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm ${
+            <div className={`absolute top-4 right-4 flex items-center gap-2 z-20 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-sm ${
               formStyle === "minimal" ? "hidden" : ""
             }`}>
               {companyLogo ? (
-                <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain flex-shrink-0" />
+                <img src={companyLogo} alt={companyName} className="h-6 w-6 object-contain flex-shrink-0" />
               ) : (
                 <div
-                  className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                  className="h-6 w-6 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
                   style={{ backgroundColor: brandColor }}
                 >
                   {companyName?.charAt(0).toUpperCase() || "E"}
                 </div>
               )}
               {companyName && (
-                <span className="text-sm font-semibold truncate max-w-[180px]" style={{ color: textColor }}>
+                <span className="text-xs font-semibold truncate max-w-[150px]" style={{ color: textColor }}>
                   {companyName}
                 </span>
               )}
