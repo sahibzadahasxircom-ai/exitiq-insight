@@ -147,17 +147,6 @@ function Workspace() {
           company_logo: logoUrl,
           company_name: companyName,
           background_style: backgroundStyle,
-          pre_form_style: preFormStyle,
-          pre_form_title: preFormTitle,
-          pre_form_description: preFormDescription,
-          button_color: buttonColor,
-          button_text_color: buttonTextColor,
-          text_color: textColor,
-          solid_background_color: solidBackgroundColor,
-          require_name: requireName,
-          require_email: requireEmail,
-          show_name_field: showNameField,
-          show_email_field: showEmailField,
         })
         .eq("id", company.id);
 
@@ -170,6 +159,43 @@ function Workspace() {
     } catch (error) {
       console.error("Failed to save branding:", error);
       alert("Failed to save branding. Check console for details.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSavePreForm = async () => {
+    if (!company?.id) return;
+
+    setSaving(true);
+    try {
+      const { error } = await (supabase as any)
+        .from("companies")
+        .update({
+          pre_form_style: preFormStyle,
+          pre_form_title: preFormTitle,
+          pre_form_description: preFormDescription,
+          background_style: backgroundStyle,
+          button_color: buttonColor,
+          button_text_color: buttonTextColor,
+          text_color: textColor,
+          solid_background_color: solidBackgroundColor,
+          require_name: requireName,
+          require_email: requireEmail,
+          show_name_field: showNameField,
+          show_email_field: showEmailField,
+        })
+        .eq("id", company.id);
+
+      if (error) {
+        console.error("Failed to save pre-form settings:", error);
+        throw error;
+      }
+
+      console.log("Pre-form settings saved successfully");
+    } catch (error) {
+      console.error("Failed to save pre-form settings:", error);
+      alert("Failed to save pre-form settings. Check console for details.");
     } finally {
       setSaving(false);
     }
@@ -578,6 +604,22 @@ function Workspace() {
 
               <Card className="border-2">
                 <CardHeader className="bg-muted/30">
+                  <CardTitle className="text-xl">Pre-Form Settings</CardTitle>
+                  <CardDescription>
+                    Save your pre-form customization settings.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8 pt-6">
+                  <div className="pt-6">
+                    <Button onClick={handleSavePreForm} disabled={saving} size="lg" className="w-full">
+                      {saving ? "Saving..." : "Save Pre-Form Settings"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2">
+                <CardHeader className="bg-muted/30">
                   <CardTitle className="text-xl">Colors & Advanced Settings</CardTitle>
                   <CardDescription>
                     Customize colors and advanced form options.
@@ -709,13 +751,13 @@ function Workspace() {
 
                   <div className="flex justify-end pt-6 border-t">
                     <Button
-                      onClick={handleSave}
+                      onClick={handleSavePreForm}
                       disabled={saving}
                       size="lg"
                       className="gap-2 px-8"
                     >
                       <Save className="h-5 w-5" />
-                      {saving ? "Saving..." : "Save All Settings"}
+                      {saving ? "Saving..." : "Save Pre-Form Settings"}
                     </Button>
                   </div>
 
