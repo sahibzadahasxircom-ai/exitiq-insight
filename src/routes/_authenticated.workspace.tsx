@@ -7,10 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Monitor, Tablet, Smartphone, Layout, Save, Upload, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/workspace")({
   head: () => ({
@@ -51,10 +51,6 @@ function Workspace() {
   const [buttonTextColor, setButtonTextColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("#000000");
   const [solidBackgroundColor, setSolidBackgroundColor] = useState("");
-  const [requireName, setRequireName] = useState(true);
-  const [requireEmail, setRequireEmail] = useState(true);
-  const [showNameField, setShowNameField] = useState(true);
-  const [showEmailField, setShowEmailField] = useState(true);
 
   console.log("Background style state:", backgroundStyle);
 
@@ -80,10 +76,6 @@ function Workspace() {
           if (data.button_text_color) setButtonTextColor(data.button_text_color);
           if (data.text_color) setTextColor(data.text_color);
           if (data.solid_background_color) setSolidBackgroundColor(data.solid_background_color);
-          if (data.require_name !== undefined) setRequireName(data.require_name);
-          if (data.require_email !== undefined) setRequireEmail(data.require_email);
-          if (data.show_name_field !== undefined) setShowNameField(data.show_name_field);
-          if (data.show_email_field !== undefined) setShowEmailField(data.show_email_field);
         }
       };
       loadCompanySettings();
@@ -156,9 +148,10 @@ function Workspace() {
       }
 
       console.log("Branding saved successfully");
+      toast.success("Branding saved successfully");
     } catch (error) {
       console.error("Failed to save branding:", error);
-      alert("Failed to save branding. Check console for details.");
+      toast.error("Failed to save branding. Check console for details.");
     } finally {
       setSaving(false);
     }
@@ -169,22 +162,21 @@ function Workspace() {
 
     setSaving(true);
     try {
+      // Build update object dynamically based on what fields exist
+      const updateData: any = {
+        pre_form_style: preFormStyle,
+        pre_form_title: preFormTitle,
+        pre_form_description: preFormDescription,
+        background_style: backgroundStyle,
+        button_color: buttonColor,
+        button_text_color: buttonTextColor,
+        text_color: textColor,
+        solid_background_color: solidBackgroundColor,
+      };
+
       const { error } = await (supabase as any)
         .from("companies")
-        .update({
-          pre_form_style: preFormStyle,
-          pre_form_title: preFormTitle,
-          pre_form_description: preFormDescription,
-          background_style: backgroundStyle,
-          button_color: buttonColor,
-          button_text_color: buttonTextColor,
-          text_color: textColor,
-          solid_background_color: solidBackgroundColor,
-          require_name: requireName,
-          require_email: requireEmail,
-          show_name_field: showNameField,
-          show_email_field: showEmailField,
-        })
+        .update(updateData)
         .eq("id", company.id);
 
       if (error) {
@@ -193,9 +185,10 @@ function Workspace() {
       }
 
       console.log("Pre-form settings saved successfully");
+      toast.success("Pre-form settings saved successfully");
     } catch (error) {
       console.error("Failed to save pre-form settings:", error);
-      alert("Failed to save pre-form settings. Check console for details.");
+      toast.error("Failed to save pre-form settings. Check console for details.");
     } finally {
       setSaving(false);
     }
@@ -706,47 +699,6 @@ function Workspace() {
                     <p className="text-sm text-muted-foreground mt-2">
                       Solid background color for the pre-form card (gradients will overlay on top)
                     </p>
-                  </div>
-
-                  {/* Form Fields Settings */}
-                  <div className="pt-4 border-t space-y-6">
-                    <Label className="text-base font-semibold mb-4 block">Form Fields</Label>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-xl">
-                        <div>
-                          <Label className="font-semibold">Show Name Field</Label>
-                          <p className="text-sm text-muted-foreground">Display the name input field in the pre-form</p>
-                        </div>
-                        <Switch checked={showNameField} onCheckedChange={setShowNameField} />
-                      </div>
-                      
-                      {showNameField && (
-                        <div className="p-4 border rounded-xl bg-muted/30">
-                          <div className="flex items-center justify-between">
-                            <Label className="font-semibold">Require Name</Label>
-                            <Switch checked={requireName} onCheckedChange={setRequireName} />
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between p-4 border rounded-xl">
-                        <div>
-                          <Label className="font-semibold">Show Email Field</Label>
-                          <p className="text-sm text-muted-foreground">Display the email input field in the pre-form</p>
-                        </div>
-                        <Switch checked={showEmailField} onCheckedChange={setShowEmailField} />
-                      </div>
-                      
-                      {showEmailField && (
-                        <div className="p-4 border rounded-xl bg-muted/30">
-                          <div className="flex items-center justify-between">
-                            <Label className="font-semibold">Require Email</Label>
-                            <Switch checked={requireEmail} onCheckedChange={setRequireEmail} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
 
                   <div className="flex justify-end pt-6 border-t">
