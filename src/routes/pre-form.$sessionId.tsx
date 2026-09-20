@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { updateInterviewSession, getCompanyBySessionId } from "@/lib/interview.functions";
 import { useQuery } from "@tanstack/react-query";
@@ -21,10 +21,15 @@ export const Route = createFileRoute("/pre-form/$sessionId")({
 
 function PreForm() {
   const { sessionId } = Route.useParams();
-  const searchParams = new URLSearchParams(window.location.search);
-  const isModal = searchParams.get('modal') === 'true';
-  console.log("PreForm component mounted with sessionId:", sessionId, "isModal:", isModal);
-  console.log("DEPLOYMENT TEST - v2.0");
+  const [isModal, setIsModal] = useState(false);
+  
+  // Fix SSR issue - only access window on client side
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    setIsModal(searchParams.get('modal') === 'true');
+    console.log("PreForm component mounted with sessionId:", sessionId, "isModal:", searchParams.get('modal') === 'true');
+    console.log("DEPLOYMENT TEST - v2.0");
+  }, [sessionId]);
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
