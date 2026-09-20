@@ -31,6 +31,15 @@ function PreForm() {
   const updateFn = useServerFn(updateInterviewSession);
   const getCompanyFn = useServerFn(getCompanyBySessionId);
 
+  // Add window error logging
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error("Pre-form page error:", event.error);
+    };
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
   // Fetch company customization using server function
   console.log("Pre-form: About to call useQuery for sessionId:", sessionId);
   
@@ -182,7 +191,15 @@ function PreForm() {
 
   if (companyError) {
     console.error("Failed to load company data:", companyError);
-    // Still show the form with defaults even if company data fails to load
+    return (
+      <div className={`min-h-screen bg-background flex items-center justify-center ${isModal ? 'p-4' : ''}`}>
+        <div className="text-center space-y-4 max-w-md">
+          <p className="text-sm text-red-500">Error loading company data</p>
+          <p className="text-xs text-muted-foreground">Error: {companyError?.message || 'Unknown error'}</p>
+          <p className="text-xs text-muted-foreground">Session ID: {sessionId}</p>
+        </div>
+      </div>
+    );
   }
 
   // Log what we're about to render
@@ -194,7 +211,9 @@ function PreForm() {
     brandColor,
     companyName,
     companyLogo,
-    isModal
+    isModal,
+    isLoading: isLoadingCompany,
+    error: companyError
   });
 
   return (
@@ -225,12 +244,10 @@ function PreForm() {
         </header>
       )}
 
-      {/* Debug info */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-2 text-xs z-50">
-          Debug: company={!!company} title={formTitle} color={brandColor}
-        </div>
-      )}
+      {/* Debug info - always visible for troubleshooting */}
+      <div className="fixed bottom-4 right-4 bg-red-500 text-white p-2 text-xs z-50 rounded shadow-lg">
+        Debug: company={!!company ? '✓' : '✗'} title={formTitle} color={brandColor} logo={!!companyLogo}
+      </div>
 
       {/* Main Content */}
       <div className={`flex items-center justify-center px-6 py-12 relative z-10 ${isModal ? 'min-h-[500px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
