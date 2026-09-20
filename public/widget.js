@@ -66,13 +66,16 @@
         document.body.removeChild(this.modal);
       }
       
+      // Hide body scroll
+      document.body.style.overflow = 'hidden';
+      
       // Create modal overlay
       var modal = document.createElement('div');
       modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
       
       // Create modal container
       var container = document.createElement('div');
-      container.style.cssText = 'background:white;border-radius:16px;max-width:600px;width:90%;max-height:85vh;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;';
+      container.style.cssText = 'background:white;border-radius:16px;max-width:600px;width:90%;height:85vh;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;';
       
       // Create close button
       var closeBtn = document.createElement('button');
@@ -80,6 +83,7 @@
       closeBtn.style.cssText = 'position:absolute;top:16px;right:16px;background:none;border:none;font-size:28px;cursor:pointer;color:#666;padding:8px;line-height:1;z-index:10;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:background-color 0.2s;';
       closeBtn.onclick = function() {
         document.body.removeChild(modal);
+        document.body.style.overflow = '';
         window.leaveesy.modal = null;
       };
       
@@ -94,7 +98,7 @@
       // Create iframe
       var iframe = document.createElement('iframe');
       iframe.src = url;
-      iframe.style.cssText = 'width:100%;height:800px;border:none;border-radius:16px;overflow:hidden;';
+      iframe.style.cssText = 'width:100%;height:100%;border:none;border-radius:16px;overflow:hidden;';
       
       // Assemble modal
       container.appendChild(closeBtn);
@@ -111,6 +115,7 @@
           console.log('Leaveesy Widget: Received continue message, sessionId:', e.data.sessionId);
           // Close modal
           document.body.removeChild(modal);
+          document.body.style.overflow = '';
           window.leaveesy.modal = null;
           window.removeEventListener('message', messageHandler);
           
@@ -132,6 +137,7 @@
       var escapeHandler = function(e) {
         if (e.key === 'Escape' && window.leaveesy.modal) {
           document.body.removeChild(window.leaveesy.modal);
+          document.body.style.overflow = '';
           window.leaveesy.modal = null;
           document.removeEventListener('keydown', escapeHandler);
           window.removeEventListener('message', messageHandler);
@@ -143,6 +149,7 @@
       modal.onclick = function(e) {
         if (e.target === modal && window.leaveesy.modal) {
           document.body.removeChild(window.leaveesy.modal);
+          document.body.style.overflow = '';
           window.leaveesy.modal = null;
           document.removeEventListener('keydown', escapeHandler);
           window.removeEventListener('message', messageHandler);

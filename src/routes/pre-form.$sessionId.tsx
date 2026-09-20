@@ -46,6 +46,16 @@ function PreForm() {
     return () => window.removeEventListener('error', handleError);
   }, []);
 
+  // Hide body scroll when in modal mode
+  useEffect(() => {
+    if (isModal) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isModal]);
+
   // Fetch company customization using server function
   console.log("Pre-form: About to call useQuery for sessionId:", sessionId);
   
@@ -221,7 +231,7 @@ function PreForm() {
   });
 
   return (
-    <div className={`min-h-screen bg-background relative ${isModal ? 'p-4 overflow-hidden' : ''}`}>
+    <div className={`min-h-screen bg-background relative ${isModal ? 'overflow-hidden' : ''}`}>
       {/* Header with company branding - only show if not modal */}
       {!isModal && (
         <header className="border-b border-border bg-background/90 backdrop-blur relative z-10">
@@ -251,34 +261,33 @@ function PreForm() {
 
 
       {/* Main Content */}
-      <div className={`flex items-center justify-center px-6 py-8 relative z-10 ${isModal ? 'min-h-[600px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
+      <div className={`flex items-center justify-center relative z-10 ${isModal ? 'h-full px-6 py-8' : 'px-6 py-12 min-h-[calc(100vh-3.5rem)]'}`}>
         <Card
-          className={`w-full max-w-lg shadow-soft relative overflow-hidden ${
+          className={`w-full max-w-lg shadow-soft relative ${
             formStyle === "casual" ? "rounded-2xl border-2" :
             formStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
           }`}
           style={{ 
-            backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white"),
-            maxHeight: isModal ? '580px' : 'auto'
+            backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white")
           }}
         >
           {/* Company Logo and Name - shown in modal */}
           {isModal && (
-            <div className={`absolute top-4 left-4 flex items-center gap-3 z-20 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-md ${
+            <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 ${
               formStyle === "minimal" ? "hidden" : ""
             }`}>
               {companyLogo ? (
-                <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain flex-shrink-0" />
+                <img src={companyLogo} alt={companyName} className="h-6 w-6 object-contain flex-shrink-0" />
               ) : (
                 <div
-                  className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                  className="h-6 w-6 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
                   style={{ backgroundColor: brandColor }}
                 >
                   {companyName?.charAt(0).toUpperCase() || "E"}
                 </div>
               )}
               {companyName && (
-                <span className="text-sm font-semibold truncate max-w-[150px]" style={{ color: textColor }}>
+                <span className="text-xs font-semibold truncate max-w-[120px]" style={{ color: textColor }}>
                   {companyName}
                 </span>
               )}
@@ -347,7 +356,7 @@ function PreForm() {
           )}
 
           <div className="relative z-10" style={{ color: textColor }}>
-          <CardHeader className={`space-y-2 pb-4 pt-16 ${formStyle === "minimal" ? "text-center" : ""}`}>
+          <CardHeader className={`space-y-2 pb-4 pt-12 ${formStyle === "minimal" ? "text-center" : ""}`}>
             <CardTitle className={`${
               formStyle === "casual" ? "text-3xl font-semibold" :
               formStyle === "minimal" ? "text-xl font-medium" : "text-2xl font-bold"
