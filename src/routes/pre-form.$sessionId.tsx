@@ -24,6 +24,7 @@ function PreForm() {
   const searchParams = new URLSearchParams(window.location.search);
   const isModal = searchParams.get('modal') === 'true';
   console.log("PreForm component mounted with sessionId:", sessionId, "isModal:", isModal);
+  console.log("DEPLOYMENT TEST - v2.0");
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
