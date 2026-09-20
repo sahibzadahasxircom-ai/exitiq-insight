@@ -174,6 +174,7 @@ function PreForm() {
         <div className="text-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin mx-auto" />
           <p className="text-sm text-muted-foreground">Loading your experience...</p>
+          <p className="text-xs text-muted-foreground">Session ID: {sessionId}</p>
         </div>
       </div>
     );
@@ -183,6 +184,18 @@ function PreForm() {
     console.error("Failed to load company data:", companyError);
     // Still show the form with defaults even if company data fails to load
   }
+
+  // Log what we're about to render
+  console.log("Pre-form rendering with:", {
+    hasCompany: !!company,
+    companyData: company,
+    formTitle,
+    formDescription,
+    brandColor,
+    companyName,
+    companyLogo,
+    isModal
+  });
 
   return (
     <div className={`min-h-screen bg-background relative ${isModal ? 'p-4' : ''}`}>
@@ -212,6 +225,13 @@ function PreForm() {
         </header>
       )}
 
+      {/* Debug info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-2 text-xs z-50">
+          Debug: company={!!company} title={formTitle} color={brandColor}
+        </div>
+      )}
+
       {/* Main Content */}
       <div className={`flex items-center justify-center px-6 py-12 relative z-10 ${isModal ? 'min-h-[500px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
         <Card
@@ -222,7 +242,7 @@ function PreForm() {
           style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
         >
           {/* Company Logo and Name - shown in modal */}
-          {isModal && (companyLogo || companyName) && (
+          {isModal && (
             <div className={`absolute top-4 right-4 flex items-center gap-2 z-20 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-sm ${
               formStyle === "minimal" ? "hidden" : ""
             }`}>
