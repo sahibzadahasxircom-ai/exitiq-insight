@@ -38,6 +38,7 @@ function PreForm() {
     queryKey: ["company", sessionId],
     queryFn: () => getCompanyFn({ data: { sessionId } }),
     retry: 2,
+    staleTime: 0, // Always fetch fresh data
   });
   
   console.log("Pre-form: useQuery called, isLoading:", isLoadingCompany, "company data:", company, "error:", companyError);
