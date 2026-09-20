@@ -189,7 +189,6 @@ function PreForm() {
         <div className="text-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin mx-auto" />
           <p className="text-sm text-muted-foreground">Loading your experience...</p>
-          <p className="text-xs text-muted-foreground">Session ID: {sessionId}</p>
         </div>
       </div>
     );
@@ -202,7 +201,6 @@ function PreForm() {
         <div className="text-center space-y-4 max-w-md">
           <p className="text-sm text-red-500">Error loading company data</p>
           <p className="text-xs text-muted-foreground">Error: {companyError?.message || 'Unknown error'}</p>
-          <p className="text-xs text-muted-foreground">Session ID: {sessionId}</p>
         </div>
       </div>
     );
@@ -253,19 +251,20 @@ function PreForm() {
 
 
       {/* Main Content */}
-      <div className={`flex items-center justify-center px-6 py-12 relative z-10 ${isModal ? 'min-h-[700px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
+      <div className={`flex items-center justify-center px-6 py-8 relative z-10 ${isModal ? 'min-h-[600px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
         <Card
           className={`w-full max-w-lg shadow-soft relative overflow-hidden ${
             formStyle === "casual" ? "rounded-2xl border-2" :
             formStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
           }`}
           style={{ 
-            backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white")
+            backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white"),
+            maxHeight: isModal ? '580px' : 'auto'
           }}
         >
           {/* Company Logo and Name - shown in modal */}
           {isModal && (
-            <div className={`absolute top-6 right-6 flex items-center gap-3 z-20 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-md ${
+            <div className={`absolute top-4 left-4 flex items-center gap-3 z-20 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-md ${
               formStyle === "minimal" ? "hidden" : ""
             }`}>
               {companyLogo ? (
@@ -279,7 +278,7 @@ function PreForm() {
                 </div>
               )}
               {companyName && (
-                <span className="text-sm font-semibold truncate max-w-[180px]" style={{ color: textColor }}>
+                <span className="text-sm font-semibold truncate max-w-[150px]" style={{ color: textColor }}>
                   {companyName}
                 </span>
               )}
@@ -348,7 +347,7 @@ function PreForm() {
           )}
 
           <div className="relative z-10" style={{ color: textColor }}>
-          <CardHeader className={`space-y-2 pb-6 ${formStyle === "minimal" ? "text-center" : ""}`}>
+          <CardHeader className={`space-y-2 pb-4 pt-16 ${formStyle === "minimal" ? "text-center" : ""}`}>
             <CardTitle className={`${
               formStyle === "casual" ? "text-3xl font-semibold" :
               formStyle === "minimal" ? "text-xl font-medium" : "text-2xl font-bold"
@@ -362,7 +361,7 @@ function PreForm() {
               {formDescription}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5 pb-8">
+          <CardContent className="space-y-4 pb-6">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">Your name (optional)</Label>
               <Input

@@ -72,7 +72,7 @@
       
       // Create modal container
       var container = document.createElement('div');
-      container.style.cssText = 'background:white;border-radius:16px;max-width:600px;width:90%;max-height:90vh;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;';
+      container.style.cssText = 'background:white;border-radius:16px;max-width:600px;width:90%;max-height:85vh;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;';
       
       // Create close button
       var closeBtn = document.createElement('button');
@@ -94,7 +94,7 @@
       // Create iframe
       var iframe = document.createElement('iframe');
       iframe.src = url;
-      iframe.style.cssText = 'width:100%;height:700px;border:none;border-radius:16px;overflow:hidden;';
+      iframe.style.cssText = 'width:100%;height:800px;border:none;border-radius:16px;overflow:hidden;';
       
       // Assemble modal
       container.appendChild(closeBtn);
