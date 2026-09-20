@@ -223,7 +223,7 @@ function PreForm() {
   });
 
   return (
-    <div className={`min-h-screen bg-background relative ${isModal ? 'p-4' : ''}`}>
+    <div className={`min-h-screen bg-background relative ${isModal ? 'p-4 overflow-hidden' : ''}`}>
       {/* Header with company branding - only show if not modal */}
       {!isModal && (
         <header className="border-b border-border bg-background/90 backdrop-blur relative z-10">
@@ -250,37 +250,36 @@ function PreForm() {
         </header>
       )}
 
-      {/* Debug info - always visible for troubleshooting */}
-      <div className="fixed bottom-4 right-4 bg-red-500 text-white p-2 text-xs z-50 rounded shadow-lg">
-        Debug: company={!!company ? '✓' : '✗'} title={formTitle} color={brandColor} logo={!!companyLogo}
-      </div>
+
 
       {/* Main Content */}
-      <div className={`flex items-center justify-center px-6 py-12 relative z-10 ${isModal ? 'min-h-[500px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
+      <div className={`flex items-center justify-center px-6 py-12 relative z-10 ${isModal ? 'min-h-[700px]' : 'min-h-[calc(100vh-3.5rem)]'}`}>
         <Card
-          className={`w-full max-w-md shadow-soft relative ${
+          className={`w-full max-w-lg shadow-soft relative overflow-hidden ${
             formStyle === "casual" ? "rounded-2xl border-2" :
             formStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
           }`}
-          style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
+          style={{ 
+            backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white")
+          }}
         >
           {/* Company Logo and Name - shown in modal */}
           {isModal && (
-            <div className={`absolute top-4 right-4 flex items-center gap-2 z-20 bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-sm ${
+            <div className={`absolute top-6 right-6 flex items-center gap-3 z-20 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-md ${
               formStyle === "minimal" ? "hidden" : ""
             }`}>
               {companyLogo ? (
-                <img src={companyLogo} alt={companyName} className="h-6 w-6 object-contain flex-shrink-0" />
+                <img src={companyLogo} alt={companyName} className="h-8 w-8 object-contain flex-shrink-0" />
               ) : (
                 <div
-                  className="h-6 w-6 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                  className="h-8 w-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                   style={{ backgroundColor: brandColor }}
                 >
                   {companyName?.charAt(0).toUpperCase() || "E"}
                 </div>
               )}
               {companyName && (
-                <span className="text-xs font-semibold truncate max-w-[150px]" style={{ color: textColor }}>
+                <span className="text-sm font-semibold truncate max-w-[180px]" style={{ color: textColor }}>
                   {companyName}
                 </span>
               )}
@@ -349,46 +348,46 @@ function PreForm() {
           )}
 
           <div className="relative z-10" style={{ color: textColor }}>
-          <CardHeader className={`space-y-1 ${formStyle === "minimal" ? "text-center" : ""}`}>
+          <CardHeader className={`space-y-2 pb-6 ${formStyle === "minimal" ? "text-center" : ""}`}>
             <CardTitle className={`${
               formStyle === "casual" ? "text-3xl font-semibold" :
               formStyle === "minimal" ? "text-xl font-medium" : "text-2xl font-bold"
-            } tracking-tight`} style={{ color: textColor }}>
+            } tracking-tight leading-tight`} style={{ color: textColor }}>
               {formTitle}
             </CardTitle>
             <CardDescription className={`${
               formStyle === "casual" ? "text-lg" :
               formStyle === "minimal" ? "text-sm" : "text-base"
-            }`} style={{ color: textColor, opacity: 0.8 }}>
+            } leading-relaxed`} style={{ color: textColor, opacity: 0.8 }}>
               {formDescription}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pb-8">
             <div className="space-y-2">
-              <Label htmlFor="name">Your name (optional)</Label>
+              <Label htmlFor="name" className="text-sm font-medium">Your name (optional)</Label>
               <Input
                 id="name"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={formStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                className="h-12"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Your email (optional)</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Your email (optional)</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="john@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={formStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                className="h-12"
               />
             </div>
             <Button 
               onClick={handleContinue}
-              className={`w-full gap-2 ${
-                formStyle === "casual" ? "rounded-full text-lg py-6" :
+              className={`w-full gap-2 h-12 ${
+                formStyle === "casual" ? "rounded-full text-lg" :
                 formStyle === "minimal" ? "border-2 bg-transparent hover:bg-muted" : ""
               }`}
               size="lg"
@@ -407,7 +406,7 @@ function PreForm() {
                 </>
               )}
             </Button>
-            <p className={`text-center text-xs text-muted-foreground ${
+            <p className={`text-center text-xs text-muted-foreground pt-2 ${
               formStyle === "minimal" ? "hidden" : ""
             }`}>
               Your responses will help us improve our service

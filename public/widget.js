@@ -72,21 +72,29 @@
       
       // Create modal container
       var container = document.createElement('div');
-      container.style.cssText = 'background:white;border-radius:12px;max-width:500px;width:90%;max-height:90vh;overflow:hidden;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);position:relative;';
+      container.style.cssText = 'background:white;border-radius:16px;max-width:600px;width:90%;max-height:90vh;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;';
       
       // Create close button
       var closeBtn = document.createElement('button');
       closeBtn.innerHTML = '×';
-      closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;background:none;border:none;font-size:24px;cursor:pointer;color:#666;padding:5px;line-height:1;z-index:10;';
+      closeBtn.style.cssText = 'position:absolute;top:16px;right:16px;background:none;border:none;font-size:28px;cursor:pointer;color:#666;padding:8px;line-height:1;z-index:10;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:background-color 0.2s;';
       closeBtn.onclick = function() {
         document.body.removeChild(modal);
         window.leaveesy.modal = null;
       };
       
+      closeBtn.onmouseover = function() {
+        closeBtn.style.backgroundColor = 'rgba(0,0,0,0.05)';
+      };
+      
+      closeBtn.onmouseout = function() {
+        closeBtn.style.backgroundColor = 'transparent';
+      };
+      
       // Create iframe
       var iframe = document.createElement('iframe');
       iframe.src = url;
-      iframe.style.cssText = 'width:100%;height:600px;border:none;border-radius:12px;overflow:hidden;';
+      iframe.style.cssText = 'width:100%;height:700px;border:none;border-radius:16px;overflow:hidden;';
       
       // Assemble modal
       container.appendChild(closeBtn);
