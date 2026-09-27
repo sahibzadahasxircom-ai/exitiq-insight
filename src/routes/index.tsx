@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart } from "lucide-react";
+import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LandingLiveDemo } from "@/components/landing-live-demo";
 import { useEffect, useState } from "react";
@@ -26,6 +26,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -47,17 +49,23 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/leaveesy.png" alt="leaveesy" className="h-32 w-auto object-contain" />
+            <img src="/leaveesy.png" alt="leaveesy" className="h-8 w-auto object-contain md:h-32" />
           </Link>
           <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
             <a href="#features" className="hover:text-foreground transition-colors">Features</a>
           </nav>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-muted"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
             <Link to="/auth">
-              <Button variant="ghost" size="sm">Sign in</Button>
+              <Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign in</Button>
             </Link>
             <Link to="/auth">
               <Button size="sm">Get started</Button>
@@ -65,6 +73,23 @@ function Landing() {
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-b border-border bg-background/95 backdrop-blur">
+          <nav className="px-4 py-4 space-y-3">
+            <a href="#how-it-works" className="block text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              How it works
+            </a>
+            <a href="#features" className="block text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              Features
+            </a>
+            <Link to="/auth" className="block text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              Sign in
+            </Link>
+          </nav>
+        </div>
+      )}
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -92,27 +117,27 @@ function Landing() {
             `,
           }}
         />
-        <div className="mx-auto max-w-7xl px-6 pt-32 pb-24">
+        <div className="mx-auto max-w-7xl px-4 md:px-6 pt-24 md:pt-32 pb-16 md:pb-24">
           <div className="text-center">
             <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm px-4 py-1.5 text-xs font-medium text-muted-foreground shadow-soft animate-fade-in">
               <Sparkles className="h-3 w-3 text-primary" />
               AI-powered churn intelligence for modern SaaS
             </div>
-            <h1 className="mx-auto max-w-4xl text-balance text-5xl font-semibold tracking-tight md:text-[72px] md:leading-[1.1] animate-slide-up">
+            <h1 className="mx-auto max-w-4xl text-balance text-4xl md:text-5xl lg:text-[72px] font-semibold tracking-tight md:leading-[1.1] animate-slide-up">
               Understand why customers leave. Know what to fix.
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-balance text-xl text-muted-foreground leading-relaxed animate-slide-up">
+            <p className="mx-auto mt-6 max-w-2xl text-balance text-lg md:text-xl text-muted-foreground leading-relaxed animate-slide-up">
               AI-powered exit interviews that automatically uncover churn reasons, competitor insights, revenue risks, and product opportunities.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4 animate-slide-up stagger-2">
               <Link to="/auth">
-                <Button size="lg" className="gap-2 h-12 px-8 text-base hover-lift">
+                <Button size="lg" className="gap-2 h-12 px-6 md:px-8 text-base hover-lift">
                   Get Started <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <button
                 onClick={() => document.getElementById('demo-section')?.scrollIntoView({ behavior: 'smooth' })}
-                className="h-12 px-8 text-base border border-border bg-background hover:bg-muted rounded-lg transition-colors"
+                className="h-12 px-6 md:px-8 text-base border border-border bg-background hover:bg-muted rounded-lg transition-colors"
               >
                 Explore leaveesy
               </button>
@@ -128,30 +153,30 @@ function Landing() {
 
       {/* Leaveesy AI Knows Your Software */}
       <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
               leaveesy AI knows your software
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
               Simply provide your URLs. leaveesy learns your features, updates, and product context automatically.
             </p>
           </div>
 
-          <div className="mt-16 space-y-6">
+          <div className="mt-12 md:mt-16 space-y-6">
             <div className="group">
-              <div className="border border-border rounded-lg p-6 hover:border-border/80 transition-colors">
+              <div className="border border-border rounded-lg p-4 md:p-6 hover:border-border/80 transition-colors">
                 <div className="flex items-start gap-4">
                   <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                     <Globe className="h-5 w-5 text-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-1">Changelog URLs</h3>
+                    <h3 className="text-base md:text-lg font-semibold mb-1">Changelog URLs</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Add your changelog or release notes URL. leaveesy scrapes and learns about your latest features and updates.
                     </p>
                     <div className="rounded-md bg-muted border border-border p-3">
-                      <code className="text-sm text-foreground font-mono">
+                      <code className="text-xs md:text-sm text-foreground font-mono break-all">
                         https://yourproduct.com/changelog
                       </code>
                     </div>
@@ -161,18 +186,18 @@ function Landing() {
             </div>
 
             <div className="group">
-              <div className="border border-border rounded-lg p-6 hover:border-border/80 transition-colors">
+              <div className="border border-border rounded-lg p-4 md:p-6 hover:border-border/80 transition-colors">
                 <div className="flex items-start gap-4">
                   <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                     <FileText className="h-5 w-5 text-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-1">Documentation URLs</h3>
+                    <h3 className="text-base md:text-lg font-semibold mb-1">Documentation URLs</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Link your docs. leaveesy understands your product capabilities, features, and use cases.
                     </p>
                     <div className="rounded-md bg-muted border border-border p-3">
-                      <code className="text-sm text-foreground font-mono">
+                      <code className="text-xs md:text-sm text-foreground font-mono break-all">
                         https://docs.yourproduct.com
                       </code>
                     </div>
@@ -186,27 +211,27 @@ function Landing() {
 
       {/* Conversation Example */}
       <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
               AI that understands your product
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
               leaveesy asks relevant questions based on your product knowledge, not generic scripts.
             </p>
           </div>
 
           <div className="mx-auto max-w-2xl">
-            <div className="border border-border rounded-lg p-6 bg-card">
+            <div className="border border-border rounded-lg p-4 md:p-6 bg-card">
               <div className="space-y-4">
                 <div className="flex gap-3 justify-end">
-                  <div className="flex-1 max-w-[80%] rounded-lg bg-muted p-4 text-sm">
+                  <div className="flex-1 max-w-[80%] rounded-lg bg-muted p-3 md:p-4 text-xs md:text-sm">
                     The reporting feature doesn't have the filters I need.
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <img src="/leaveesy.png" alt="leaveesy" className="h-8 w-auto object-contain shrink-0" />
-                  <div className="flex-1 rounded-lg bg-muted border border-border p-4 text-sm">
+                  <img src="/leaveesy.png" alt="leaveesy" className="h-6 md:h-8 w-auto object-contain shrink-0" />
+                  <div className="flex-1 rounded-lg bg-muted border border-border p-3 md:p-4 text-xs md:text-sm">
                     I understand. Are you looking for custom date range filters or specific data field filtering in your reports?
                   </div>
                 </div>
@@ -218,30 +243,30 @@ function Landing() {
 
       {/* Know What to Fix */}
       <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
               Know what to fix
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
               Visual breakdown of churn causes with trend analysis to identify patterns.
             </p>
           </div>
 
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-border rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-6">
+          <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                   <TrendingUp className="h-5 w-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold">Churn Causes</h3>
+                <h3 className="text-base md:text-lg font-semibold">Churn Causes</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
+              <p className="text-sm text-muted-foreground mb-4 md:mb-6">
                 See exactly why customers cancel with visual breakdown by category, feature, and competitor.
               </p>
               <div className="space-y-4">
                 <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
+                  <div className="flex items-center justify-between text-xs md:text-sm mb-2">
                     <span className="text-foreground">Missing features</span>
                     <span className="text-muted-foreground">42%</span>
                   </div>
@@ -250,7 +275,7 @@ function Landing() {
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
+                  <div className="flex items-center justify-between text-xs md:text-sm mb-2">
                     <span className="text-foreground">Pricing</span>
                     <span className="text-muted-foreground">23%</span>
                   </div>
@@ -259,7 +284,7 @@ function Landing() {
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
+                  <div className="flex items-center justify-between text-xs md:text-sm mb-2">
                     <span className="text-foreground">Competitor</span>
                     <span className="text-muted-foreground">18%</span>
                   </div>
@@ -270,18 +295,18 @@ function Landing() {
               </div>
             </div>
 
-            <div className="border border-border rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-6">
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                   <LineChart className="h-5 w-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold">Trend Analysis</h3>
+                <h3 className="text-base md:text-lg font-semibold">Trend Analysis</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
+              <p className="text-sm text-muted-foreground mb-4 md:mb-6">
                 Track churn trends over time to identify patterns and measure the impact of your fixes.
               </p>
-              <div className="rounded-md bg-muted border border-border p-4">
-                <div className="flex items-end gap-2 h-24">
+              <div className="rounded-md bg-muted border border-border p-3 md:p-4">
+                <div className="flex items-end gap-2 h-20 md:h-24">
                   <div className="flex-1 bg-muted-foreground/40 rounded-t" style={{ height: '40%' }} />
                   <div className="flex-1 bg-muted-foreground/40 rounded-t" style={{ height: '55%' }} />
                   <div className="flex-1 bg-muted-foreground/40 rounded-t" style={{ height: '45%' }} />
@@ -297,73 +322,73 @@ function Landing() {
 
       {/* Leaveesy AI Recommendations */}
       <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
               leaveesy AI recommendations
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
               AI-generated actions to reduce churn and improve retention based on real customer feedback.
             </p>
           </div>
 
-          <div className="mt-16 space-y-4">
-            <div className="border border-border rounded-lg p-6">
-              <div className="flex items-start justify-between mb-4">
+          <div className="mt-12 md:mt-16 space-y-4">
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-2">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                     <Lightbulb className="h-5 w-5 text-foreground" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">Add cohort reporting</h3>
-                    <p className="text-sm text-muted-foreground">HIGH IMPACT</p>
+                    <h3 className="text-base md:text-lg font-semibold">Add cohort reporting</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">HIGH IMPACT</p>
                   </div>
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs md:text-sm text-muted-foreground">
                   Reduce churn by 23%
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 Customers need to analyze user behavior by segments. This feature was mentioned in 23% of cancellations.
               </p>
             </div>
 
-            <div className="border border-border rounded-lg p-6">
-              <div className="flex items-start justify-between mb-4">
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-2">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                     <Lightbulb className="h-5 w-5 text-foreground" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">Viewer-tier pricing</h3>
-                    <p className="text-sm text-muted-foreground">MEDIUM</p>
+                    <h3 className="text-base md:text-lg font-semibold">Viewer-tier pricing</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">MEDIUM</p>
                   </div>
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs md:text-sm text-muted-foreground">
                   Save $12k/mo revenue
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 Introduce a lower-cost plan for read-only users. Could save $12k/mo in revenue.
               </p>
             </div>
 
-            <div className="border border-border rounded-lg p-6">
-              <div className="flex items-start justify-between mb-4">
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-2">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                     <Lightbulb className="h-5 w-5 text-foreground" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">Improve onboarding</h3>
-                    <p className="text-sm text-muted-foreground">QUICK WIN</p>
+                    <h3 className="text-base md:text-lg font-semibold">Improve onboarding</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground">QUICK WIN</p>
                   </div>
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs md:text-sm text-muted-foreground">
                   Reduce churn by 18%
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 Simplify the setup process. 18% of users cited complexity as their primary reason for leaving.
               </p>
             </div>
@@ -373,17 +398,17 @@ function Landing() {
 
       {/* Customize Your Own */}
       <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
               Customize your own
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
               Professional pre-form templates that change automatically. Choose the perfect fit for your brand.
             </p>
           </div>
 
-          <div className="mt-16">
+          <div className="mt-12 md:mt-16">
             <TemplateCarousel />
           </div>
         </div>
@@ -391,36 +416,36 @@ function Landing() {
 
       {/* Invite Your Team */}
       <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
               Invite your team
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
               Collaborate with your team through email invitations. Share insights and work together on retention.
             </p>
           </div>
 
-          <div className="mt-16 max-w-2xl mx-auto">
-            <div className="border border-border rounded-lg p-6">
-              <div className="mb-6 flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-foreground font-semibold">
+          <div className="mt-12 md:mt-16 max-w-2xl mx-auto">
+            <div className="border border-border rounded-lg p-4 md:p-6">
+              <div className="mb-4 md:mb-6 flex items-center gap-4">
+                <div className="h-10 md:h-12 w-10 md:w-12 rounded-full bg-muted flex items-center justify-center text-foreground font-semibold text-sm md:text-base">
                   JD
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold">John Doe</h3>
-                  <p className="text-sm text-muted-foreground">Product Manager</p>
+                  <h3 className="text-base md:text-lg font-semibold">John Doe</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground">Product Manager</p>
                 </div>
               </div>
-              <div className="rounded-md bg-muted border border-border p-4 mb-6">
+              <div className="rounded-md bg-muted border border-border p-3 md:p-4 mb-4 md:mb-6">
                 <div className="text-xs text-muted-foreground mb-2">Email Invitation</div>
-                <div className="text-sm text-foreground">
+                <div className="text-xs md:text-sm text-foreground">
                   Join our leaveesy workspace to collaborate on customer insights and churn reduction strategies.
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Button className="flex-1">Send Invitation</Button>
-                <Button variant="outline" className="flex-1">Copy Link</Button>
+              <div className="flex gap-2 md:gap-3">
+                <Button className="flex-1 text-xs md:text-sm">Send Invitation</Button>
+                <Button variant="outline" className="flex-1 text-xs md:text-sm">Copy Link</Button>
               </div>
             </div>
           </div>
@@ -429,9 +454,9 @@ function Landing() {
 
       {/* Dashboard Features */}
       <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
               Powerful dashboard features
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
@@ -439,51 +464,51 @@ function Landing() {
             </p>
           </div>
 
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-border rounded-lg p-6">
+          <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border border-border rounded-lg p-4 md:p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                   <BarChart3 className="h-5 w-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold">Churn Analytics</h3>
+                <h3 className="text-base md:text-lg font-semibold">Churn Analytics</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 Visual breakdown of cancellation reasons and trends
               </p>
             </div>
 
-            <div className="border border-border rounded-lg p-6">
+            <div className="border border-border rounded-lg p-4 md:p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                   <DollarSign className="h-5 w-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold">Revenue at Risk</h3>
+                <h3 className="text-base md:text-lg font-semibold">Revenue at Risk</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 Track MRR impact and revenue loss from churn
               </p>
             </div>
 
-            <div className="border border-border rounded-lg p-6">
+            <div className="border border-border rounded-lg p-4 md:p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                   <MessageSquare className="h-5 w-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold">Customer Voice</h3>
+                <h3 className="text-base md:text-lg font-semibold">Customer Voice</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 Direct quotes and feedback from customers
               </p>
             </div>
 
-            <div className="border border-border rounded-lg p-6">
+            <div className="border border-border rounded-lg p-4 md:p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
                   <Lightbulb className="h-5 w-5 text-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold">AI Recommendations</h3>
+                <h3 className="text-base md:text-lg font-semibold">AI Recommendations</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 Actionable insights to reduce churn
               </p>
             </div>
@@ -493,21 +518,21 @@ function Landing() {
 
       {/* Final CTA */}
       <section className="border-t border-border/60 bg-muted/30">
-        <div className="mx-auto max-w-4xl px-6 py-32 text-center">
-          <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
+        <div className="mx-auto max-w-4xl px-4 md:px-6 py-16 md:py-32 text-center">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight">
             Ready to understand your customers?
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-base md:text-lg text-muted-foreground">
             Start your free trial today. Turn every cancellation into actionable intelligence.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-8 md:mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link to="/auth">
-              <Button size="lg" className="gap-2 h-12 px-8 text-base">
+              <Button size="lg" className="gap-2 h-12 px-6 md:px-8 text-base">
                 Start free trial <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link to="/exit-interview">
-              <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+              <Button size="lg" variant="outline" className="h-12 px-6 md:px-8 text-base">
                 See live demo
               </Button>
             </Link>
@@ -516,11 +541,11 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-8 text-sm text-muted-foreground">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 md:px-6 py-6 md:py-8 text-xs md:text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <img src="/leaveesy.png" alt="leaveesy" className="h-32 w-auto object-contain" />
+            <img src="/leaveesy.png" alt="leaveesy" className="h-6 md:h-32 w-auto object-contain" />
           </div>
-          <p> 2023 leaveesy. All rights reserved.</p>
+          <p className="hidden md:block"> 2023 leaveesy. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -88,7 +88,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border pb-0 -mt-8">
         <Link to="/" className="flex items-center gap-2">
-          <img src="/leaveesy.png" alt="leaveesy" className="h-32 w-auto object-contain" />
+          <img src="/leaveesy.png" alt="leaveesy" className="h-8 w-auto object-contain md:h-32" />
         </Link>
       </SidebarHeader>
       <SidebarContent className="-mt-6">
@@ -120,7 +120,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         <div className="px-2 py-2 text-[11px] leading-relaxed text-muted-foreground group-data-[collapsible=icon]:hidden">
           <p className="font-medium text-foreground">Auto-pilot active</p>
-          <p>Interviews trigger on every cancellation event.</p>
+          <p className="hidden md:block">Interviews trigger on every cancellation event.</p>
         </div>
       </SidebarFooter>
     </Sidebar>
