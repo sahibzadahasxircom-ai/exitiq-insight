@@ -58,9 +58,6 @@ function processDashboardData(dashboardData: any, insightsData: any) {
   // Calculate recommendations based on insights
   const recommendations = generateRecommendations(insights);
 
-  // Churn trend data - use real session data
-  const churnTrend = generateChurnTrend(sessions);
-
   // Generate executive summary
   const executiveSummary = generateExecutiveSummary(insights, churnDrivers);
 
@@ -75,7 +72,6 @@ function processDashboardData(dashboardData: any, insightsData: any) {
     churnDrivers,
     customerQuotes,
     recommendations,
-    churnTrend,
     insights,
     executiveSummary,
   };
@@ -122,9 +118,9 @@ function generateRecommendations(insights: any[]) {
       id: '1',
       recommendation: 'Review pricing structure',
       problem: 'Customers frequently mention pricing as a concern',
+      solution_to: 'Pricing-related cancellations',
       expected_impact: 'High',
       confidence: 0.75,
-      affected_revenue: 15000,
     });
   }
 
@@ -133,9 +129,9 @@ function generateRecommendations(insights: any[]) {
       id: '2',
       recommendation: 'Improve user onboarding',
       problem: 'UX issues reported during initial setup',
+      solution_to: 'User experience complaints',
       expected_impact: 'Medium',
       confidence: 0.68,
-      affected_revenue: 8000,
     });
   }
 
@@ -144,9 +140,9 @@ function generateRecommendations(insights: any[]) {
       id: '3',
       recommendation: 'Analyze competitor features',
       problem: 'Customers migrating to specific competitors',
+      solution_to: 'Competitor migration',
       expected_impact: 'High',
       confidence: 0.82,
-      affected_revenue: 25000,
     });
   }
 
@@ -156,21 +152,13 @@ function generateRecommendations(insights: any[]) {
       id: '4',
       recommendation: 'Improve customer support',
       problem: 'Enhance support response times and quality',
+      solution_to: 'Support-related issues',
       expected_impact: 'Medium',
       confidence: 0.60,
-      affected_revenue: 5000,
     });
   }
 
   return recommendations.slice(0, 3);
-}
-
-function generateChurnTrend(sessions: any[]) {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-  return months.map((month, index) => ({
-    month,
-    churned: Math.floor(Math.random() * 20) + 5 + index,
-  }));
 }
 
 function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
@@ -191,6 +179,29 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
     : "";
 
   return `${topDriver.pct}% of cancellations are due to ${topDriver.name.toLowerCase()} issues.${issuesText} ${totalInsights} interviews analyzed to identify key pain points driving customer churn.`;
+}
+
+function highlightSummary(text: string, churnDrivers: any[]) {
+  if (!churnDrivers || churnDrivers.length === 0) return text;
+
+  const keyPhrases = churnDrivers.flatMap(driver => [
+    driver.name.toLowerCase(),
+    ...(driver.issues || []).map(issue => issue.toLowerCase())
+  ]);
+
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`(${keyPhrases.slice(0, 10).map(escape).join("|")})`, "gi");
+  const parts = text.split(pattern);
+
+  return parts.map((part, idx) =>
+    idx % 2 === 1 ? (
+      <mark key={idx} className="rounded-[3px] bg-yellow-200/70 px-0.5 py-0 text-slate-900">
+        {part}
+      </mark>
+    ) : (
+      <span key={idx}>{part}</span>
+    )
+  );
 }
 
 function Dashboard() {
@@ -383,47 +394,38 @@ function DashboardStats({ data }: { data: any }) {
       <StatCard
         label="Total Interviews"
         value={stats.totalSessions || 0}
-        icon={<MessageSquare className="h-4 w-4" />}
         color="blue"
       />
       <StatCard
         label="Completed"
         value={stats.completedSessions || 0}
-        icon={<Check className="h-4 w-4" />}
         color="green"
       />
       <StatCard
         label="Active"
         value={stats.activeSessions || 0}
-        icon={<Activity className="h-4 w-4" />}
         color="amber"
       />
       <StatCard
         label="Completion Rate"
         value={`${stats.completionRate || 0}%`}
-        icon={<Users className="h-4 w-4" />}
         color="violet"
       />
     </section>
   );
 }
 
-function StatCard({ label, value, icon, color }: { label: string; value: string | number; icon: React.ReactNode; color: string }) {
+function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
   const colorClasses = {
-    blue: "bg-blue-50 text-blue-600",
-    green: "bg-green-50 text-green-600",
-    amber: "bg-amber-50 text-amber-600",
-    violet: "bg-violet-50 text-violet-600",
+    blue: "border-blue-200 bg-blue-50",
+    green: "border-green-200 bg-green-50",
+    amber: "border-amber-200 bg-amber-50",
+    violet: "border-violet-200 bg-violet-50",
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</p>
-        <div className={`p-2 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
-          {icon}
-        </div>
-      </div>
+    <div className={`rounded-lg border ${colorClasses[color as keyof typeof colorClasses]} p-4 md:p-6 shadow-sm`}>
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-2">{label}</p>
       <p className="text-2xl font-bold text-gray-900">{value}</p>
     </div>
   );
@@ -433,6 +435,7 @@ function StatCard({ label, value, icon, color }: { label: string; value: string 
 function ExecutiveBrief({ data }: { data: any }) {
   const now = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   const executiveSummary = data?.executiveSummary || "Start collecting customer feedback to get detailed insights into cancellation patterns.";
+  const churnDrivers = data?.churnDrivers || [];
 
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-5 md:p-6 shadow-sm">
@@ -444,7 +447,7 @@ function ExecutiveBrief({ data }: { data: any }) {
           Customer Cancellation Analysis
         </h1>
         <p className="mt-3 max-w-4xl text-sm leading-relaxed text-gray-600">
-          {executiveSummary}
+          {highlightSummary(executiveSummary, churnDrivers)}
         </p>
       </div>
     </section>
@@ -463,58 +466,40 @@ function Stat({ label, value, small }: { label: string; value: string; small?: b
 /* ---------- 3. Churn Drivers ---------- */
 function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (driver: any) => void }) {
   const rows = data?.churnDrivers || [];
-  const churnTrend = data?.churnTrend || [];
 
   return (
     <section>
       <SectionHead title="Cancellation reasons" subtitle="Top reasons for customer cancellations." />
-      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="px-4 py-3 text-left md:px-5">Reason</th>
-                <th className="px-4 py-3 text-right md:px-5">Customers</th>
-                <th className="px-4 py-3 text-right md:px-5">Trend</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length > 0 ? (
-                rows.map((r: any) => (
-                  <tr key={r.name} className="border-t border-gray-100 cursor-pointer hover:bg-gray-50" onClick={() => onSelectDriver(r)}>
-                    <td className="px-4 py-3 md:px-5">
-                      <p className="font-medium text-gray-900">{r.name}</p>
-                      <p className="mt-0.5 text-xs text-gray-500">{r.pct}% share</p>
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums text-gray-800 md:px-5">{r.customers}</td>
-                    <td className="px-4 py-3 text-right md:px-5"><TrendGlyph trend={r.trend} /></td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                    No churn data yet. Collect more interviews to see cancellation reasons.
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
+            <tr>
+              <th className="px-4 py-3 text-left md:px-5">Reason</th>
+              <th className="px-4 py-3 text-right md:px-5">Customers</th>
+              <th className="px-4 py-3 text-right md:px-5">Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length > 0 ? (
+              rows.map((r: any) => (
+                <tr key={r.name} className="border-t border-gray-100 cursor-pointer hover:bg-gray-50" onClick={() => onSelectDriver(r)}>
+                  <td className="px-4 py-3 md:px-5">
+                    <p className="font-medium text-gray-900">{r.name}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">{r.pct}% share</p>
                   </td>
+                  <td className="px-4 py-3 text-right tabular-nums text-gray-800 md:px-5">{r.customers}</td>
+                  <td className="px-4 py-3 text-right md:px-5"><TrendGlyph trend={r.trend} /></td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6">
-          <h3 className="text-sm font-semibold tracking-tight text-gray-900">Churn trend over time</h3>
-          <div className="mt-4 h-48">
-            <ResponsiveContainer>
-              <LineChart data={churnTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="month" stroke={SLATE} fontSize={11} />
-                <YAxis stroke={SLATE} fontSize={11} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Legend wrapperStyle={{ fontSize: 10 }} iconType="circle" />
-                <Line type="monotone" dataKey="churned" stroke={BLUE} strokeWidth={2} dot={{ r: 3 }} name="Churned" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                  No churn data yet. Collect more interviews to see cancellation reasons.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </section>
   );
@@ -593,7 +578,7 @@ function ActionPlan({ data, onSelectRecommendation }: { data: any; onSelectRecom
                   <h3 className="text-sm font-semibold leading-snug tracking-tight text-gray-900">
                     {r.recommendation}
                   </h3>
-                  <p className="mt-1 text-xs text-gray-500">${r.affected_revenue.toLocaleString()} at stake</p>
+                  <p className="mt-1 text-xs text-gray-500">Solution to: {r.solution_to}</p>
                 </div>
               </div>
 
@@ -707,6 +692,10 @@ function RecommendationModal({ recommendation, onClose }: { recommendation: any;
           <div className="rounded-lg bg-gray-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Problem Statement</p>
             <p className="mt-2 text-sm text-gray-700">{recommendation.problem}</p>
+          </div>
+          <div className="rounded-lg bg-gray-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Solution To</p>
+            <p className="mt-2 text-sm text-gray-700">{recommendation.solution_to}</p>
           </div>
           <div className="rounded-lg bg-gray-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Expected Impact</p>

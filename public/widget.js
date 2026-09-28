@@ -163,6 +163,11 @@
         return;
       }
       
+      // For SignOut, CancelSubscription, DeleteAccount events, show loading modal immediately
+      if ((eventName === 'SignOut' || eventName === 'CancelSubscription' || eventName === 'DeleteAccount')) {
+        this.showLoadingModal();
+      }
+      
       // Send event to backend
       var payload = {
         company_id: this.companyId,
@@ -192,13 +197,16 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-        keepalive: false
+        keepalive: true
       }).then(function(response) {
         console.log('Leaveesy Widget: Response received, status:', response.status);
         console.log('Leaveesy Widget: Response headers:', response.headers);
         
         if (!response.ok) {
           console.error('Leaveesy Widget: Failed to send event, status:', response.status);
+          if (window.leaveesy.modal) {
+            window.leaveesy.closeModal();
+          }
           return;
         }
         
@@ -233,21 +241,65 @@
               
               console.log('Leaveesy Widget: Pre-form URL:', leaveesyUrl);
               
-              // Create and show modal
+              // Replace loading modal with actual pre-form
               window.leaveesy.showModal(leaveesyUrl);
             } else {
               console.log('Leaveesy Widget: Not showing modal - conditions not met');
               console.log('Leaveesy Widget: eventName:', eventName, 'interviewSessionId:', data.interviewSessionId);
+              if (window.leaveesy.modal) {
+                window.leaveesy.closeModal();
+              }
             }
           } catch (parseError) {
             console.error('Leaveesy Widget: Failed to parse JSON response:', parseError);
+            if (window.leaveesy.modal) {
+              window.leaveesy.closeModal();
+            }
           }
         });
       }).catch(function(error) {
         console.error('Leaveesy Widget: Failed to send event', error);
+        if (window.leaveesy.modal) {
+          window.leaveesy.closeModal();
+        }
       });
       
       console.log('Leaveesy Widget: Tracked event', eventName, payload);
+    },
+    
+    showLoadingModal: function() {
+      // Remove existing modal if any
+      if (this.modal) {
+        document.body.removeChild(this.modal);
+      }
+      
+      // Hide body scroll
+      document.body.style.overflow = 'hidden';
+      
+      // Create modal overlay
+      var modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+      
+      // Create loading container
+      var container = document.createElement('div');
+      container.style.cssText = 'background:white;border-radius:16px;max-width:600px;width:90%;height:400px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;display:flex;align-items:center;justify-content:center;';
+      
+      // Add loading spinner
+      var spinner = document.createElement('div');
+      spinner.innerHTML = '<div style="width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #2563eb;border-radius:50%;animation:spin 1s linear infinite;"></div><style>@keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}</style>';
+      
+      container.appendChild(spinner);
+      modal.appendChild(container);
+      document.body.appendChild(modal);
+      this.modal = modal;
+    },
+    
+    closeModal: function() {
+      if (this.modal) {
+        document.body.removeChild(this.modal);
+        document.body.style.overflow = '';
+        this.modal = null;
+      }
     }
   };
 

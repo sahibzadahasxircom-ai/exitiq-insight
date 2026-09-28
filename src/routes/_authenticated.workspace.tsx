@@ -231,7 +231,7 @@ function Workspace() {
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Workspace</h1>
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Workspace</h1>
         <p className="text-muted-foreground mt-2">
           Customize your workspace branding and customer experience.
         </p>

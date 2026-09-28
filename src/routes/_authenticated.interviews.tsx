@@ -52,13 +52,6 @@ function InterviewLibrary() {
     });
   }, [search, displayData]);
 
-  // Calculate stats
-  const stats = {
-    total: sessions.length,
-    completed: sessions.filter((s: any) => s.interview_status === 'completed').length,
-    active: sessions.filter((s: any) => s.interview_status === 'active').length,
-  };
-
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 md:space-y-8 px-4 py-4 md:px-6 md:py-6 lg:py-8">
       <header className="mb-6 md:mb-8">
@@ -71,13 +64,6 @@ function InterviewLibrary() {
           </div>
         </div>
       </header>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-4 md:gap-6">
-        <StatCard label="Total" value={stats.total} icon={<Users className="h-4 w-4" />} color="blue" />
-        <StatCard label="Completed" value={stats.completed} icon={<MessageSquare className="h-4 w-4" />} color="green" />
-        <StatCard label="Active" value={stats.active} icon={<Activity className="h-4 w-4" />} color="amber" />
-      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-sm">
@@ -147,26 +133,6 @@ function InterviewLibrary() {
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-function StatCard({ label, value, icon, color }: { label: string; value: number; icon: React.ReactNode; color: string }) {
-  const colorClasses = {
-    blue: "bg-blue-50 text-blue-600",
-    green: "bg-green-50 text-green-600",
-    amber: "bg-amber-50 text-amber-600",
-  };
-
-  return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</p>
-        <div className={`p-2 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
-          {icon}
-        </div>
-      </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
