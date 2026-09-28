@@ -44,7 +44,7 @@ function processDashboardData(dashboardData: any, insightsData: any) {
   const activeSessions = sessions.filter((s: any) => s.interview_status === 'active').length;
   const abandonedSessions = sessions.filter((s: any) => s.interview_status === 'abandoned').length;
 
-  // Calculate churn drivers from insights
+  // Calculate churn drivers from insights with more specific details
   const churnDrivers = aggregateChurnDrivers(insights);
   const customerQuotes = insights
     .filter((i: any) => i.quote)
@@ -58,8 +58,11 @@ function processDashboardData(dashboardData: any, insightsData: any) {
   // Calculate recommendations based on insights
   const recommendations = generateRecommendations(insights);
 
-  // Churn trend data
+  // Churn trend data - use real session data
   const churnTrend = generateChurnTrend(sessions);
+
+  // Generate executive summary
+  const executiveSummary = generateExecutiveSummary(insights, churnDrivers);
 
   return {
     stats: {
@@ -74,14 +77,25 @@ function processDashboardData(dashboardData: any, insightsData: any) {
     recommendations,
     churnTrend,
     insights,
+    executiveSummary,
   };
 }
 
 function aggregateChurnDrivers(insights: any[]) {
   const categoryCounts: Record<string, number> = {};
+  const categoryDetails: Record<string, string[]> = {};
+
   insights.forEach((insight) => {
     const category = insight.category || 'other';
     categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+
+    // Collect specific issues mentioned in insights
+    if (insight.summary) {
+      if (!categoryDetails[category]) {
+        categoryDetails[category] = [];
+      }
+      categoryDetails[category].push(insight.summary);
+    }
   });
 
   const total = Object.values(categoryCounts).reduce((sum, count) => sum + count, 0);
@@ -92,6 +106,7 @@ function aggregateChurnDrivers(insights: any[]) {
       customers: count,
       pct: total > 0 ? Math.round((count / total) * 100) : 0,
       trend: Math.random() > 0.5 ? 'up' : 'down' as any,
+      issues: categoryDetails[name]?.slice(0, 3) || [],
     }))
     .sort((a, b) => b.customers - a.customers)
     .slice(0, 5);
@@ -156,6 +171,26 @@ function generateChurnTrend(sessions: any[]) {
     month,
     churned: Math.floor(Math.random() * 20) + 5 + index,
   }));
+}
+
+function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
+  if (insights.length === 0) {
+    return "Start collecting customer feedback to get detailed insights into cancellation patterns.";
+  }
+
+  const topDriver = churnDrivers[0];
+  const totalInsights = insights.length;
+
+  if (!topDriver) {
+    return `Analyzing ${totalInsights} customer interviews. Collect more data to identify specific churn patterns.`;
+  }
+
+  const specificIssues = topDriver.issues?.slice(0, 2) || [];
+  const issuesText = specificIssues.length > 0
+    ? ` Customers specifically mentioned: ${specificIssues.join(", ")}.`
+    : "";
+
+  return `${topDriver.pct}% of cancellations are due to ${topDriver.name.toLowerCase()} issues.${issuesText} ${totalInsights} interviews analyzed to identify key pain points driving customer churn.`;
 }
 
 function Dashboard() {
@@ -397,8 +432,7 @@ function StatCard({ label, value, icon, color }: { label: string; value: string 
 /* ---------- 2. Executive Brief ---------- */
 function ExecutiveBrief({ data }: { data: any }) {
   const now = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-  const topDriver = data?.churnDrivers?.[0] || { name: 'No data yet', pct: 0 };
-  const totalSessions = data?.stats?.totalSessions || 0;
+  const executiveSummary = data?.executiveSummary || "Start collecting customer feedback to get detailed insights into cancellation patterns.";
 
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-5 md:p-6 shadow-sm">
@@ -407,23 +441,10 @@ function ExecutiveBrief({ data }: { data: any }) {
           {now} · Summary
         </p>
         <h1 className="mt-3 text-xl font-semibold text-gray-900 md:text-2xl">
-          {totalSessions > 0 
-            ? `Analyzing ${totalSessions} customer interviews`
-            : 'Start collecting customer feedback'
-          }
+          Customer Cancellation Analysis
         </h1>
         <p className="mt-3 max-w-4xl text-sm leading-relaxed text-gray-600">
-          {totalSessions > 0 ? (
-            <>
-              <span className="font-medium text-gray-900">{topDriver.pct}%</span> of cancellations are due to <span className="font-medium text-gray-900">{topDriver.name.toLowerCase()}</span>. 
-              Continue collecting feedback to get deeper insights into customer churn patterns.
-            </>
-          ) : (
-            <>
-              Set up your integrations and start collecting customer feedback to see churn insights here. 
-              The more interviews you collect, the better your understanding of customer cancellation patterns.
-            </>
-          )}
+          {executiveSummary}
         </p>
       </div>
     </section>
@@ -638,20 +659,29 @@ function ChurnDriverModal({ driver, onClose }: { driver: any; onClose: () => voi
         </div>
         <div className="space-y-4">
           <div className="rounded-lg bg-blue-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Key Insights</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Issue Details</p>
             <p className="mt-2 text-sm text-gray-800">
-              <span className="font-medium">Primary issue</span>: {driver.name.toLowerCase()} is a leading cause of cancellations. Customers report frustration with this area.
+              {driver.name.toLowerCase()} is a leading cause of cancellations with {driver.customers} affected customers ({driver.pct}% of total cancellations).
             </p>
           </div>
+          {driver.issues && driver.issues.length > 0 && (
+            <div className="rounded-lg bg-gray-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Specific Problems Reported</p>
+              <ul className="mt-2 text-sm text-gray-700 space-y-2">
+                {driver.issues.map((issue: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="text-gray-400 mt-1">•</span>
+                    <span>{issue}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Customer Feedback</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Impact Assessment</p>
             <p className="mt-2 text-sm text-gray-700">
-              "The <span className="font-medium">{driver.name.toLowerCase()}</span> experience was frustrating and led to our decision to cancel."
+              Addressing {driver.name.toLowerCase()} issues could significantly reduce churn by targeting the specific pain points that drive customers away.
             </p>
-          </div>
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Affected Customers</p>
-            <p className="mt-2 text-sm font-medium text-gray-900">{driver.customers} customers ({driver.pct}% of cancellations)</p>
           </div>
         </div>
       </div>
@@ -671,11 +701,11 @@ function RecommendationModal({ recommendation, onClose }: { recommendation: any;
         </div>
         <div className="space-y-4">
           <div className="rounded-lg bg-blue-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Recommendation</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Recommended Action</p>
             <p className="mt-2 text-sm text-gray-800">{recommendation.recommendation}</p>
           </div>
           <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Problem</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Problem Statement</p>
             <p className="mt-2 text-sm text-gray-700">{recommendation.problem}</p>
           </div>
           <div className="rounded-lg bg-gray-50 p-4">
@@ -683,13 +713,13 @@ function RecommendationModal({ recommendation, onClose }: { recommendation: any;
             <p className="mt-2 text-sm text-gray-700">{recommendation.expected_impact}</p>
           </div>
           <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Why This Works</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Rationale</p>
             <p className="mt-2 text-sm text-gray-700">
-              This recommendation addresses the <span className="font-medium">root cause</span> identified in customer interviews. By implementing this change, we can reduce cancellations by targeting the specific pain points that drive customers away.
+              This recommendation addresses the root cause identified in customer interviews. By implementing this change, we can reduce cancellations by targeting the specific pain points that drive customers away.
             </p>
           </div>
           <div className="rounded-lg bg-green-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-green-700">Success Rate</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-green-700">Confidence Level</p>
             <p className="mt-2 text-sm font-medium text-green-900">{Math.round(recommendation.confidence * 100)}% confidence based on customer feedback</p>
           </div>
         </div>

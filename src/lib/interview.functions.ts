@@ -170,6 +170,19 @@ export const getInterviewSession = createServerFn({ method: "GET" })
     return { session, messages: messages ?? [], insight: insight ?? null };
   });
 
+export const getInterviewMessages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ sessionId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: messages, error } = await context.supabase
+      .from("interview_messages")
+      .select("*")
+      .eq("session_id", data.sessionId)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return messages ?? [];
+  });
+
 export const deleteInterviewSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
