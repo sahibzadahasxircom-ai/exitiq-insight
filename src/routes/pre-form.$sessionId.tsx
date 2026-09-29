@@ -273,24 +273,25 @@ function PreForm() {
         >
           {/* Company Logo and Name - shown in modal */}
           {isModal && (
-            <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 ${
+            <div className={`absolute top-6 left-6 flex items-center gap-3 z-20 ${
               formStyle === "minimal" ? "hidden" : ""
             }`}>
               {companyLogo ? (
-                <img src={companyLogo} alt={companyName} className="h-6 w-6 object-contain flex-shrink-0" />
+                <img src={companyLogo} alt={companyName} className="h-10 w-10 object-contain flex-shrink-0 rounded-lg" />
               ) : (
                 <div
-                  className="h-6 w-6 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                  className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                   style={{ backgroundColor: brandColor }}
                 >
                   {companyName?.charAt(0).toUpperCase() || "E"}
                 </div>
               )}
-              {companyName && (
-                <span className="text-xs font-semibold truncate max-w-[120px]" style={{ color: textColor }}>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold" style={{ color: textColor }}>
                   {companyName}
                 </span>
-              )}
+                <span className="text-xs text-gray-500">Exit Interview</span>
+              </div>
             </div>
           )}
           {/* Background effect for the card - overlays on solid background if set */}
@@ -356,8 +357,8 @@ function PreForm() {
           )}
 
           <div className="relative z-10" style={{ color: textColor }}>
-          <CardHeader className={`space-y-2 pb-4 pt-12 ${formStyle === "minimal" ? "text-center" : ""}`}>
-            <CardTitle className={`${
+            <CardHeader className={`space-y-3 pb-4 pt-16 ${formStyle === "minimal" ? "text-center" : ""}`}>
+              <CardTitle className={`${
               formStyle === "casual" ? "text-3xl font-semibold" :
               formStyle === "minimal" ? "text-xl font-medium" : "text-2xl font-bold"
             } tracking-tight leading-tight`} style={{ color: textColor }}>
@@ -370,7 +371,7 @@ function PreForm() {
               {formDescription}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 pb-6">
+          <CardContent className="space-y-5 pb-8">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">Your name (optional)</Label>
               <Input

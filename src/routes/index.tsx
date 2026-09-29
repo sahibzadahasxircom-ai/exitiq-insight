@@ -117,27 +117,27 @@ function Landing() {
             `,
           }}
         />
-        <div className="mx-auto max-w-7xl px-4 md:px-6 pt-24 md:pt-32 pb-16 md:pb-24">
+        <div className="mx-auto max-w-7xl px-4 md:px-6 pt-20 md:pt-32 pb-12 md:pb-24">
           <div className="text-center">
-            <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm px-4 py-1.5 text-xs font-medium text-muted-foreground shadow-soft animate-fade-in">
+            <div className="mx-auto mb-4 md:mb-6 inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/50 backdrop-blur-sm px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium text-muted-foreground shadow-soft animate-fade-in">
               <Sparkles className="h-3 w-3 text-primary" />
               AI-powered churn intelligence for modern SaaS
             </div>
-            <h1 className="mx-auto max-w-4xl text-balance text-4xl md:text-5xl lg:text-[72px] font-semibold tracking-tight md:leading-[1.1] animate-slide-up">
+            <h1 className="mx-auto max-w-4xl text-balance text-3xl md:text-4xl lg:text-[72px] font-semibold tracking-tight md:leading-[1.1] animate-slide-up">
               Understand why customers leave. Know what to fix.
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-balance text-lg md:text-xl text-muted-foreground leading-relaxed animate-slide-up">
+            <p className="mx-auto mt-4 md:mt-6 max-w-2xl text-balance text-base md:text-lg md:text-xl text-muted-foreground leading-relaxed animate-slide-up">
               AI-powered exit interviews that automatically uncover churn reasons, competitor insights, revenue risks, and product opportunities.
             </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4 animate-slide-up stagger-2">
+            <div className="mt-8 md:mt-10 flex flex-wrap items-center justify-center gap-3 md:gap-4 animate-slide-up stagger-2">
               <Link to="/auth">
-                <Button size="lg" className="gap-2 h-12 px-6 md:px-8 text-base hover-lift">
+                <Button size="lg" className="gap-2 h-12 px-5 md:px-8 text-base hover-lift">
                   Get Started <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <button
                 onClick={() => document.getElementById('demo-section')?.scrollIntoView({ behavior: 'smooth' })}
-                className="h-12 px-6 md:px-8 text-base border border-border bg-background hover:bg-muted rounded-lg transition-colors"
+                className="h-12 px-5 md:px-8 text-base border border-border bg-background hover:bg-muted rounded-lg transition-colors"
               >
                 Explore leaveesy
               </button>

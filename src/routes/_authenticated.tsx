@@ -72,7 +72,7 @@ function AuthenticatedLayout() {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur md:px-6">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 md:px-6 backdrop-blur">
             <SidebarTrigger className="md:hidden" />
             <div className="hidden md:block h-5 w-px bg-border" />
             <span className="text-sm text-muted-foreground hidden md:block">leaveesy Console</span>
