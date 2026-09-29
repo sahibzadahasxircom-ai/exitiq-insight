@@ -295,7 +295,6 @@ function Dashboard() {
               variant="outline"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              className="hidden md:flex"
             >
               <Filter className="h-4 w-4 mr-2" />
               Filters

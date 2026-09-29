@@ -93,7 +93,7 @@ function InterviewAnalysis() {
   const phrases = buildHighlightPhrases(insight);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-10 px-6 py-10">
+    <div className="mx-auto max-w-4xl space-y-8 md:space-y-10 px-4 md:px-6 py-6 md:py-10">
       <Link
         to="/interviews"
         className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
@@ -102,8 +102,8 @@ function InterviewAnalysis() {
       </Link>
 
       {/* Header */}
-      <header className="border-b border-slate-200 pb-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+      <header className="border-b border-slate-200 pb-6 md:pb-8">
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">
           {session.customer_name || "Anonymous Customer"}
         </h1>
         <p className="mt-2 text-sm text-slate-600">
@@ -116,7 +116,7 @@ function InterviewAnalysis() {
           }
         </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-6 md:grid-cols-4">
+        <div className="mt-4 md:mt-6 grid grid-cols-2 gap-4 md:gap-6">
           <Stat label="Status" value={session.interview_status || "Active"} capitalize />
           <Stat label="Progress" value={session.interview_progress || "Started"} capitalize />
           <Stat label="Primary Category" value={insight?.category || "Not categorized"} capitalize />
@@ -134,26 +134,26 @@ function InterviewAnalysis() {
       {/* Conversation Messages */}
       {messages.length > 0 && (
         <Section title="Conversation">
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {messages.map((message: any) => (
               <div
                 key={message.id}
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-4 ${
+                  className={`max-w-[85%] md:max-w-[80%] rounded-lg p-3 md:p-4 ${
                     message.role === 'user'
                       ? 'bg-blue-50 text-slate-900'
                       : 'bg-slate-100 text-slate-900'
                   }`}
                 >
-                  <p className="text-xs font-medium mb-2">
+                  <p className="text-xs font-medium mb-1 md:mb-2">
                     {message.role === 'user' ? 'Customer' : 'leaveesy'}
                   </p>
                   <p className="text-sm leading-relaxed">
                     {message.role === 'user' ? highlight(message.message_content, phrases) : message.message_content}
                   </p>
-                  <p className="text-xs text-slate-500 mt-2">
+                  <p className="text-xs text-slate-500 mt-1 md:mt-2">
                     {format(new Date(message.created_at), "HH:mm")}
                   </p>
                 </div>
