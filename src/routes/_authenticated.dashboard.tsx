@@ -6,7 +6,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, Legend, PieChart, Pie, Cell,
 } from "recharts";
-import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Download, Calendar, Filter, TrendingUp, TrendingDown, Users, Activity, MessageSquare } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Calendar, Filter, TrendingUp, TrendingDown, Users, Activity, MessageSquare } from "lucide-react";
 import { getDashboardData, listInsights } from "@/lib/interview.functions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -298,23 +298,6 @@ function Dashboard() {
             >
               <Filter className="h-4 w-4 mr-2" />
               Filters
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const exportData = JSON.stringify(processedData, null, 2);
-                const blob = new Blob([exportData], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `leaveesy-export-${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                toast.success('Export downloaded successfully');
-              }}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
             </Button>
             {integrationStatus && (
               <div className="flex items-center gap-2">

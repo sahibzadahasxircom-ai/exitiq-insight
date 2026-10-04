@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Monitor, Tablet, Smartphone, Layout, Save, Upload, ArrowRight } from "lucide-react";
+import { Layout, Save, Upload, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/workspace")({
@@ -46,7 +46,6 @@ function Workspace() {
   const [preFormStyle, setPreFormStyle] = useState("professional");
   const [preFormTitle, setPreFormTitle] = useState("We're sorry to see you go");
   const [preFormDescription, setPreFormDescription] = useState("Help us improve by sharing your feedback");
-  const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [backgroundStyle, setBackgroundStyle] = useState("gradient");
   const [buttonColor, setButtonColor] = useState(brandColor);
   const [buttonTextColor, setButtonTextColor] = useState("#ffffff");
@@ -242,48 +241,22 @@ function Workspace() {
           <TabsTrigger value="pre-form" className="rounded-md">Pre-Form Customization</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pre-form" className="space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Live Preview + Quick Settings */}
-            <div className="space-y-8">
-              <Card className="border-2">
-                <CardHeader className="bg-muted/30">
-                  <CardTitle className="text-xl">Live Preview</CardTitle>
-                  <CardDescription>
-                    See how your pre-form will look to customers in real-time.
+        <TabsContent value="pre-form" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column - Live Preview */}
+            <div className="space-y-4">
+              <Card className="border border-gray-200">
+                <CardHeader className="bg-white pb-4">
+                  <CardTitle className="text-base font-semibold">Live Preview</CardTitle>
+                  <CardDescription className="text-xs">
+                    See how your pre-form will look to customers
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-base font-semibold">Device Preview</Label>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className={`h-10 w-10 ${previewDevice === "desktop" ? "bg-primary text-primary-foreground" : ""}`}
-                          onClick={() => setPreviewDevice("desktop")}
-                        >
-                          <Monitor className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className={`h-10 w-10 ${previewDevice === "tablet" ? "bg-primary text-primary-foreground" : ""}`}
-                          onClick={() => setPreviewDevice("tablet")}
-                        >
-                          <Tablet className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className={`h-10 w-10 ${previewDevice === "mobile" ? "bg-primary text-primary-foreground" : ""}`}
-                          onClick={() => setPreviewDevice("mobile")}
-                        >
-                          <Smartphone className="h-5 w-5" />
-                        </Button>
-                      </div>
-                    </div>
+                <CardContent className="pt-4">
+                  <div
+                    className={`mx-auto border rounded-lg overflow-hidden relative max-w-lg`}
+                    style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
+                  >
                 <div
                   className={`mx-auto border rounded-xl overflow-hidden relative ${
                     previewDevice === "desktop"
@@ -361,21 +334,24 @@ function Workspace() {
 
                   {/* Logo and Company Name in corner */}
                   {(logoPreview || logo || companyName) && (
-                    <div className={`absolute top-4 left-4 flex items-center gap-3 z-20 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm ${
+                    <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 ${
                       preFormStyle === "minimal" ? "hidden" : ""
                     }`}>
                       {(logoPreview || logo) && (
-                        <img src={logoPreview || logo} alt="Logo" className="h-10 w-10 object-contain flex-shrink-0" />
+                        <img src={logoPreview || logo} alt="Logo" className="h-8 w-8 object-contain flex-shrink-0 rounded-lg" />
                       )}
                       {companyName && (
-                        <span className="text-sm font-semibold truncate max-w-[180px]" style={{ color: textColor }}>
-                          {companyName}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-semibold" style={{ color: textColor }}>
+                            {companyName}
+                          </span>
+                          <span className="text-[10px] text-gray-500">Exit Interview</span>
+                        </div>
                       )}
                     </div>
                   )}
 
-                  <div className={`p-8 pt-16 space-y-6 relative z-10 ${
+                  <div className={`p-8 pt-20 space-y-6 relative z-10 ${
                     preFormStyle === "minimal" ? "text-center" : ""
                   }`} style={{ color: textColor }}>
                     <div className={`space-y-1 ${
@@ -442,30 +418,30 @@ function Workspace() {
           </Card>
 
               {/* Quick Settings Below Preview */}
-              <Card className="border-2">
-                <CardHeader className="bg-muted/30">
-                  <CardTitle className="text-xl">Quick Settings</CardTitle>
-                  <CardDescription>
-                    Common customizations for your pre-form.
+              <Card className="border border-gray-200">
+                <CardHeader className="bg-white pb-4">
+                  <CardTitle className="text-base font-semibold">Quick Settings</CardTitle>
+                  <CardDescription className="text-xs">
+                    Common customizations for your pre-form
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6 pt-6">
+                <CardContent className="space-y-4 pt-4">
                   {/* Form Style */}
                   <div>
-                    <Label className="text-base font-semibold mb-4 block">Form Style</Label>
-                    <div className="grid grid-cols-3 gap-4">
+                    <Label className="text-sm font-medium mb-3 block">Form Style</Label>
+                    <div className="grid grid-cols-3 gap-3">
                       {preFormTemplates.map((template) => (
                         <button
                           key={template.id}
                           onClick={() => setPreFormStyle(template.id)}
-                          className={`p-4 rounded-xl border-2 text-left transition-all group ${
+                          className={`p-3 rounded-lg border text-left transition-all ${
                             preFormStyle === template.id
-                              ? "border-primary bg-primary/10 ring-2 ring-primary/30"
-                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                              ? "border-primary bg-primary/10"
+                              : "border-gray-200 hover:border-primary/50 hover:bg-gray-50"
                           }`}
                         >
-                          <div className="font-semibold text-base mb-1">{template.name}</div>
-                          <div className="text-sm text-muted-foreground">{template.description}</div>
+                          <div className="font-semibold text-sm mb-1">{template.name}</div>
+                          <div className="text-xs text-gray-500">{template.description}</div>
                         </button>
                       ))}
                     </div>
@@ -473,9 +449,8 @@ function Workspace() {
 
                   {/* Background Effect */}
                   <div>
-                    <Label className="text-base font-semibold mb-4 block">Form Background Effect</Label>
+                    <Label className="text-sm font-medium mb-3 block">Background Effect</Label>
                     <Select value={backgroundStyle} onValueChange={(value) => {
-                      console.log("Background style changed to:", value);
                       setBackgroundStyle(value);
                     }}>
                       <SelectTrigger className="w-full">
@@ -492,9 +467,9 @@ function Workspace() {
                   </div>
 
                   {/* Content Customization */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
-                      <Label htmlFor="pre-form-title" className="text-base font-semibold mb-3 block">
+                      <Label htmlFor="pre-form-title" className="text-sm font-medium mb-2 block">
                         Form Title
                       </Label>
                       <Input
@@ -502,11 +477,11 @@ function Workspace() {
                         value={preFormTitle}
                         onChange={(e) => setPreFormTitle(e.target.value)}
                         placeholder="We're sorry to see you go"
-                        className="text-base h-11"
+                        className="text-sm h-10"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="pre-form-description" className="text-base font-semibold mb-3 block">
+                      <Label htmlFor="pre-form-description" className="text-sm font-medium mb-2 block">
                         Form Description
                       </Label>
                       <Textarea
@@ -514,8 +489,8 @@ function Workspace() {
                         value={preFormDescription}
                         onChange={(e) => setPreFormDescription(e.target.value)}
                         placeholder="Help us improve by sharing your feedback"
-                        rows={3}
-                        className="text-base resize-none"
+                        rows={2}
+                        className="text-sm resize-none"
                       />
                     </div>
                   </div>
@@ -524,29 +499,29 @@ function Workspace() {
             </div>
 
             {/* Right Column - Detailed Settings */}
-            <div className="space-y-8">
-              <Card className="border-2">
-                <CardHeader className="bg-muted/30">
-                  <CardTitle className="text-xl">Brand Identity</CardTitle>
-                  <CardDescription>
-                    Customize your company logo, name, and brand color.
+            <div className="space-y-4">
+              <Card className="border border-gray-200">
+                <CardHeader className="bg-white pb-4">
+                  <CardTitle className="text-base font-semibold">Brand Identity</CardTitle>
+                  <CardDescription className="text-xs">
+                    Customize your company logo, name, and brand color
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-8 pt-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="company-name" className="text-base font-semibold">Company Name</Label>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="company-name" className="text-sm font-medium">Company Name</Label>
                     <Input
                       id="company-name"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       placeholder="Your company name"
-                      className="h-11 text-base"
+                      className="h-10 text-sm"
                     />
                   </div>
 
-                  <div className="space-y-3">
-                    <Label htmlFor="logo-upload" className="text-base font-semibold">Company Logo</Label>
-                    <div className="flex items-start gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="logo-upload" className="text-sm font-medium">Company Logo</Label>
+                    <div className="flex items-start gap-3">
                       <div className="flex-1">
                         <Input
                           id="logo-upload"
@@ -560,17 +535,17 @@ function Workspace() {
                           type="button"
                           variant="outline"
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-full"
+                          className="w-full h-10 text-sm"
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           Upload Logo
                         </Button>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-gray-500 mt-1">
                           PNG, JPG, or SVG up to 2MB
                         </p>
                       </div>
                       {(logoPreview || logo) && (
-                        <div className="h-16 w-16 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
+                        <div className="h-12 w-12 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
                           <img
                             src={logoPreview || logo}
                             alt="Logo preview"
@@ -581,90 +556,90 @@ function Workspace() {
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <Label htmlFor="brand-color" className="text-base font-semibold">Brand Color</Label>
-                    <div className="flex gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="brand-color" className="text-sm font-medium">Brand Color</Label>
+                    <div className="flex gap-2">
                       <Input
                         id="brand-color"
                         type="color"
                         value={brandColor}
                         onChange={(e) => setBrandColor(e.target.value)}
-                        className="w-20 h-11 p-1"
+                        className="w-16 h-10 p-1"
                       />
                       <Input
                         value={brandColor}
                         onChange={(e) => setBrandColor(e.target.value)}
                         placeholder="#2563eb"
-                        className="flex-1 h-11"
+                        className="flex-1 h-10 text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="pt-6">
-                    <Button onClick={handleSave} disabled={saving} size="lg" className="w-full">
+                  <div className="pt-4">
+                    <Button onClick={handleSave} disabled={saving} className="w-full h-10">
                       {saving ? "Saving..." : "Save Branding"}
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-2">
-                <CardHeader className="bg-muted/30">
-                  <CardTitle className="text-xl">Pre-Form Settings</CardTitle>
-                  <CardDescription>
-                    Save your pre-form customization settings.
+              <Card className="border border-gray-200">
+                <CardHeader className="bg-white pb-4">
+                  <CardTitle className="text-base font-semibold">Pre-Form Settings</CardTitle>
+                  <CardDescription className="text-xs">
+                    Save your pre-form customization settings
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-8 pt-6">
-                  <div className="pt-6">
-                    <Button onClick={handleSavePreForm} disabled={saving} size="lg" className="w-full">
+                <CardContent className="space-y-4 pt-4">
+                  <div className="pt-2">
+                    <Button onClick={handleSavePreForm} disabled={saving} className="w-full h-10">
                       {saving ? "Saving..." : "Save Pre-Form Settings"}
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-2">
-                <CardHeader className="bg-muted/30">
-                  <CardTitle className="text-xl">Colors & Advanced Settings</CardTitle>
-                  <CardDescription>
-                    Customize colors and advanced form options.
+              <Card className="border border-gray-200">
+                <CardHeader className="bg-white pb-4">
+                  <CardTitle className="text-base font-semibold">Colors & Advanced Settings</CardTitle>
+                  <CardDescription className="text-xs">
+                    Customize colors and advanced form options
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-8 pt-6">
+                <CardContent className="space-y-4 pt-4">
                   {/* Button Colors - Side by Side */}
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-base font-semibold mb-3 block">Button Color</Label>
-                      <div className="flex gap-3">
+                      <Label className="text-sm font-medium mb-2 block">Button Color</Label>
+                      <div className="flex gap-2">
                         <Input
                           type="color"
                           value={buttonColor}
                           onChange={(e) => setButtonColor(e.target.value)}
-                          className="w-20 h-11 p-1"
+                          className="w-16 h-10 p-1"
                         />
                         <Input
                           value={buttonColor}
                           onChange={(e) => setButtonColor(e.target.value)}
                           placeholder="#2563eb"
-                          className="flex-1 h-11"
+                          className="flex-1 h-10 text-sm"
                         />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-base font-semibold mb-3 block">Button Text Color</Label>
-                      <div className="flex gap-3">
+                      <Label className="text-sm font-medium mb-2 block">Button Text Color</Label>
+                      <div className="flex gap-2">
                         <Input
                           type="color"
                           value={buttonTextColor}
                           onChange={(e) => setButtonTextColor(e.target.value)}
-                          className="w-20 h-11 p-1"
+                          className="w-16 h-10 p-1"
                         />
                         <Input
                           value={buttonTextColor}
                           onChange={(e) => setButtonTextColor(e.target.value)}
                           placeholder="#ffffff"
-                          className="flex-1 h-11"
+                          className="flex-1 h-10 text-sm"
                         />
                       </div>
                     </div>
@@ -672,82 +647,82 @@ function Workspace() {
 
                   {/* Text Color */}
                   <div>
-                    <Label className="text-base font-semibold mb-3 block">Pre-Form Text Color</Label>
-                    <div className="flex gap-3">
+                    <Label className="text-sm font-medium mb-2 block">Pre-Form Text Color</Label>
+                    <div className="flex gap-2">
                       <Input
                         type="color"
                         value={textColor}
                         onChange={(e) => setTextColor(e.target.value)}
-                        className="w-20 h-11 p-1"
+                        className="w-16 h-10 p-1"
                       />
                       <Input
                         value={textColor}
                         onChange={(e) => setTextColor(e.target.value)}
                         placeholder="#000000"
-                        className="flex-1 h-11"
+                        className="flex-1 h-10 text-sm"
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className="text-xs text-gray-500 mt-1">
                       Color of the title and description text
                     </p>
                   </div>
 
                   {/* Solid Background Color */}
                   <div>
-                    <Label className="text-base font-semibold mb-3 block">Solid Background Color</Label>
-                    <div className="flex gap-3">
+                    <Label className="text-sm font-medium mb-2 block">Solid Background Color</Label>
+                    <div className="flex gap-2">
                       <Input
                         type="color"
                         value={solidBackgroundColor}
                         onChange={(e) => setSolidBackgroundColor(e.target.value)}
-                        className="w-20 h-11 p-1"
+                        className="w-16 h-10 p-1"
                       />
                       <Input
                         value={solidBackgroundColor}
                         onChange={(e) => setSolidBackgroundColor(e.target.value)}
                         placeholder="#000000"
-                        className="flex-1 h-11"
+                        className="flex-1 h-10 text-sm"
                       />
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Solid background color for the pre-form card (gradients will overlay on top)
+                    <p className="text-xs text-gray-500 mt-1">
+                      Solid background color for the pre-form card
                     </p>
                   </div>
 
                   {/* Form Fields Settings */}
-                  <div className="pt-4 border-t space-y-6">
-                    <Label className="text-base font-semibold mb-4 block">Form Fields</Label>
+                  <div className="pt-4 border-t space-y-4">
+                    <Label className="text-sm font-medium mb-3 block">Form Fields</Label>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-xl">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
-                          <Label className="font-semibold">Show Name Field</Label>
-                          <p className="text-sm text-muted-foreground">Display the name input field in the pre-form</p>
+                          <Label className="text-sm font-medium">Show Name Field</Label>
+                          <p className="text-xs text-gray-500">Display the name input field</p>
                         </div>
                         <Switch checked={showNameField} onCheckedChange={setShowNameField} />
                       </div>
                       
                       {showNameField && (
-                        <div className="p-4 border rounded-xl bg-muted/30">
+                        <div className="p-3 border rounded-lg bg-gray-50">
                           <div className="flex items-center justify-between">
-                            <Label className="font-semibold">Require Name</Label>
+                            <Label className="text-sm font-medium">Require Name</Label>
                             <Switch checked={requireName} onCheckedChange={setRequireName} />
                           </div>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between p-4 border rounded-xl">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
-                          <Label className="font-semibold">Show Email Field</Label>
-                          <p className="text-sm text-muted-foreground">Display the email input field in the pre-form</p>
+                          <Label className="text-sm font-medium">Show Email Field</Label>
+                          <p className="text-xs text-gray-500">Display the email input field</p>
                         </div>
                         <Switch checked={showEmailField} onCheckedChange={setShowEmailField} />
                       </div>
                       
                       {showEmailField && (
-                        <div className="p-4 border rounded-xl bg-muted/30">
+                        <div className="p-3 border rounded-lg bg-gray-50">
                           <div className="flex items-center justify-between">
-                            <Label className="font-semibold">Require Email</Label>
+                            <Label className="text-sm font-medium">Require Email</Label>
                             <Switch checked={requireEmail} onCheckedChange={setRequireEmail} />
                           </div>
                         </div>
@@ -755,15 +730,14 @@ function Workspace() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end pt-6 border-t">
+                  <div className="flex justify-end pt-4 border-t">
                     <Button
                       onClick={handleSavePreForm}
                       disabled={saving}
-                      size="lg"
-                      className="gap-2 px-8"
+                      className="gap-2 h-10"
                     >
-                      <Save className="h-5 w-5" />
-                      {saving ? "Saving..." : "Save Pre-Form Settings"}
+                      <Save className="h-4 w-4" />
+                      {saving ? "Saving..." : "Save Settings"}
                     </Button>
                   </div>
 
