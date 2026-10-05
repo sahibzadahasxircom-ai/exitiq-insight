@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart, Menu, X } from "lucide-react";
+import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart, Menu, X, Check, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LandingLiveDemo } from "@/components/landing-live-demo";
 import { useEffect, useState } from "react";
@@ -56,6 +56,7 @@ function Landing() {
           <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
             <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
           </nav>
           <div className="flex items-center gap-2">
             <button
@@ -511,6 +512,146 @@ function Landing() {
               <p className="text-xs md:text-sm text-muted-foreground">
                 Actionable insights to reduce churn
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="border-t border-border bg-background">
+        <div className="mx-auto max-w-7xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
+              Simple, transparent pricing
+            </h2>
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
+              Choose the perfect plan for your business needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {/* Free Plan */}
+            <div className="border border-border rounded-xl p-6 bg-card">
+              <h3 className="text-lg font-semibold mb-2">Free</h3>
+              <p className="text-sm text-muted-foreground mb-4">Perfect for getting started</p>
+              <div className="mb-4">
+                <span className="text-3xl font-bold">$0</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">5 interviews per month</p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Full access to all features</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Basic analytics</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Email support</span>
+                </li>
+              </ul>
+              <Link to="/auth">
+                <Button className="w-full" variant="outline">Get Started</Button>
+              </Link>
+            </div>
+
+            {/* Starter Plan */}
+            <div className="border-2 border-primary rounded-xl p-6 bg-card relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
+                Popular
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Starter</h3>
+              <p className="text-sm text-muted-foreground mb-4">For growing teams</p>
+              <div className="mb-4">
+                <span className="text-3xl font-bold">$27</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">75 interviews per month</p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Everything in Free</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Advanced analytics</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Priority email support</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Custom branding</span>
+                </li>
+              </ul>
+              <Link to="/auth">
+                <Button className="w-full">Get Started</Button>
+              </Link>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="border border-border rounded-xl p-6 bg-card">
+              <h3 className="text-lg font-semibold mb-2">Pro</h3>
+              <p className="text-sm text-muted-foreground mb-4">For high volume needs</p>
+              <div className="mb-4">
+                <span className="text-3xl font-bold">$97</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">250 interviews per month</p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Everything in Starter</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>API access</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Webhook integrations</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Dedicated support</span>
+                </li>
+              </ul>
+              <Link to="/auth">
+                <Button className="w-full">Get Started</Button>
+              </Link>
+            </div>
+
+            {/* Custom Plan */}
+            <div className="border border-border rounded-xl p-6 bg-card">
+              <h3 className="text-lg font-semibold mb-2">Custom</h3>
+              <p className="text-sm text-muted-foreground mb-4">For enterprise needs</p>
+              <div className="mb-4">
+                <span className="text-3xl font-bold">Custom</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">Unlimited interviews</p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Everything in Pro</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Custom integrations</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>SLA guarantee</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Dedicated account manager</span>
+                </li>
+              </ul>
+              <Button className="w-full" variant="outline">Contact Sales</Button>
             </div>
           </div>
         </div>

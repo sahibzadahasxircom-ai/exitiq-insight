@@ -6,12 +6,14 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, Legend, PieChart, Pie, Cell,
 } from "recharts";
-import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Calendar, Filter, TrendingUp, TrendingDown, Users, Activity, MessageSquare } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Calendar, Filter, TrendingUp, TrendingDown, Users, Activity, MessageSquare, AlertCircle, CreditCard } from "lucide-react";
 import { getDashboardData, listInsights } from "@/lib/interview.functions";
+import { getCompanyUsage, canCreateInterview } from "@/lib/pricing.functions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -219,6 +221,20 @@ function Dashboard() {
     retry: false,
   });
 
+  const getUsageFn = useServerFn(getCompanyUsage);
+  const { data: usage } = useQuery({
+    queryKey: ["company-usage"],
+    queryFn: () => getUsageFn({ data: undefined }),
+    retry: false,
+  });
+
+  const canCreateFn = useServerFn(canCreateInterview);
+  const { data: canCreate } = useQuery({
+    queryKey: ["can-create-interview"],
+    queryFn: () => canCreateFn({ data: undefined }),
+    retry: false,
+  });
+
   const [selectedChurnDriver, setSelectedChurnDriver] = useState<any>(null);
   const [selectedRecommendation, setSelectedRecommendation] = useState<any>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -299,6 +315,33 @@ function Dashboard() {
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
+            {usage && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200">
+                <Activity className="h-4 w-4 text-slate-600" />
+                <span className="text-sm text-slate-700">
+                  {usage.interviews_count}/{usage.limit === Infinity ? '∞' : usage.limit} interviews
+                </span>
+                {usage.remaining <= 0 && (
+                  <Badge variant="destructive" className="ml-2">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    Limit reached
+                  </Badge>
+                )}
+                {usage.remaining > 0 && usage.remaining <= 3 && (
+                  <Badge variant="outline" className="ml-2 border-amber-500 text-amber-700">
+                    {usage.remaining} left
+                  </Badge>
+                )}
+              </div>
+            )}
+            {canCreate && !canCreate.canCreate && (
+              <Link to="/pricing">
+                <Button size="sm" className="gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Upgrade Plan
+                </Button>
+              </Link>
+            )}
             {integrationStatus && (
               <div className="flex items-center gap-2">
                 {integrationStatus.setup_completed ? (

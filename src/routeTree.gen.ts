@@ -23,6 +23,7 @@ import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedInstallRouteImport } from './routes/_authenticated.install'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated.integrations'
 import { Route as AuthenticatedInterviewsRouteImport } from './routes/_authenticated.interviews'
+import { Route as AuthenticatedPricingRouteImport } from './routes/_authenticated.pricing'
 import { Route as AuthenticatedProductKnowledgeRouteImport } from './routes/_authenticated.product-knowledge'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedSetupWizardRouteImport } from './routes/_authenticated.setup-wizard'
@@ -104,6 +105,11 @@ const AuthenticatedInterviewsRoute = AuthenticatedInterviewsRouteImport.update({
   path: '/interviews',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPricingRoute = AuthenticatedPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedProductKnowledgeRoute =
   AuthenticatedProductKnowledgeRouteImport.update({
     id: '/product-knowledge',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/install': typeof AuthenticatedInstallRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/interviews': typeof AuthenticatedInterviewsRouteWithChildren
+  '/pricing': typeof AuthenticatedPricingRoute
   '/product-knowledge': typeof AuthenticatedProductKnowledgeRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup-wizard': typeof AuthenticatedSetupWizardRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/install': typeof AuthenticatedInstallRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/interviews': typeof AuthenticatedInterviewsRouteWithChildren
+  '/pricing': typeof AuthenticatedPricingRoute
   '/product-knowledge': typeof AuthenticatedProductKnowledgeRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup-wizard': typeof AuthenticatedSetupWizardRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/_authenticated/install': typeof AuthenticatedInstallRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/interviews': typeof AuthenticatedInterviewsRouteWithChildren
+  '/_authenticated/pricing': typeof AuthenticatedPricingRoute
   '/_authenticated/product-knowledge': typeof AuthenticatedProductKnowledgeRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup-wizard': typeof AuthenticatedSetupWizardRoute
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/install'
     | '/integrations'
     | '/interviews'
+    | '/pricing'
     | '/product-knowledge'
     | '/settings'
     | '/setup-wizard'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/install'
     | '/integrations'
     | '/interviews'
+    | '/pricing'
     | '/product-knowledge'
     | '/settings'
     | '/setup-wizard'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/_authenticated/install'
     | '/_authenticated/integrations'
     | '/_authenticated/interviews'
+    | '/_authenticated/pricing'
     | '/_authenticated/product-knowledge'
     | '/_authenticated/settings'
     | '/_authenticated/setup-wizard'
@@ -404,6 +416,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInterviewsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/pricing': {
+      id: '/_authenticated/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof AuthenticatedPricingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/product-knowledge': {
       id: '/_authenticated/product-knowledge'
       path: '/product-knowledge'
@@ -485,6 +504,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedInstallRoute: typeof AuthenticatedInstallRoute
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedInterviewsRoute: typeof AuthenticatedInterviewsRouteWithChildren
+  AuthenticatedPricingRoute: typeof AuthenticatedPricingRoute
   AuthenticatedProductKnowledgeRoute: typeof AuthenticatedProductKnowledgeRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupWizardRoute: typeof AuthenticatedSetupWizardRoute
@@ -500,6 +520,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInstallRoute: AuthenticatedInstallRoute,
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedInterviewsRoute: AuthenticatedInterviewsRouteWithChildren,
+  AuthenticatedPricingRoute: AuthenticatedPricingRoute,
   AuthenticatedProductKnowledgeRoute: AuthenticatedProductKnowledgeRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupWizardRoute: AuthenticatedSetupWizardRoute,
