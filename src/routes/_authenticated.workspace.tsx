@@ -258,16 +258,7 @@ function Workspace() {
                     style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
                   >
                 <div
-                  className={`mx-auto border rounded-xl overflow-hidden relative ${
-                    previewDevice === "desktop"
-                      ? "max-w-lg"
-                      : previewDevice === "tablet"
-                      ? "max-w-sm"
-                      : "max-w-[280px]"
-                  } ${
-                    preFormStyle === "casual" ? "rounded-2xl border-2" :
-                    preFormStyle === "minimal" ? "border-none shadow-none bg-transparent" : ""
-                  }`}
+                  className="mx-auto border rounded-lg overflow-hidden relative max-w-lg"
                   style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
                 >
                   {/* Background effect for the card - overlays on solid background if set */}

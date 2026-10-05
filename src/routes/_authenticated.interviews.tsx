@@ -272,28 +272,23 @@ function InterviewDetailContent({ interviewId }: { interviewId: string }) {
 
   const session = interviewData.session;
   const insight = interviewData.insight;
-  const phrases = buildHighlightPhrases(insight);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header - Name and Category only */}
       <div className="border-b border-slate-200 pb-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Status</p>
-            <p className="mt-1 font-semibold text-slate-900 capitalize">{session.interview_status || "Active"}</p>
+            <p className="text-sm font-medium text-slate-500">Customer</p>
+            <p className="mt-1 text-lg font-semibold text-slate-900">
+              {session.customer_name || "Anonymous Customer"}
+            </p>
           </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Progress</p>
-            <p className="mt-1 font-semibold text-slate-900 capitalize">{session.interview_progress || "Started"}</p>
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Category</p>
-            <p className="mt-1 font-semibold text-slate-900 capitalize">{insight?.category || "Not categorized"}</p>
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sentiment</p>
-            <p className="mt-1 font-semibold text-slate-900 capitalize">{insight?.sentiment || "Neutral"}</p>
+          <div className="text-right">
+            <p className="text-sm font-medium text-slate-500">Category</p>
+            <p className="mt-1 text-lg font-semibold text-slate-900 capitalize">
+              {insight?.category || "Not categorized"}
+            </p>
           </div>
         </div>
       </div>
@@ -301,15 +296,15 @@ function InterviewDetailContent({ interviewId }: { interviewId: string }) {
       {/* Summary */}
       {insight?.summary && (
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Summary</h3>
-          <p className="text-sm leading-relaxed text-slate-800">{insight.summary}</p>
+          <h3 className="text-base font-semibold text-slate-900 mb-2">Summary</h3>
+          <p className="text-sm leading-relaxed text-slate-700">{insight.summary}</p>
         </div>
       )}
 
       {/* Conversation Messages */}
       {messages.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-3">Conversation</h3>
+          <h3 className="text-base font-semibold text-slate-900 mb-3">Conversation</h3>
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {messages.map((message: any) => (
               <div
@@ -327,7 +322,7 @@ function InterviewDetailContent({ interviewId }: { interviewId: string }) {
                     {message.role === 'user' ? 'Customer' : 'leaveesy'}
                   </p>
                   <p className="text-sm leading-relaxed">
-                    {message.role === 'user' ? highlight(message.message_content, phrases) : message.message_content}
+                    {message.message_content}
                   </p>
                   <p className="text-xs text-slate-500 mt-1">
                     {format(new Date(message.created_at), "HH:mm")}
@@ -338,66 +333,8 @@ function InterviewDetailContent({ interviewId }: { interviewId: string }) {
           </div>
         </div>
       )}
-
-      {/* Key Insights */}
-      {insight && (
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-3">Key Insights</h3>
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Primary Category</p>
-              <p className="mt-1 text-sm text-slate-900">{insight.category || "Not categorized"}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Sentiment</p>
-              <p className="mt-1 text-sm text-slate-700">{insight.sentiment || "Neutral"}</p>
-            </div>
-            {insight.quote && (
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Notable Quote</p>
-                <p className="mt-1 text-sm italic text-slate-700">"{insight.quote}"</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-
-function buildHighlightPhrases(insight: any): string[] {
-  if (!insight) return [];
-
-  const raw = [
-    insight.summary || "",
-    insight.category || "",
-    insight.sentiment || "",
-  ]
-    .flatMap((s) =>
-      s
-        .split(/[,.—·\s]+/)
-        .map((x) => x.trim())
-        .filter((x) => x.length > 4)
-    );
-
-  return Array.from(new Set(raw)).sort((a, b) => b.length - a.length);
-}
-
-function highlight(text: string, phrases: string[]) {
-  if (phrases.length === 0) return text;
-  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(`(${phrases.slice(0, 30).map(escape).join("|")})`, "gi");
-  const parts = text.split(pattern);
-  return parts.map((part, idx) =>
-    idx % 2 === 1 ? (
-      <mark key={idx} className="rounded-[3px] bg-yellow-200/70 px-0.5 py-0 text-slate-900">
-        {part}
-      </mark>
-    ) : (
-      <span key={idx}>{part}</span>
-    )
-  );
-}
-
 
 
