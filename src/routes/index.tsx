@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart, Menu, X, Check, CreditCard } from "lucide-react";
+import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart, Menu, X, Check, CreditCard, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LandingLiveDemo } from "@/components/landing-live-demo";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from "recharts";
 
@@ -145,9 +144,18 @@ function Landing() {
             </div>
           </div>
 
-          {/* Live auto-playing demo */}
+          {/* Video demo */}
           <div id="demo-section" className="mx-auto mt-16 max-w-6xl animate-slide-up stagger-3">
-            <LandingLiveDemo />
+            <div className="relative w-full rounded-2xl border border-border bg-black shadow-2xl overflow-hidden">
+              <video
+                src="/leaveesy-demo.mp4"
+                controls
+                className="w-full h-auto"
+                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%23000' width='1920' height='1080'/%3E%3C/svg%3E"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </div>
         </div>
       </section>

@@ -28,6 +28,7 @@ import { Route as AuthenticatedProductKnowledgeRouteImport } from './routes/_aut
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedSetupWizardRouteImport } from './routes/_authenticated.setup-wizard'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated.team'
+import { Route as AuthenticatedUsageRouteImport } from './routes/_authenticated.usage'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated.workspace'
 import { Route as InterviewSessionIdRouteImport } from './routes/interview.$sessionId'
 import { Route as PreFormSessionIdRouteImport } from './routes/pre-form.$sessionId'
@@ -132,6 +133,11 @@ const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedUsageRoute = AuthenticatedUsageRouteImport.update({
+  id: '/usage',
+  path: '/usage',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   id: '/workspace',
   path: '/workspace',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup-wizard': typeof AuthenticatedSetupWizardRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/usage': typeof AuthenticatedUsageRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
   '/pre-form/$sessionId': typeof PreFormSessionIdRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/setup-wizard': typeof AuthenticatedSetupWizardRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/usage': typeof AuthenticatedUsageRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
   '/pre-form/$sessionId': typeof PreFormSessionIdRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/setup-wizard': typeof AuthenticatedSetupWizardRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/usage': typeof AuthenticatedUsageRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/interview/$sessionId': typeof InterviewSessionIdRoute
   '/pre-form/$sessionId': typeof PreFormSessionIdRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/setup-wizard'
     | '/team'
+    | '/usage'
     | '/workspace'
     | '/interview/$sessionId'
     | '/pre-form/$sessionId'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/setup-wizard'
     | '/team'
+    | '/usage'
     | '/workspace'
     | '/interview/$sessionId'
     | '/pre-form/$sessionId'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/setup-wizard'
     | '/_authenticated/team'
+    | '/_authenticated/usage'
     | '/_authenticated/workspace'
     | '/interview/$sessionId'
     | '/pre-form/$sessionId'
@@ -451,6 +463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTeamRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/usage': {
+      id: '/_authenticated/usage'
+      path: '/usage'
+      fullPath: '/usage'
+      preLoaderRoute: typeof AuthenticatedUsageRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/workspace': {
       id: '/_authenticated/workspace'
       path: '/workspace'
@@ -509,6 +528,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSetupWizardRoute: typeof AuthenticatedSetupWizardRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedUsageRoute: typeof AuthenticatedUsageRoute
   AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
 }
 
@@ -525,6 +545,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSetupWizardRoute: AuthenticatedSetupWizardRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedUsageRoute: AuthenticatedUsageRoute,
   AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
 }
 
