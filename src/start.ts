@@ -472,6 +472,156 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
   return await next();
 });
 
+// Paddle webhook handler
+const paddleWebhookMiddleware = createMiddleware().server(async ({ request, next }): Promise<Response> => {
+  const url = new URL(request.url);
+  
+  if (url.pathname === '/api/paddle/webhook') {
+    if (request.method === 'POST') {
+      try {
+        const rawBody = await request.text();
+        const signature = request.headers.get('paddle-signature');
+        
+        const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET;
+        if (!webhookSecret) {
+          console.error('PADDLE_WEBHOOK_SECRET not set');
+          return new Response(JSON.stringify({ error: 'Webhook secret not configured' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        
+        // Import Paddle SDK for webhook verification
+        const { initializeSdk } = await import('@paddle/paddle-node-sdk');
+        
+        const paddle = initializeSdk({
+          apiKey: process.env.PADDLE_API_KEY,
+          environment: process.env.PADDLE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
+        });
+        
+        // Verify webhook signature
+        let eventData;
+        try {
+          eventData = paddle.webhooks.unmarshal(rawBody, webhookSecret, signature);
+        } catch (error) {
+          console.error('Paddle webhook signature verification failed:', error);
+          return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        
+        console.log('Paddle webhook event received:', eventData.eventType);
+        
+        // Import Supabase client
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        
+        // Handle different event types
+        switch (eventData.eventType) {
+          case 'customer.created':
+          case 'customer.updated': {
+            const customerData = eventData.data;
+            await supabase
+              .from('companies')
+              .upsert({
+                id: customerData.id,
+                paddle_customer_id: customerData.id,
+                email: customerData.email,
+                updated_at: new Date().toISOString(),
+              }, {
+                onConflict: 'id',
+              });
+            break;
+          }
+          
+          case 'subscription.created':
+          case 'subscription.updated': {
+            const subscriptionData = eventData.data;
+            const customerId = subscriptionData.customerId;
+            
+            // Find company by paddle_customer_id
+            const { data: company } = await supabase
+              .from('companies')
+              .select('id')
+              .eq('paddle_customer_id', customerId)
+              .single();
+            
+            if (company) {
+              // Update or create subscription
+              await supabase
+                .from('company_subscriptions')
+                .upsert({
+                  paddle_subscription_id: subscriptionData.id,
+                  company_id: company.id,
+                  paddle_customer_id: customerId,
+                  paddle_price_id: subscriptionData.items[0]?.priceId,
+                  paddle_product_id: subscriptionData.items[0]?.productId,
+                  status: subscriptionData.status,
+                  billing_cycle: subscriptionData.items[0]?.billingPeriod?.frequency === 'month' ? 'monthly' : 'yearly',
+                  current_period_start: subscriptionData.currentPeriod?.startDate,
+                  current_period_end: subscriptionData.currentPeriod?.endDate,
+                  cancel_at_period_end: subscriptionData.scheduledChange?.action === 'cancel',
+                  updated_at: new Date().toISOString(),
+                }, {
+                  onConflict: 'paddle_subscription_id',
+                });
+            }
+            break;
+          }
+          
+          case 'subscription.canceled': {
+            const subscriptionData = eventData.data;
+            await supabase
+              .from('company_subscriptions')
+              .update({
+                status: 'canceled',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('paddle_subscription_id', subscriptionData.id);
+            break;
+          }
+          
+          case 'transaction.completed': {
+            const transactionData = eventData.data;
+            const subscriptionId = transactionData.subscriptionId;
+            
+            // Update subscription with transaction info
+            await supabase
+              .from('company_subscriptions')
+              .update({
+                paddle_transaction_id: transactionData.id,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('paddle_subscription_id', subscriptionId);
+            break;
+          }
+          
+          default:
+            console.log('Unhandled Paddle event type:', eventData.eventType);
+        }
+        
+        return new Response(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error('Paddle webhook error:', error);
+        return new Response(JSON.stringify({ error: 'Internal server error' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+    
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+  
+  return await next();
+});
+
 // API middleware to handle raw API handlers
 // Note: Integration endpoints will be implemented as server functions instead
 const apiMiddleware = createMiddleware().server(async ({ next }) => {
@@ -480,5 +630,5 @@ const apiMiddleware = createMiddleware().server(async ({ next }) => {
 
 export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
-  requestMiddleware: [corsMiddleware, apiMiddleware, errorMiddleware],
+  requestMiddleware: [corsMiddleware, paddleWebhookMiddleware, apiMiddleware, errorMiddleware],
 }));

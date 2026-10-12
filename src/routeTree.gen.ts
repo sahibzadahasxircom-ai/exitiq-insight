@@ -16,6 +16,7 @@ import { Route as ExitInterviewRouteImport } from './routes/exit-interview'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TestInterviewRouteImport } from './routes/test-interview'
+import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated.account'
 import { Route as AuthenticatedCompanyDetailsRouteImport } from './routes/_authenticated.company-details'
 import { Route as AuthenticatedCompetitorsRouteImport } from './routes/_authenticated.competitors'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
@@ -67,6 +68,11 @@ const TestInterviewRoute = TestInterviewRouteImport.update({
   id: '/test-interview',
   path: '/test-interview',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCompanyDetailsRoute =
   AuthenticatedCompanyDetailsRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/test-interview': typeof TestInterviewRoute
+  '/account': typeof AuthenticatedAccountRoute
   '/company-details': typeof AuthenticatedCompanyDetailsRoute
   '/competitors': typeof AuthenticatedCompetitorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/test-interview': typeof TestInterviewRoute
+  '/account': typeof AuthenticatedAccountRoute
   '/company-details': typeof AuthenticatedCompanyDetailsRoute
   '/competitors': typeof AuthenticatedCompetitorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/test-interview': typeof TestInterviewRoute
+  '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/company-details': typeof AuthenticatedCompanyDetailsRoute
   '/_authenticated/competitors': typeof AuthenticatedCompetitorsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/test-interview'
+    | '/account'
     | '/company-details'
     | '/competitors'
     | '/dashboard'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/test-interview'
+    | '/account'
     | '/company-details'
     | '/competitors'
     | '/dashboard'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/test-interview'
+    | '/_authenticated/account'
     | '/_authenticated/company-details'
     | '/_authenticated/competitors'
     | '/_authenticated/dashboard'
@@ -378,6 +390,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/test-interview'
       preLoaderRoute: typeof TestInterviewRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/company-details': {
       id: '/_authenticated/company-details'
@@ -516,6 +535,7 @@ const AuthenticatedInterviewsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedCompanyDetailsRoute: typeof AuthenticatedCompanyDetailsRoute
   AuthenticatedCompetitorsRoute: typeof AuthenticatedCompetitorsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -533,6 +553,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedCompanyDetailsRoute: AuthenticatedCompanyDetailsRoute,
   AuthenticatedCompetitorsRoute: AuthenticatedCompetitorsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,

@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Settings, Palette, Plug, BookOpen, Activity } from "lucide-react";
+import { LayoutDashboard, Inbox, Settings, Palette, Plug, BookOpen, Activity, User } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +33,7 @@ const workspace = [
   { title: "Workspace", url: "/workspace", icon: Palette },
   { title: "Settings", url: "/settings", icon: Settings },
   { title: "Usage", url: "/usage", icon: Activity },
+  { title: "Account", url: "/account", icon: User },
 ];
 
 export function AppSidebar() {
