@@ -63,9 +63,7 @@ CREATE POLICY "Public can view pricing plans" ON public.pricing_plans
 -- RLS policies for company_subscriptions
 CREATE POLICY "Users can view own company subscription" ON public.company_subscriptions
   FOR SELECT USING (
-    company_id IN (
-      SELECT id FROM public.companies WHERE user_id = auth.uid()
-    )
+    public.is_company_member(auth.uid(), company_id)
   );
 
 CREATE POLICY "Service role can manage subscriptions" ON public.company_subscriptions
@@ -74,9 +72,7 @@ CREATE POLICY "Service role can manage subscriptions" ON public.company_subscrip
 -- RLS policies for usage_records
 CREATE POLICY "Users can view own company usage" ON public.usage_records
   FOR SELECT USING (
-    company_id IN (
-      SELECT id FROM public.companies WHERE user_id = auth.uid()
-    )
+    public.is_company_member(auth.uid(), company_id)
   );
 
 CREATE POLICY "Service role can manage usage records" ON public.usage_records

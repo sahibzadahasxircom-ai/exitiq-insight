@@ -2,6 +2,21 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// Helper function to get user's company_id from profiles
+async function getUserCompanyId(supabase: any, userId: string) {
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("company_id")
+    .eq("id", userId)
+    .single();
+  
+  if (error || !profile?.company_id) {
+    return null;
+  }
+  
+  return profile.company_id;
+}
+
 // Get Paddle client-side token and environment
 export const getPaddleConfig = createServerFn({ method: "GET" })
   .handler(async () => {
@@ -16,11 +31,18 @@ export const getPaddleCustomerId = createServerFn({ method: "GET" })
   .handler(async () => {
     const { supabase, user } = await requireSupabaseAuth();
 
-    // Get user's company
+    // Get user's company_id from profiles
+    const companyId = await getUserCompanyId(supabase, user.id);
+    
+    if (!companyId) {
+      return { paddleCustomerId: null };
+    }
+
+    // Get company's paddle_customer_id
     const { data: company } = await supabase
       .from("companies")
       .select("paddle_customer_id")
-      .eq("user_id", user.id)
+      .eq("id", companyId)
       .single();
 
     return {
@@ -37,11 +59,18 @@ export const createPaddleCustomer = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabase, user } = await requireSupabaseAuth();
 
-    // Get user's company
+    // Get user's company_id from profiles
+    const companyId = await getUserCompanyId(supabase, user.id);
+    
+    if (!companyId) {
+      return { success: false, error: "Company not found" };
+    }
+
+    // Get company details
     const { data: company } = await supabase
       .from("companies")
       .select("id, paddle_customer_id, company_name")
-      .eq("user_id", user.id)
+      .eq("id", companyId)
       .single();
 
     if (!company) {
@@ -89,14 +118,10 @@ export const updatePaddleSubscription = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabase, user } = await requireSupabaseAuth();
 
-    // Get user's company
-    const { data: company } = await supabase
-      .from("companies")
-      .select("id")
-      .eq("user_id", user.id)
-      .single();
-
-    if (!company) {
+    // Get user's company_id from profiles
+    const companyId = await getUserCompanyId(supabase, user.id);
+    
+    if (!companyId) {
       return { success: false, error: "Company not found" };
     }
 
@@ -110,7 +135,7 @@ export const updatePaddleSubscription = createServerFn({ method: "POST" })
         paddle_product_id: data.paddleProductId,
         updated_at: new Date().toISOString(),
       })
-      .eq("company_id", company.id);
+      .eq("company_id", companyId);
 
     return { success: true };
   });
@@ -120,11 +145,18 @@ export const generateCustomerPortalSession = createServerFn({ method: "POST" })
   .handler(async () => {
     const { supabase, user } = await requireSupabaseAuth();
 
-    // Get user's company
+    // Get user's company_id from profiles
+    const companyId = await getUserCompanyId(supabase, user.id);
+    
+    if (!companyId) {
+      return { success: false, error: "No company found" };
+    }
+
+    // Get company's paddle_customer_id
     const { data: company } = await supabase
       .from("companies")
       .select("paddle_customer_id")
-      .eq("user_id", user.id)
+      .eq("id", companyId)
       .single();
 
     if (!company || !company.paddle_customer_id) {
@@ -171,14 +203,14 @@ export const getCompanySubscription = createServerFn({ method: "GET" })
   .handler(async () => {
     const { supabase, user } = await requireSupabaseAuth();
 
-    // Get user's company
-    const { data: company, error: companyError } = await supabase
-      .from("companies")
-      .select("id")
-      .eq("user_id", user.id)
+    // Get user's company from profiles
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", user.id)
       .single();
 
-    if (companyError || !company) {
+    if (profileError || !profile?.company_id) {
       return null;
     }
 
@@ -189,7 +221,7 @@ export const getCompanySubscription = createServerFn({ method: "GET" })
         *,
         pricing_plans (*)
       `)
-      .eq("company_id", company.id)
+      .eq("company_id", profile.company_id)
       .single();
 
     if (subError) {
@@ -205,14 +237,10 @@ export const getCompanyUsage = createServerFn({ method: "GET" })
   .handler(async () => {
     const { supabase, user } = await requireSupabaseAuth();
 
-    // Get user's company
-    const { data: company, error: companyError } = await supabase
-      .from("companies")
-      .select("id")
-      .eq("user_id", user.id)
-      .single();
-
-    if (companyError || !company) {
+    // Get user's company_id from profiles
+    const companyId = await getUserCompanyId(supabase, user.id);
+    
+    if (!companyId) {
       return { interviews_count: 0, limit: 5, remaining: 5 };
     }
 
@@ -223,7 +251,7 @@ export const getCompanyUsage = createServerFn({ method: "GET" })
         *,
         pricing_plans (*)
       `)
-      .eq("company_id", company.id)
+      .eq("company_id", companyId)
       .single();
 
     const plan = subscription?.pricing_plans;
@@ -238,7 +266,7 @@ export const getCompanyUsage = createServerFn({ method: "GET" })
     const { data: usage, error: usageError } = await supabase
       .from("usage_records")
       .select("*")
-      .eq("company_id", company.id)
+      .eq("company_id", companyId)
       .gte("period_start", monthStart.toISOString())
       .lte("period_end", monthEnd.toISOString())
       .single();
@@ -248,7 +276,7 @@ export const getCompanyUsage = createServerFn({ method: "GET" })
       const { data: newUsage, error: createError } = await supabase
         .from("usage_records")
         .insert({
-          company_id: company.id,
+          company_id: companyId,
           subscription_id: subscription?.id,
           period_start: monthStart.toISOString(),
           period_end: monthEnd.toISOString(),
@@ -338,14 +366,10 @@ export const canCreateInterview = createServerFn({ method: "GET" })
   .handler(async () => {
     const { supabase, user } = await requireSupabaseAuth();
 
-    // Get user's company
-    const { data: company, error: companyError } = await supabase
-      .from("companies")
-      .select("id")
-      .eq("user_id", user.id)
-      .single();
-
-    if (companyError || !company) {
+    // Get user's company_id from profiles
+    const companyId = await getUserCompanyId(supabase, user.id);
+    
+    if (!companyId) {
       return { canCreate: false, reason: "No company found" };
     }
 
@@ -356,7 +380,7 @@ export const canCreateInterview = createServerFn({ method: "GET" })
         *,
         pricing_plans (*)
       `)
-      .eq("company_id", company.id)
+      .eq("company_id", companyId)
       .single();
 
     const plan = subscription?.pricing_plans;
@@ -375,7 +399,7 @@ export const canCreateInterview = createServerFn({ method: "GET" })
     const { data: usage, error: usageError } = await supabase
       .from("usage_records")
       .select("*")
-      .eq("company_id", company.id)
+      .eq("company_id", companyId)
       .gte("period_start", monthStart.toISOString())
       .lte("period_end", monthEnd.toISOString())
       .single();
@@ -410,14 +434,10 @@ export const updateSubscription = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabase, user } = await requireSupabaseAuth();
 
-    // Get user's company
-    const { data: company, error: companyError } = await supabase
-      .from("companies")
-      .select("id")
-      .eq("user_id", user.id)
-      .single();
-
-    if (companyError || !company) {
+    // Get user's company_id from profiles
+    const companyId = await getUserCompanyId(supabase, user.id);
+    
+    if (!companyId) {
       return { success: false, error: "No company found" };
     }
 
@@ -425,7 +445,7 @@ export const updateSubscription = createServerFn({ method: "POST" })
     const { data: existingSub, error: subError } = await supabase
       .from("company_subscriptions")
       .select("*")
-      .eq("company_id", company.id)
+      .eq("company_id", companyId)
       .single();
 
     if (existingSub) {
@@ -451,7 +471,7 @@ export const updateSubscription = createServerFn({ method: "POST" })
     const { error: createError } = await supabase
       .from("company_subscriptions")
       .insert({
-        company_id: company.id,
+        company_id: companyId,
         plan_id: data.planId,
         billing_cycle: data.billingCycle || "monthly",
         status: "active",
