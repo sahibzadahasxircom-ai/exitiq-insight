@@ -57,24 +57,29 @@ ALTER TABLE public.company_subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.usage_records ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies for pricing_plans (read-only for public)
+DROP POLICY IF EXISTS "Public can view pricing plans" ON public.pricing_plans;
 CREATE POLICY "Public can view pricing plans" ON public.pricing_plans
   FOR SELECT USING (true);
 
 -- RLS policies for company_subscriptions
+DROP POLICY IF EXISTS "Users can view own company subscription" ON public.company_subscriptions;
 CREATE POLICY "Users can view own company subscription" ON public.company_subscriptions
   FOR SELECT USING (
     public.is_company_member(auth.uid(), company_id)
   );
 
+DROP POLICY IF EXISTS "Service role can manage subscriptions" ON public.company_subscriptions;
 CREATE POLICY "Service role can manage subscriptions" ON public.company_subscriptions
   FOR ALL USING (auth.role() = 'service_role');
 
 -- RLS policies for usage_records
+DROP POLICY IF EXISTS "Users can view own company usage" ON public.usage_records;
 CREATE POLICY "Users can view own company usage" ON public.usage_records
   FOR SELECT USING (
     public.is_company_member(auth.uid(), company_id)
   );
 
+DROP POLICY IF EXISTS "Service role can manage usage records" ON public.usage_records;
 CREATE POLICY "Service role can manage usage records" ON public.usage_records
   FOR ALL USING (auth.role() = 'service_role');
 
@@ -144,11 +149,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Triggers for updated_at
+DROP TRIGGER IF EXISTS update_pricing_plans_updated_at ON public.pricing_plans;
 CREATE TRIGGER update_pricing_plans_updated_at BEFORE UPDATE ON public.pricing_plans
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_company_subscriptions_updated_at ON public.company_subscriptions;
 CREATE TRIGGER update_company_subscriptions_updated_at BEFORE UPDATE ON public.company_subscriptions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_usage_records_updated_at ON public.usage_records;
 CREATE TRIGGER update_usage_records_updated_at BEFORE UPDATE ON public.usage_records
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
