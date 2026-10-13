@@ -13,9 +13,11 @@ ADD COLUMN IF NOT EXISTS paddle_price_id TEXT,
 ADD COLUMN IF NOT EXISTS paddle_product_id TEXT;
 
 -- Add index for paddle_customer_id for faster lookups
+DROP INDEX IF EXISTS idx_companies_paddle_customer_id;
 CREATE INDEX IF NOT EXISTS idx_companies_paddle_customer_id 
 ON public.companies(paddle_customer_id);
 
+DROP INDEX IF EXISTS idx_company_subscriptions_paddle_customer_id;
 CREATE INDEX IF NOT EXISTS idx_company_subscriptions_paddle_customer_id 
 ON public.company_subscriptions(paddle_customer_id);
 
