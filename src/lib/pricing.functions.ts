@@ -429,7 +429,6 @@ export const canCreateInterview = createServerFn({ method: "GET" })
 export const updateSubscription = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({
     planId: z.string().uuid(),
-    billingCycle: z.enum(["monthly", "yearly"]).optional(),
   }).parse(d))
   .handler(async ({ data }) => {
     const { supabase, user } = await requireSupabaseAuth();
@@ -454,7 +453,6 @@ export const updateSubscription = createServerFn({ method: "POST" })
         .from("company_subscriptions")
         .update({
           plan_id: data.planId,
-          billing_cycle: data.billingCycle || "monthly",
           updated_at: new Date().toISOString(),
         })
         .eq("id", existingSub.id);
@@ -473,7 +471,7 @@ export const updateSubscription = createServerFn({ method: "POST" })
       .insert({
         company_id: companyId,
         plan_id: data.planId,
-        billing_cycle: data.billingCycle || "monthly",
+        billing_cycle: "monthly",
         status: "active",
         current_period_start: new Date().toISOString(),
         current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),

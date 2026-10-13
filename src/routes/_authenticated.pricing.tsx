@@ -13,7 +13,6 @@ export const Route = createFileRoute("/_authenticated/pricing")({
 });
 
 function PricingPage() {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [prices, setPrices] = useState<any[]>([]);
   const [isLoadingPrices, setIsLoadingPrices] = useState(false);
 
@@ -66,14 +65,13 @@ function PricingPage() {
             environment: paddleConfig.environment,
           });
 
-          // Fetch prices for all plans
+          // Fetch prices for all plans (monthly only)
           const priceIds = plans
             .filter((p: any) => !p.is_custom)
             .map((p: any) => ({
               name: p.name,
               slug: p.slug,
               monthPriceId: p.monthly_price_id || '',
-              yearPriceId: p.yearly_price_id || '',
             }));
 
           setIsLoadingPrices(true);
@@ -81,7 +79,7 @@ function PricingPage() {
             try {
               // @ts-ignore
               const priceData = await window.Paddle.PricePreview({
-                items: [{ priceId: billingCycle === 'monthly' ? priceItem.monthPriceId : priceItem.yearPriceId, quantity: 1 }],
+                items: [{ priceId: priceItem.monthPriceId, quantity: 1 }],
               });
               return {
                 ...priceItem,
@@ -103,49 +101,7 @@ function PricingPage() {
     };
 
     initializePaddle();
-  }, [paddleConfig, plans, billingCycle]);
-
-  // Re-fetch prices when billing cycle changes
-  useEffect(() => {
-    if (paddleConfig?.token && plans.length) {
-      // Re-run price fetch
-      const fetchPrices = async () => {
-        if (!window.Paddle) return;
-
-        const priceIds = plans
-          .filter((p: any) => !p.is_custom)
-          .map((p: any) => ({
-            name: p.name,
-            slug: p.slug,
-            monthPriceId: p.monthly_price_id || '',
-            yearPriceId: p.yearly_price_id || '',
-          }));
-
-        setIsLoadingPrices(true);
-        const pricePromises = priceIds.map(async (priceItem) => {
-          try {
-            // @ts-ignore
-            const priceData = await window.Paddle.PricePreview({
-              items: [{ priceId: billingCycle === 'monthly' ? priceItem.monthPriceId : priceItem.yearPriceId, quantity: 1 }],
-            });
-            return {
-              ...priceItem,
-              priceData,
-            };
-          } catch (error) {
-            console.error(`Failed to fetch price for ${priceItem.name}:`, error);
-            return null;
-          }
-        });
-
-        const results = await Promise.all(pricePromises);
-        setPrices(results.filter(r => r !== null));
-        setIsLoadingPrices(false);
-      };
-
-      fetchPrices();
-    }
-  }, [billingCycle, paddleConfig, plans]);
+  }, [paddleConfig, plans]);
 
   const handleSubscribe = async (plan: any) => {
     try {
@@ -175,8 +131,8 @@ function PricingPage() {
         return;
       }
 
-      // Get the appropriate price ID based on billing cycle
-      const priceId = billingCycle === 'monthly' ? plan.monthly_price_id : plan.yearly_price_id;
+      // Get the monthly price ID
+      const priceId = plan.monthly_price_id;
 
       if (!priceId) {
         alert('Price ID not configured for this plan. Please contact support.');
@@ -222,34 +178,6 @@ function PricingPage() {
             <p className="mt-4 text-lg text-slate-600">
               Choose the perfect plan for your business needs
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Billing Toggle */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center bg-slate-100 rounded-lg p-1">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-                billingCycle === 'monthly'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingCycle('yearly')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-                billingCycle === 'yearly'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Yearly (Save 17%)
-            </button>
           </div>
         </div>
       </div>
@@ -306,7 +234,7 @@ function PricingPage() {
                       <span className="text-4xl font-bold text-slate-900">
                         {planPrice.priceData.formattedTotals.total}
                       </span>
-                      <span className="ml-2 text-slate-600">/{billingCycle}</span>
+                      <span className="ml-2 text-slate-600">/month</span>
                     </div>
                   ) : (
                     <div className="flex items-baseline">
@@ -315,11 +243,6 @@ function PricingPage() {
                       </span>
                       <span className="ml-2 text-slate-600">/month</span>
                     </div>
-                  )}
-                  {plan.price_yearly && !plan.is_custom && (
-                    <p className="mt-1 text-sm text-slate-500">
-                      ${plan.price_yearly}/year (save 17%)
-                    </p>
                   )}
                 </div>
 

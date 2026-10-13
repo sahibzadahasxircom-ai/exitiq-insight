@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.pricing_plans (
   description TEXT,
   monthly_interview_limit INTEGER DEFAULT 5,
   price_monthly DECIMAL(10, 2) DEFAULT 0,
-  price_yearly DECIMAL(10, 2),
+  monthly_price_id TEXT,
   features JSONB DEFAULT '[]'::jsonb,
   is_active BOOLEAN DEFAULT true,
   is_custom BOOLEAN DEFAULT false,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS public.company_subscriptions (
   company_id UUID NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,
   plan_id UUID NOT NULL REFERENCES public.pricing_plans(id),
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'past_due', 'trialing')),
-  billing_cycle TEXT DEFAULT 'monthly' CHECK (billing_cycle IN ('monthly', 'yearly')),
+  billing_cycle TEXT DEFAULT 'monthly' CHECK (billing_cycle IN ('monthly')),
   current_period_start TIMESTAMPTZ DEFAULT NOW(),
   current_period_end TIMESTAMPTZ,
   cancel_at_period_end BOOLEAN DEFAULT false,
@@ -79,14 +79,14 @@ CREATE POLICY "Service role can manage usage records" ON public.usage_records
   FOR ALL USING (auth.role() = 'service_role');
 
 -- Insert default pricing plans
-INSERT INTO public.pricing_plans (name, slug, description, monthly_interview_limit, price_monthly, price_yearly, features, is_custom, sort_order) VALUES
+INSERT INTO public.pricing_plans (name, slug, description, monthly_interview_limit, price_monthly, monthly_price_id, features, is_custom, sort_order) VALUES
 (
   'Free',
   'free',
   'Perfect for getting started with leaveesy',
   5,
   0,
-  0,
+  NULL,
   '["5 interviews per month", "Full access to all features", "Basic analytics", "Email support"]'::jsonb,
   false,
   1
@@ -97,7 +97,7 @@ INSERT INTO public.pricing_plans (name, slug, description, monthly_interview_lim
   'For growing teams that need more insights',
   75,
   27,
-  270,
+  NULL,
   '["75 interviews per month", "Full access to all features", "Advanced analytics", "Priority email support", "Custom branding"]'::jsonb,
   false,
   2
@@ -108,7 +108,7 @@ INSERT INTO public.pricing_plans (name, slug, description, monthly_interview_lim
   'For businesses with high volume needs',
   250,
   97,
-  970,
+  NULL,
   '["250 interviews per month", "Full access to all features", "Advanced analytics & insights", "Priority support", "Custom branding", "API access", "Webhook integrations"]'::jsonb,
   false,
   3
