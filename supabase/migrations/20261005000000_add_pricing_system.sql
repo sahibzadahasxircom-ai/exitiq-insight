@@ -1,6 +1,3 @@
--- Ensure monthly_price_id column exists (for tables created with old schema)
-ALTER TABLE public.pricing_plans ADD COLUMN IF NOT EXISTS monthly_price_id TEXT;
-
 -- Create pricing_plans table
 CREATE TABLE IF NOT EXISTS public.pricing_plans (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -9,7 +6,6 @@ CREATE TABLE IF NOT EXISTS public.pricing_plans (
   description TEXT,
   monthly_interview_limit INTEGER DEFAULT 5,
   price_monthly DECIMAL(10, 2) DEFAULT 0,
-  monthly_price_id TEXT,
   features JSONB DEFAULT '[]'::jsonb,
   is_active BOOLEAN DEFAULT true,
   is_custom BOOLEAN DEFAULT false,
@@ -17,6 +13,9 @@ CREATE TABLE IF NOT EXISTS public.pricing_plans (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add monthly_price_id column (handles both new and existing tables)
+ALTER TABLE public.pricing_plans ADD COLUMN IF NOT EXISTS monthly_price_id TEXT;
 
 -- Create company_subscriptions table
 CREATE TABLE IF NOT EXISTS public.company_subscriptions (
@@ -98,9 +97,6 @@ CREATE POLICY "Service role can manage usage records" ON public.usage_records
   FOR ALL USING (auth.role() = 'service_role');
 
 -- Insert default pricing plans
--- Ensure monthly_price_id column exists first
-ALTER TABLE public.pricing_plans ADD COLUMN IF NOT EXISTS monthly_price_id TEXT;
-
 INSERT INTO public.pricing_plans (name, slug, description, monthly_interview_limit, price_monthly, monthly_price_id, features, is_custom, sort_order) VALUES
 (
   'Free',
