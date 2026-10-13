@@ -1,3 +1,6 @@
+-- Ensure monthly_price_id column exists (for tables created with old schema)
+ALTER TABLE public.pricing_plans ADD COLUMN IF NOT EXISTS monthly_price_id TEXT;
+
 -- Create pricing_plans table
 CREATE TABLE IF NOT EXISTS public.pricing_plans (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -31,6 +34,17 @@ CREATE TABLE IF NOT EXISTS public.company_subscriptions (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(company_id)
 );
+
+-- Fix billing_cycle constraint if table exists with old constraint (includes 'yearly')
+DO $$
+BEGIN
+  ALTER TABLE public.company_subscriptions DROP CONSTRAINT IF EXISTS company_subscriptions_billing_cycle_check;
+  ALTER TABLE public.company_subscriptions ADD CONSTRAINT company_subscriptions_billing_cycle_check 
+    CHECK (billing_cycle IN ('monthly'));
+EXCEPTION
+  WHEN duplicate_object THEN
+    NULL;
+END $$;
 
 -- Create usage_records table
 CREATE TABLE IF NOT EXISTS public.usage_records (
@@ -84,6 +98,9 @@ CREATE POLICY "Service role can manage usage records" ON public.usage_records
   FOR ALL USING (auth.role() = 'service_role');
 
 -- Insert default pricing plans
+-- Ensure monthly_price_id column exists first
+ALTER TABLE public.pricing_plans ADD COLUMN IF NOT EXISTS monthly_price_id TEXT;
+
 INSERT INTO public.pricing_plans (name, slug, description, monthly_interview_limit, price_monthly, monthly_price_id, features, is_custom, sort_order) VALUES
 (
   'Free',
