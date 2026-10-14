@@ -52,11 +52,7 @@ export const getPaddleCustomerId = createServerFn({ method: "GET" })
 
 // Create or update Paddle customer
 export const createPaddleCustomer = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({
-    email: z.string().email(),
-    name: z.string().optional(),
-  }).parse(d))
-  .handler(async ({ data }) => {
+  .handler(async () => {
     const { supabase, user } = await requireSupabaseAuth();
 
     // Get user's company_id from profiles
@@ -65,6 +61,13 @@ export const createPaddleCustomer = createServerFn({ method: "POST" })
     if (!companyId) {
       return { success: false, error: "Company not found" };
     }
+
+    // Get user's email from profiles
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", user.id)
+      .single();
 
     // Get company details
     const { data: company } = await supabase
@@ -92,8 +95,8 @@ export const createPaddleCustomer = createServerFn({ method: "POST" })
 
     // Create customer in Paddle
     const customer = await paddle.customers.create({
-      email: data.email,
-      name: data.name || company.company_name,
+      email: profile?.email || user.email,
+      name: company.company_name,
     });
 
     // Update company with paddle_customer_id

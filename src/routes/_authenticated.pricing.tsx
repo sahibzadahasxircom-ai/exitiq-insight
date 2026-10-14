@@ -113,16 +113,8 @@ function PricingPage() {
       
       if (!customerId) {
         console.log('Creating Paddle customer...');
-        // Get user email from session
-        const { data: { user } } = await (await import('@/integrations/supabase/client.server')).createClient().auth.getUser();
-        const { data: profile } = await (await import('@/integrations/supabase/client.server')).createClient()
-          .from('profiles')
-          .select('email')
-          .eq('id', user.id)
-          .single();
-
         const result = await createPaddleCustomerFn({
-          data: { email: profile?.email || user.email },
+          data: {},
         });
 
         if (result.success) {
