@@ -113,9 +113,7 @@ function PricingPage() {
       
       if (!customerId) {
         console.log('Creating Paddle customer...');
-        const result = await createPaddleCustomerFn({
-          data: {},
-        });
+        const result = await createPaddleCustomerFn();
 
         if (result.success) {
           customerId = result.customerId;
