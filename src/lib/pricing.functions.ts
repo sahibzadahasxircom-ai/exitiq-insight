@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { createClient } from "@supabase/supabase-js";
 
 // Helper function to get user's company_id from profiles
 async function getUserCompanyId(supabase: any, userId: string) {
@@ -17,6 +17,33 @@ async function getUserCompanyId(supabase: any, userId: string) {
   return profile.company_id;
 }
 
+// Helper function to get authenticated user context
+async function getAuthContext() {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('Unauthorized: No user found');
+  }
+  
+  const supabaseService = createClient(
+    supabaseUrl,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      global: {
+        headers: {
+          Authorization: `Bearer ${user.session.access_token}`,
+        },
+      },
+    }
+  );
+  
+  return { supabase: supabaseService, user: { id: user.id, email: user.email } };
+}
+
 // Get Paddle client-side token and environment
 export const getPaddleConfig = createServerFn({ method: "GET" })
   .handler(async () => {
@@ -29,7 +56,7 @@ export const getPaddleConfig = createServerFn({ method: "GET" })
 // Get current user's Paddle customer ID
 export const getPaddleCustomerId = createServerFn({ method: "GET" })
   .handler(async () => {
-    const { supabase, user } = await requireSupabaseAuth();
+    const { supabase, user } = await getAuthContext();
 
     // Get user's company_id from profiles
     const companyId = await getUserCompanyId(supabase, user.id);
@@ -53,7 +80,7 @@ export const getPaddleCustomerId = createServerFn({ method: "GET" })
 // Create or update Paddle customer
 export const createPaddleCustomer = createServerFn({ method: "POST" })
   .handler(async () => {
-    const { supabase, user } = await requireSupabaseAuth();
+    const { supabase, user } = await getAuthContext();
 
     // Get user's company_id from profiles
     const companyId = await getUserCompanyId(supabase, user.id);
@@ -119,7 +146,7 @@ export const updatePaddleSubscription = createServerFn({ method: "POST" })
     paddleProductId: z.string(),
   }).parse(d))
   .handler(async ({ data }) => {
-    const { supabase, user } = await requireSupabaseAuth();
+    const { supabase, user } = await getAuthContext();
 
     // Get user's company_id from profiles
     const companyId = await getUserCompanyId(supabase, user.id);
@@ -146,7 +173,7 @@ export const updatePaddleSubscription = createServerFn({ method: "POST" })
 // Generate Paddle customer portal session
 export const generateCustomerPortalSession = createServerFn({ method: "POST" })
   .handler(async () => {
-    const { supabase, user } = await requireSupabaseAuth();
+    const { supabase, user } = await getAuthContext();
 
     // Get user's company_id from profiles
     const companyId = await getUserCompanyId(supabase, user.id);
@@ -204,7 +231,7 @@ export const getPricingPlans = createServerFn({ method: "GET" })
 // Get current company subscription
 export const getCompanySubscription = createServerFn({ method: "GET" })
   .handler(async () => {
-    const { supabase, user } = await requireSupabaseAuth();
+    const { supabase, user } = await getAuthContext();
 
     // Get user's company from profiles
     const { data: profile, error: profileError } = await supabase
@@ -238,7 +265,7 @@ export const getCompanySubscription = createServerFn({ method: "GET" })
 // Get company usage for current month
 export const getCompanyUsage = createServerFn({ method: "GET" })
   .handler(async () => {
-    const { supabase, user } = await requireSupabaseAuth();
+    const { supabase, user } = await getAuthContext();
 
     // Get user's company_id from profiles
     const companyId = await getUserCompanyId(supabase, user.id);
@@ -367,7 +394,7 @@ export const incrementUsage = createServerFn({ method: "POST" })
 // Check if company can create more interviews
 export const canCreateInterview = createServerFn({ method: "GET" })
   .handler(async () => {
-    const { supabase, user } = await requireSupabaseAuth();
+    const { supabase, user } = await getAuthContext();
 
     // Get user's company_id from profiles
     const companyId = await getUserCompanyId(supabase, user.id);
@@ -434,7 +461,7 @@ export const updateSubscription = createServerFn({ method: "POST" })
     planId: z.string().uuid(),
   }).parse(d))
   .handler(async ({ data }) => {
-    const { supabase, user } = await requireSupabaseAuth();
+    const { supabase, user } = await getAuthContext();
 
     // Get user's company_id from profiles
     const companyId = await getUserCompanyId(supabase, user.id);
