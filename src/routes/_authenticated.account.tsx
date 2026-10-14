@@ -5,7 +5,7 @@ import { ArrowRight, ExternalLink, CreditCard, RefreshCw, CheckCircle2, AlertCir
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { generateCustomerPortalSession, getPaddleCustomerId } from "@/lib/paddle.functions";
+import { generateCustomerPortalSession, getPaddleCustomerId } from "@/lib/pricing.functions";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({ meta: [{ title: "Account — leaveesy" }] }),
