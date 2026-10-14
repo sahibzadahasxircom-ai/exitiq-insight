@@ -105,10 +105,14 @@ function PricingPage() {
 
   const handleSubscribe = async (plan: any) => {
     try {
+      console.log('Subscribe clicked for plan:', plan.name);
+      console.log('Plan monthly_price_id:', plan.monthly_price_id);
+      
       // Get or create Paddle customer
       let customerId = paddleCustomerIdData?.paddleCustomerId;
       
       if (!customerId) {
+        console.log('Creating Paddle customer...');
         // Get user email from session
         const { data: { user } } = await (await import('@/integrations/supabase/client.server')).createClient().auth.getUser();
         const { data: profile } = await (await import('@/integrations/supabase/client.server')).createClient()
@@ -123,6 +127,9 @@ function PricingPage() {
 
         if (result.success) {
           customerId = result.customerId;
+          console.log('Paddle customer created:', customerId);
+        } else {
+          console.error('Failed to create Paddle customer:', result.error);
         }
       }
 
@@ -136,6 +143,15 @@ function PricingPage() {
 
       if (!priceId) {
         alert('Price ID not configured for this plan. Please contact support.');
+        return;
+      }
+
+      console.log('Opening Paddle checkout with priceId:', priceId);
+      
+      // Check if Paddle is loaded
+      // @ts-ignore
+      if (!window.Paddle) {
+        alert('Paddle SDK not loaded. Please refresh the page.');
         return;
       }
 
@@ -277,7 +293,7 @@ function PricingPage() {
                   <Button 
                     className="w-full" 
                     onClick={() => handleSubscribe(plan)}
-                    disabled={isLoadingPrices || !planPrice}
+                    disabled={!plan.monthly_price_id}
                   >
                     Subscribe
                   </Button>

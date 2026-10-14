@@ -64,10 +64,10 @@ function Landing() {
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <Link to="/auth">
+            <Link to="/pricing">
               <Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign in</Button>
             </Link>
-            <Link to="/auth">
+            <Link to="/pricing">
               <Button size="sm">Get started</Button>
             </Link>
           </div>
@@ -84,7 +84,7 @@ function Landing() {
             <a href="#features" className="block text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>
               Features
             </a>
-            <Link to="/auth" className="block text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>
+            <Link to="/pricing" className="block text-sm text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>
               Sign in
             </Link>
           </nav>
@@ -596,7 +596,7 @@ function Landing() {
                   <span>Custom branding</span>
                 </li>
               </ul>
-              <Link to="/auth">
+              <Link to="/pricing">
                 <Button className="w-full">Get Started</Button>
               </Link>
             </div>
@@ -628,7 +628,7 @@ function Landing() {
                   <span>Dedicated support</span>
                 </li>
               </ul>
-              <Link to="/auth">
+              <Link to="/pricing">
                 <Button className="w-full">Get Started</Button>
               </Link>
             </div>
@@ -659,7 +659,9 @@ function Landing() {
                   <span>Dedicated account manager</span>
                 </li>
               </ul>
-              <Button className="w-full" variant="outline">Contact Sales</Button>
+              <Button className="w-full" variant="outline" asChild>
+                <Link to="/pricing">Contact Sales</Link>
+              </Button>
             </div>
           </div>
         </div>
