@@ -37,6 +37,8 @@ function PricingPage() {
     queryFn: () => getPaddleConfigFn({ data: undefined }),
   });
 
+  console.log('Paddle config loaded:', paddleConfig);
+
   const { data: paddleCustomerIdData } = useQuery({
     queryKey: ["paddle-customer-id"],
     queryFn: () => getPaddleCustomerIdFn({ data: undefined }),
@@ -60,6 +62,7 @@ function PricingPage() {
 
         // @ts-ignore - Paddle SDK types not available
         if (window.Paddle) {
+          console.log('Initializing Paddle with token:', paddleConfig.token.substring(0, 10) + '...');
           window.Paddle.Initialize({
             token: paddleConfig.token,
           });
