@@ -62,7 +62,6 @@ function PricingPage() {
         if (window.Paddle) {
           window.Paddle.Initialize({
             token: paddleConfig.token,
-            environment: paddleConfig.environment,
           });
 
           // Fetch prices for all plans (monthly only)

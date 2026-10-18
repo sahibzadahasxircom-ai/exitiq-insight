@@ -87,29 +87,40 @@ export const createPaddleCustomer = createServerFn({ method: "POST" })
       return { success: true, customerId: company.paddle_customer_id };
     }
 
-    // Import Paddle SDK
-    const { PaddleClient } = await import('@paddle/paddle-node-sdk');
+    // Create customer in Paddle using REST API
+    const paddleApiUrl = process.env.PADDLE_ENVIRONMENT === 'production' 
+      ? 'https://api.paddle.com' 
+      : 'https://sandbox-api.paddle.com';
     
-    const paddleClient = new PaddleClient({
-      apiKey: process.env.PADDLE_API_KEY,
-      environment: process.env.PADDLE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
+    const response = await fetch(`${paddleApiUrl}/customers`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.PADDLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: profile?.email,
+        name: company.company_name,
+      }),
     });
 
-    // Create customer in Paddle
-    const customer = await paddleClient.customers.create({
-      email: profile?.email,
-      name: company.company_name,
-    });
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Paddle API error:', error);
+      return { success: false, error: 'Failed to create Paddle customer' };
+    }
+
+    const customer = await response.json();
 
     // Update company with paddle_customer_id
     await supabase
       .from("companies")
       .update({
-        paddle_customer_id: customer.id,
+        paddle_customer_id: customer.data.id,
       })
       .eq("id", company.id);
 
-    return { success: true, customerId: customer.id };
+    return { success: true, customerId: customer.data.id };
   });
 
 // Update subscription with Paddle IDs
@@ -170,20 +181,31 @@ export const generateCustomerPortalSession = createServerFn({ method: "POST" })
       return { success: false, error: "No Paddle customer found" };
     }
 
-    // Import Paddle SDK
-    const { PaddleClient } = await import('@paddle/paddle-node-sdk');
+    // Generate customer portal session using REST API
+    const paddleApiUrl = process.env.PADDLE_ENVIRONMENT === 'production' 
+      ? 'https://api.paddle.com' 
+      : 'https://sandbox-api.paddle.com';
     
-    const paddleClient = new PaddleClient({
-      apiKey: process.env.PADDLE_API_KEY,
-      environment: process.env.PADDLE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
+    const response = await fetch(`${paddleApiUrl}/customer-portal/sessions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.PADDLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customer_id: company.paddle_customer_id,
+      }),
     });
 
-    // Generate customer portal session
-    const session = await paddleClient.customerPortal.generateSession({
-      customerId: company.paddle_customer_id,
-    });
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Paddle API error:', error);
+      return { success: false, error: 'Failed to generate portal session' };
+    }
 
-    return { success: true, url: session.url };
+    const session = await response.json();
+
+    return { success: true, url: session.data.url };
   });
 
 // Get all pricing plans
