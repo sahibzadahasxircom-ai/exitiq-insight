@@ -13,9 +13,6 @@ export const Route = createFileRoute("/_authenticated/pricing")({
 });
 
 function PricingPage() {
-  const [prices, setPrices] = useState<any[]>([]);
-  const [isLoadingPrices, setIsLoadingPrices] = useState(false);
-
   const getPlansFn = useServerFn(getPricingPlans);
   const getSubscriptionFn = useServerFn(getCompanySubscription);
   const getPaddleConfigFn = useServerFn(getPaddleConfig);
@@ -37,8 +34,6 @@ function PricingPage() {
     queryFn: () => getPaddleConfigFn({ data: undefined }),
   });
 
-  console.log('Paddle config loaded:', paddleConfig);
-
   const { data: paddleCustomerIdData } = useQuery({
     queryKey: ["paddle-customer-id"],
     queryFn: () => getPaddleCustomerIdFn({ data: undefined }),
@@ -46,9 +41,9 @@ function PricingPage() {
 
   const currentPlanId = subscription?.plan_id;
 
-  // Initialize Paddle SDK and fetch prices
+  // Initialize Paddle SDK
   useEffect(() => {
-    if (!paddleConfig?.token || !plans.length) return;
+    if (!paddleConfig?.token) return;
 
     const initializePaddle = async () => {
       try {
@@ -62,40 +57,9 @@ function PricingPage() {
 
         // @ts-ignore - Paddle SDK types not available
         if (window.Paddle) {
-          console.log('Initializing Paddle with token:', paddleConfig.token.substring(0, 10) + '...');
           window.Paddle.Initialize({
             token: paddleConfig.token,
           });
-
-          // Fetch prices for all plans (monthly only)
-          const priceIds = plans
-            .filter((p: any) => !p.is_custom)
-            .map((p: any) => ({
-              name: p.name,
-              slug: p.slug,
-              monthPriceId: p.monthly_price_id || '',
-            }));
-
-          setIsLoadingPrices(true);
-          const pricePromises = priceIds.map(async (priceItem) => {
-            try {
-              // @ts-ignore
-              const priceData = await window.Paddle.PricePreview({
-                items: [{ priceId: priceItem.monthPriceId, quantity: 1 }],
-              });
-              return {
-                ...priceItem,
-                priceData,
-              };
-            } catch (error) {
-              console.error(`Failed to fetch price for ${priceItem.name}:`, error);
-              return null;
-            }
-          });
-
-          const results = await Promise.all(pricePromises);
-          setPrices(results.filter(r => r !== null));
-          setIsLoadingPrices(false);
         }
       } catch (error) {
         console.error('Failed to initialize Paddle:', error);
@@ -103,7 +67,7 @@ function PricingPage() {
     };
 
     initializePaddle();
-  }, [paddleConfig, plans]);
+  }, [paddleConfig]);
 
   const handleSubscribe = async (plan: any) => {
     try {
@@ -197,7 +161,6 @@ function PricingPage() {
             const features = Array.isArray(plan.features) ? plan.features : [];
             const isCurrentPlan = currentPlanId === plan.id;
             const isPopular = plan.slug === "starter" || plan.slug === "pro";
-            const planPrice = prices.find((p: any) => p.slug === plan.slug);
 
             return (
               <div
@@ -231,18 +194,6 @@ function PricingPage() {
                   {plan.is_custom ? (
                     <div className="flex items-baseline">
                       <span className="text-4xl font-bold text-slate-900">Custom</span>
-                    </div>
-                  ) : isLoadingPrices ? (
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400"></div>
-                      Loading...
-                    </div>
-                  ) : planPrice?.priceData ? (
-                    <div className="flex items-baseline">
-                      <span className="text-4xl font-bold text-slate-900">
-                        {planPrice.priceData.formattedTotals.total}
-                      </span>
-                      <span className="ml-2 text-slate-600">/month</span>
                     </div>
                   ) : (
                     <div className="flex items-baseline">
