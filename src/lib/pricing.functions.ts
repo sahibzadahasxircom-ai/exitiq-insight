@@ -88,9 +88,9 @@ export const createPaddleCustomer = createServerFn({ method: "POST" })
     }
 
     // Import Paddle SDK
-    const paddle = await import('@paddle/paddle-node-sdk');
+    const { PaddleClient } = await import('@paddle/paddle-node-sdk');
     
-    const paddleClient = new paddle.PaddleClient({
+    const paddleClient = new PaddleClient({
       apiKey: process.env.PADDLE_API_KEY,
       environment: process.env.PADDLE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
     });
@@ -171,9 +171,9 @@ export const generateCustomerPortalSession = createServerFn({ method: "POST" })
     }
 
     // Import Paddle SDK
-    const paddle = await import('@paddle/paddle-node-sdk');
+    const { PaddleClient } = await import('@paddle/paddle-node-sdk');
     
-    const paddleClient = new paddle.PaddleClient({
+    const paddleClient = new PaddleClient({
       apiKey: process.env.PADDLE_API_KEY,
       environment: process.env.PADDLE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
     });
