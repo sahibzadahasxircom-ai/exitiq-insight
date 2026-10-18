@@ -153,7 +153,7 @@ function PricingPage() {
           successUrl: `${window.location.origin}/welcome`,
         },
         customer: {
-          email: customerId,
+          id: customerId,
         },
         items: [{ priceId, quantity: 1 }],
       });
