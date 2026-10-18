@@ -88,15 +88,15 @@ export const createPaddleCustomer = createServerFn({ method: "POST" })
     }
 
     // Import Paddle SDK
-    const { initializeSdk } = await import('@paddle/paddle-node-sdk');
+    const paddle = await import('@paddle/paddle-node-sdk');
     
-    const paddle = initializeSdk({
+    const paddleClient = new paddle.PaddleClient({
       apiKey: process.env.PADDLE_API_KEY,
       environment: process.env.PADDLE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
     });
 
     // Create customer in Paddle
-    const customer = await paddle.customers.create({
+    const customer = await paddleClient.customers.create({
       email: profile?.email,
       name: company.company_name,
     });
@@ -171,15 +171,15 @@ export const generateCustomerPortalSession = createServerFn({ method: "POST" })
     }
 
     // Import Paddle SDK
-    const { initializeSdk } = await import('@paddle/paddle-node-sdk');
+    const paddle = await import('@paddle/paddle-node-sdk');
     
-    const paddle = initializeSdk({
+    const paddleClient = new paddle.PaddleClient({
       apiKey: process.env.PADDLE_API_KEY,
       environment: process.env.PADDLE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
     });
 
     // Generate customer portal session
-    const session = await paddle.customerPortal.generateSession({
+    const session = await paddleClient.customerPortal.generateSession({
       customerId: company.paddle_customer_id,
     });
 
