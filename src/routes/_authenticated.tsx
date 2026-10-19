@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -83,6 +83,16 @@ function AuthenticatedLayout() {
           <main className="flex-1">
             <Outlet />
           </main>
+          <footer className="border-t border-border/60 mt-auto">
+            <div className="px-4 md:px-6 py-8 text-center text-xs text-muted-foreground">
+              <div className="flex flex-wrap justify-center gap-4 mb-2">
+                <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+                <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+                <Link to="/refund" className="hover:text-foreground transition-colors">Refund Policy</Link>
+              </div>
+              <p>© 2026 leaveesy. All rights reserved.</p>
+            </div>
+          </footer>
         </div>
       </div>
     </SidebarProvider>

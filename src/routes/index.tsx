@@ -692,11 +692,35 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 md:px-6 py-6 md:py-8 text-xs md:text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <img src="/leaveesy.png" alt="leaveesy" className="h-6 md:h-32 w-auto object-contain" />
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-8 md:py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <img src="/leaveesy.png" alt="leaveesy" className="h-8 w-auto object-contain" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Customer exit interviews and churn intelligence for SaaS businesses.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Product</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></li>
+                <li><Link to="/exit-interview" className="hover:text-foreground transition-colors">Demo</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Legal</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
+                <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/refund" className="hover:text-foreground transition-colors">Refund Policy</Link></li>
+              </ul>
+            </div>
           </div>
-          <p className="hidden md:block"> 2023 leaveesy. All rights reserved.</p>
+          <div className="border-t border-border pt-8 text-center text-xs md:text-sm text-muted-foreground">
+            <p>© 2026 leaveesy. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>
