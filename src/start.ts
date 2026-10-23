@@ -183,6 +183,7 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
             
             if (sessionError) {
               console.error("Failed to create interview session:", sessionError);
+              console.error("Session error details:", JSON.stringify(sessionError));
             } else {
               interviewSessionId = newSession.id;
               console.log("Created new interview session:", interviewSessionId);
