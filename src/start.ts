@@ -262,8 +262,8 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
         });
       } catch (error) {
         console.error("Widget event error:", error);
-        return new Response(JSON.stringify({ success: false, error: "Internal server error" }), {
-          status: 500,
+        return new Response(JSON.stringify({ success: false, error: "Internal server error", interviewSessionId: null }), {
+          status: 200,
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',

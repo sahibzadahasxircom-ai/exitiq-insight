@@ -7,41 +7,46 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const getCompanyBySessionId = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ sessionId: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    
-    console.log("getCompanyBySessionId called with sessionId:", data.sessionId);
-    
-    const { data: session, error: sessionError } = await supabaseAdmin
-      .from("interview_sessions")
-      .select("company_id")
-      .eq("id", data.sessionId)
-      .single();
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      
+      console.log("getCompanyBySessionId called with sessionId:", data.sessionId);
+      
+      const { data: session, error: sessionError } = await supabaseAdmin
+        .from("interview_sessions")
+        .select("company_id")
+        .eq("id", data.sessionId)
+        .single();
 
-    if (sessionError) {
-      console.error("Failed to fetch session:", sessionError);
+      if (sessionError) {
+        console.error("Failed to fetch session:", sessionError);
+        return null;
+      }
+
+      if (!session?.company_id) {
+        console.error("No company_id found for session:", data.sessionId);
+        return null;
+      }
+
+      console.log("Fetching company data for company_id:", session.company_id);
+
+      const { data: company, error: companyError } = await supabaseAdmin
+        .from("companies")
+        .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color, background_style, button_color, button_text_color, text_color, solid_background_color")
+        .eq("id", session.company_id)
+        .single();
+
+      if (companyError) {
+        console.error("Failed to fetch company:", companyError);
+        return null;
+      }
+
+      console.log("Company data fetched:", company);
+      return company;
+    } catch (error) {
+      console.error("Unexpected error in getCompanyBySessionId:", error);
       return null;
     }
-
-    if (!session?.company_id) {
-      console.error("No company_id found for session:", data.sessionId);
-      return null;
-    }
-
-    console.log("Fetching company data for company_id:", session.company_id);
-
-    const { data: company, error: companyError } = await supabaseAdmin
-      .from("companies")
-      .select("pre_form_style, pre_form_title, pre_form_description, pre_form_fields, company_name, company_logo, brand_color, background_style, button_color, button_text_color, text_color, solid_background_color")
-      .eq("id", session.company_id)
-      .single();
-
-    if (companyError) {
-      console.error("Failed to fetch company:", companyError);
-      return null;
-    }
-
-    console.log("Company data fetched:", company);
-    return company;
   });
 
 export const getCompanyBrandingBySessionId = createServerFn({ method: "GET" })
