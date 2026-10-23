@@ -94,47 +94,70 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
         if (body.event_name === "SignOut" || body.event_name === "CancelSubscription" || body.event_name === "DeleteAccount") {
           console.log(`${body.event_name} event detected, creating new interview session`);
           
-          // Check if company has reached their plan limit
-          const now = new Date();
-          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-          
-          // Get company subscription
-          const { data: subscription, error: subError } = await supabase
-            .from("company_subscriptions")
-            .select(`
-              *,
-              pricing_plans (*)
-            `)
-            .eq("company_id", body.company_id)
-            .single();
-          
-          const plan = subscription?.pricing_plans;
-          const limit = plan?.monthly_interview_limit || 5;
-          
-          // Custom plans have no limit
-          if (!plan?.is_custom && limit !== null) {
-            // Get current month usage
-            const { data: usage, error: usageError } = await supabase
-              .from("usage_records")
-              .select("*")
+          try {
+            // Check if company has reached their plan limit
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            
+            // Get company subscription (might not exist for free trial companies)
+            const { data: subscription, error: subError } = await supabase
+              .from("company_subscriptions")
+              .select(`
+                *,
+                pricing_plans (*)
+              `)
               .eq("company_id", body.company_id)
-              .gte("period_start", monthStart.toISOString())
-              .lte("period_end", monthEnd.toISOString())
               .single();
             
-            const currentUsage = usage?.interviews_count || 0;
+            const plan = subscription?.pricing_plans;
+            const limit = plan?.monthly_interview_limit || 5;
             
-            if (currentUsage >= limit) {
-              console.log(`Company ${body.company_id} has reached monthly limit (${limit} interviews)`);
-              return new Response(JSON.stringify({ 
-                success: false, 
-                error: "limit_reached",
-                message: "Monthly interview limit reached. Please upgrade your plan.",
-                currentUsage,
-                limit,
-                planName: plan?.name || "Free"
-              }), {
+            // Custom plans have no limit
+            if (!plan?.is_custom && limit !== null) {
+              // Get current month usage
+              const { data: usage, error: usageError } = await supabase
+                .from("usage_records")
+                .select("*")
+                .eq("company_id", body.company_id)
+                .gte("period_start", monthStart.toISOString())
+                .lte("period_end", monthEnd.toISOString())
+                .single();
+              
+              const currentUsage = usage?.interviews_count || 0;
+              
+              if (currentUsage >= limit) {
+                console.log(`Company ${body.company_id} has reached monthly limit (${limit} interviews)`);
+                return new Response(JSON.stringify({ 
+                  success: false, 
+                  error: "limit_reached",
+                  message: "Monthly interview limit reached. Please upgrade your plan.",
+                  currentUsage,
+                  limit,
+                  planName: plan?.name || "Free"
+                }), {
+                  status: 200,
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                  },
+                });
+              }
+            }
+            
+            // Always create a new interview session for each event
+            console.log("Creating new interview session for company:", body.company_id);
+            
+            // First, verify the company exists and get its name
+            const { data: companyData, error: companyCheckError } = await supabase
+              .from("companies")
+              .select("id, company_name")
+              .eq("id", body.company_id)
+              .single();
+            
+            if (companyCheckError || !companyData) {
+              console.error("Company not found:", companyCheckError);
+              return new Response(JSON.stringify({ success: false, error: "Company not found" }), {
                 status: 200,
                 headers: {
                   'Content-Type': 'application/json',
@@ -142,81 +165,66 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
                 },
               });
             }
-          }
-          
-          // Always create a new interview session for each event
-          console.log("Creating new interview session for company:", body.company_id);
-          
-          // First, verify the company exists and get its name
-          const { data: companyData, error: companyCheckError } = await supabase
-            .from("companies")
-            .select("id, company_name")
-            .eq("id", body.company_id)
-            .single();
-          
-          if (companyCheckError || !companyData) {
-            console.error("Company not found:", companyCheckError);
-            return new Response(JSON.stringify({ success: false, error: "Company not found" }), {
-              status: 200,
-              headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-              },
-            });
-          }
-          
-          console.log("Company verified:", companyData);
-          
-          const { data: newSession, error: sessionError } = await supabase
-            .from("interview_sessions")
-            .insert({
-              company_id: body.company_id,
-              customer_name: "Widget User",
-              customer_email: "widget@example.com",
-              interview_status: "active",
-              interview_progress: "started",
-              source_url: body.url,
-            })
-            .select("id")
-            .single();
-          
-          if (sessionError) {
-            console.error("Failed to create interview session:", sessionError);
-          } else {
-            interviewSessionId = newSession.id;
-            console.log("Created new interview session:", interviewSessionId);
-            console.log("Full session data:", newSession);
             
-            // Increment usage
-            const { error: usageError } = await supabase
-              .from("usage_records")
-              .select("*")
-              .eq("company_id", body.company_id)
-              .gte("period_start", monthStart.toISOString())
-              .lte("period_end", monthEnd.toISOString())
+            console.log("Company verified:", companyData);
+            
+            const { data: newSession, error: sessionError } = await supabase
+              .from("interview_sessions")
+              .insert({
+                company_id: body.company_id,
+                customer_name: "Widget User",
+                customer_email: "widget@example.com",
+                interview_status: "active",
+                interview_progress: "started",
+                source_url: body.url,
+              })
+              .select("id")
               .single();
             
-            if (usageError || !usage) {
-              // Create new usage record
-              await supabase
-                .from("usage_records")
-                .insert({
-                  company_id: body.company_id,
-                  subscription_id: subscription?.id,
-                  period_start: monthStart.toISOString(),
-                  period_end: monthEnd.toISOString(),
-                  interviews_count: 1,
-                });
+            if (sessionError) {
+              console.error("Failed to create interview session:", sessionError);
             } else {
-              // Increment existing usage
-              await supabase
-                .from("usage_records")
-                .update({
-                  interviews_count: usage.interviews_count + 1,
-                  updated_at: new Date().toISOString(),
-                })
-                .eq("id", usage.id);
+              interviewSessionId = newSession.id;
+              console.log("Created new interview session:", interviewSessionId);
+              console.log("Full session data:", newSession);
+              
+              // Increment usage
+              try {
+                const { data: usage, error: usageError } = await supabase
+                  .from("usage_records")
+                  .select("*")
+                  .eq("company_id", body.company_id)
+                  .gte("period_start", monthStart.toISOString())
+                  .lte("period_end", monthEnd.toISOString())
+                  .single();
+                
+                if (usageError || !usage) {
+                  // Create new usage record
+                  await supabase
+                    .from("usage_records")
+                    .insert({
+                      company_id: body.company_id,
+                      subscription_id: subscription?.id,
+                      period_start: monthStart.toISOString(),
+                      period_end: monthEnd.toISOString(),
+                      interviews_count: 1,
+                    });
+                } else {
+                  // Increment existing usage
+                  await supabase
+                    .from("usage_records")
+                    .update({
+                      interviews_count: usage.interviews_count + 1,
+                      updated_at: new Date().toISOString(),
+                    })
+                    .eq("id", usage.id);
+                }
+              } catch (usageError) {
+                console.error("Failed to update usage:", usageError);
+              }
             }
+          } catch (sessionCreationError) {
+            console.error("Error creating interview session:", sessionCreationError);
           }
         }
 
