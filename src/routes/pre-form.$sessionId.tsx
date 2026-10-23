@@ -62,7 +62,7 @@ function PreForm() {
   const { data: company, isLoading: isLoadingCompany, error: companyError } = useQuery({
     queryKey: ["company", sessionId],
     queryFn: () => getCompanyFn({ data: { sessionId } }),
-    retry: 1,
+    retry: 0,
     staleTime: 0, // Always fetch fresh data
     onError: (error) => {
       console.error("Query error for company data:", error);
