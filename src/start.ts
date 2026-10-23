@@ -148,6 +148,56 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
             // Always create a new interview session for each event
             console.log("Creating new interview session for company:", body.company_id);
             
+            // Check if company has reached their plan limit
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            
+            // Get current month usage
+            const { data: usage, error: usageError } = await supabase
+              .from("usage_records")
+              .select("*")
+              .eq("company_id", body.company_id)
+              .gte("period_start", monthStart.toISOString())
+              .lte("period_end", monthEnd.toISOString())
+              .single();
+            
+            const currentUsage = usage?.interviews_count || 0;
+            
+            // Get company subscription to check plan limits
+            const { data: subscription, error: subError } = await supabase
+              .from("company_subscriptions")
+              .select(`
+                *,
+                pricing_plans (*)
+              `)
+              .eq("company_id", body.company_id)
+              .single();
+            
+            const plan = subscription?.pricing_plans;
+            const limit = plan?.monthly_interview_limit || 5;
+            
+            // Custom plans have no limit
+            if (!plan?.is_custom && limit !== null && currentUsage >= limit) {
+              console.log(`Company ${body.company_id} has reached monthly limit (${limit} interviews)`);
+              return new Response(JSON.stringify({ 
+                success: false, 
+                error: "limit_reached",
+                message: `Monthly interview limit reached (${limit} interviews). Please upgrade your plan.`,
+                currentUsage,
+                limit,
+                planName: plan?.name || "Free",
+                interviewSessionId: null,
+                action: "upgrade"
+              }), {
+                status: 200,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Access-Control-Allow-Origin': '*',
+                },
+              });
+            }
+            
             // First, verify the company exists and get its name
             const { data: companyData, error: companyCheckError } = await supabase
               .from("companies")

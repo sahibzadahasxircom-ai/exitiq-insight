@@ -243,6 +243,10 @@
               
               // Replace loading modal with actual pre-form
               window.leaveesy.showModal(leaveesyUrl);
+            } else if (data.error === 'limit_reached') {
+              // Show upgrade modal instead of pre-form
+              console.log('Leaveesy Widget: Limit reached, showing upgrade modal');
+              window.leaveesy.showUpgradeModal(data.message, data.planName, data.currentUsage, data.limit);
             } else {
               console.log('Leaveesy Widget: Not showing modal - conditions not met');
               console.log('Leaveesy Widget: eventName:', eventName, 'interviewSessionId:', data.interviewSessionId);
@@ -300,6 +304,83 @@
         document.body.style.overflow = '';
         this.modal = null;
       }
+    },
+    
+    showUpgradeModal: function(message, planName, currentUsage, limit) {
+      // Remove existing modal if any
+      if (this.modal) {
+        document.body.removeChild(this.modal);
+      }
+      
+      // Hide body scroll
+      document.body.style.overflow = 'hidden';
+      
+      // Create modal overlay
+      var modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+      
+      // Create modal container
+      var container = document.createElement('div');
+      container.style.cssText = 'background:white;border-radius:16px;max-width:450px;width:90%;padding:32px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;text-align:center;';
+      
+      // Create close button
+      var closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '×';
+      closeBtn.style.cssText = 'position:absolute;top:16px;right:16px;background:none;border:none;font-size:28px;cursor:pointer;color:#666;padding:8px;line-height:1;z-index:10;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:background-color 0.2s;';
+      closeBtn.onclick = function() {
+        document.body.removeChild(modal);
+        document.body.style.overflow = '';
+        window.leaveesy.modal = null;
+      };
+      
+      closeBtn.onmouseover = function() {
+        closeBtn.style.backgroundColor = 'rgba(0,0,0,0.05)';
+      };
+      
+      closeBtn.onmouseout = function() {
+        closeBtn.style.backgroundColor = 'transparent';
+      };
+      
+      // Content
+      container.innerHTML = `
+        <div style="font-size:48px;margin-bottom:16px;">📊</div>
+        <h2 style="font-size:24px;font-weight:600;margin-bottom:12px;color:#1a1a1a;">Limit Reached</h2>
+        <p style="color:#666;margin-bottom:24px;line-height:1.5;">${message || 'You have reached your monthly interview limit.'}</p>
+        <div style="background:#f3f4f6;border-radius:8px;padding:16px;margin-bottom:24px;">
+          <p style="font-size:14px;color:#666;margin:0;">Current Usage: <strong>${currentUsage}/${limit}</strong></p>
+          <p style="font-size:14px;color:#666;margin:4px 0 0;">Plan: <strong>${planName}</strong></p>
+        </div>
+        <a href="${window.location.origin}/pricing" style="display:inline-block;padding:12px 24px;background:#2563eb;color:white;text-decoration:none;border-radius:8px;font-weight:500;transition:background-color 0.2s;">
+          Upgrade Plan
+        </a>
+      `;
+      
+      // Assemble modal
+      container.appendChild(closeBtn);
+      modal.appendChild(container);
+      document.body.appendChild(modal);
+      this.modal = modal;
+      
+      // Close on escape key
+      var escapeHandler = function(e) {
+        if (e.key === 'Escape' && window.leaveesy.modal) {
+          document.body.removeChild(window.leaveesy.modal);
+          document.body.style.overflow = '';
+          window.leaveesy.modal = null;
+          document.removeEventListener('keydown', escapeHandler);
+        }
+      };
+      document.addEventListener('keydown', escapeHandler);
+      
+      // Close on backdrop click
+      modal.onclick = function(e) {
+        if (e.target === modal && window.leaveesy.modal) {
+          document.body.removeChild(window.leaveesy.modal);
+          document.body.style.overflow = '';
+          window.leaveesy.modal = null;
+          document.removeEventListener('keydown', escapeHandler);
+        }
+      };
     }
   };
 
