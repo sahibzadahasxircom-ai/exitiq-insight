@@ -148,11 +148,6 @@ const corsMiddleware = createMiddleware().server(async ({ request, next }): Prom
             // Always create a new interview session for each event
             console.log("Creating new interview session for company:", body.company_id);
             
-            // Check if company has reached their plan limit
-            const now = new Date();
-            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            
             // Get current month usage
             const { data: usage, error: usageError } = await supabase
               .from("usage_records")
