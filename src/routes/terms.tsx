@@ -44,6 +44,11 @@ function TermsPage() {
               Paid subscriptions are billed monthly. You agree to provide accurate payment information 
               and authorize us to charge your payment method for the selected plan.
             </p>
+            <p className="text-muted-foreground mt-2">
+              Our order process is conducted by our online reseller Paddle.com. Paddle.com is the 
+              Merchant of Record for all our orders. Paddle provides all customer service inquiries 
+              and handles returns.
+            </p>
           </section>
 
           <section>
