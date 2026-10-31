@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Calendar, Filter, TrendingUp, TrendingDown, Users, Activity, MessageSquare, AlertCircle, CreditCard } from "lucide-react";
 import { getDashboardData, listInsights } from "@/lib/interview.functions";
-import { getCompanyUsage, canCreateInterview } from "@/lib/pricing.functions";
+import { canCreateInterview } from "@/lib/pricing.functions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -112,55 +112,111 @@ function aggregateChurnDrivers(insights: any[]) {
 
 function generateRecommendations(insights: any[]) {
   const recommendations = [];
-  const categories = new Set(insights.map((i) => i.category));
+  const categoryMap: Record<string, any[]> = {};
 
-  // Generate recommendations based on common churn categories
-  if (categories.has('pricing')) {
+  // Group insights by category
+  insights.forEach((insight) => {
+    const category = insight.category || 'other';
+    if (!categoryMap[category]) {
+      categoryMap[category] = [];
+    }
+    categoryMap[category].push(insight);
+  });
+
+  // Generate specific recommendations based on actual insights
+  Object.entries(categoryMap).forEach(([category, categoryInsights]) => {
+    const summaries = categoryInsights.map(i => i.summary).filter(Boolean);
+    const uniqueSummaries = [...new Set(summaries)];
+
+    if (category === 'ai_assistant' || category === 'feature') {
+      if (uniqueSummaries.some(s => s.toLowerCase().includes('capability') || s.toLowerCase().includes('limited'))) {
+        recommendations.push({
+          id: `rec-${category}-1`,
+          recommendation: 'Enhance AI assistant capabilities',
+          problem: `Customers reported: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+          solution_to: 'AI assistant limitations',
+          expected_impact: 'High',
+          confidence: 0.85,
+        });
+      }
+    }
+
+    if (category === 'ux' || category === 'workflow') {
+      if (uniqueSummaries.some(s => s.toLowerCase().includes('workflow') || s.toLowerCase().includes('confusing'))) {
+        recommendations.push({
+          id: `rec-${category}-1`,
+          recommendation: 'Simplify user workflows',
+          problem: `Customers found workflows difficult: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+          solution_to: 'Complex workflow issues',
+          expected_impact: 'Medium',
+          confidence: 0.75,
+        });
+      }
+    }
+
+    if (category === 'design') {
+      if (uniqueSummaries.some(s => s.toLowerCase().includes('design') || s.toLowerCase().includes('ui'))) {
+        recommendations.push({
+          id: `rec-${category}-1`,
+          recommendation: 'Improve UI/UX design',
+          problem: `Customers mentioned design issues: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+          solution_to: 'Design-related complaints',
+          expected_impact: 'Medium',
+          confidence: 0.70,
+        });
+      }
+    }
+
+    if (category === 'feature') {
+      if (uniqueSummaries.some(s => s.toLowerCase().includes('missing') || s.toLowerCase().includes('need'))) {
+        recommendations.push({
+          id: `rec-${category}-2`,
+          recommendation: 'Add missing core features',
+          problem: `Customers needed features: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+          solution_to: 'Missing feature requests',
+          expected_impact: 'High',
+          confidence: 0.80,
+        });
+      }
+    }
+
+    if (category === 'support') {
+      recommendations.push({
+        id: `rec-${category}-1`,
+        recommendation: 'Improve customer support quality',
+        problem: `Support issues reported: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        solution_to: 'Customer support complaints',
+        expected_impact: 'Medium',
+        confidence: 0.65,
+      });
+    }
+
+    if (category === 'pricing') {
+      recommendations.push({
+        id: `rec-${category}-1`,
+        recommendation: 'Review pricing model',
+        problem: `Pricing concerns: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        solution_to: 'Pricing-related cancellations',
+        expected_impact: 'High',
+        confidence: 0.78,
+      });
+    }
+  });
+
+  // If no specific recommendations, provide generic ones based on data
+  if (recommendations.length === 0 && insights.length > 0) {
+    const topIssues = insights.slice(0, 3).map(i => i.summary).filter(Boolean);
     recommendations.push({
-      id: '1',
-      recommendation: 'Review pricing structure',
-      problem: 'Customers frequently mention pricing as a concern',
-      solution_to: 'Pricing-related cancellations',
+      id: 'rec-generic-1',
+      recommendation: 'Address top customer concerns',
+      problem: `Key issues mentioned: ${topIssues.join(', ')}`,
+      solution_to: 'Overall customer feedback',
       expected_impact: 'High',
-      confidence: 0.75,
+      confidence: 0.70,
     });
   }
 
-  if (categories.has('ux')) {
-    recommendations.push({
-      id: '2',
-      recommendation: 'Improve user onboarding',
-      problem: 'UX issues reported during initial setup',
-      solution_to: 'User experience complaints',
-      expected_impact: 'Medium',
-      confidence: 0.68,
-    });
-  }
-
-  if (categories.has('competitor')) {
-    recommendations.push({
-      id: '3',
-      recommendation: 'Analyze competitor features',
-      problem: 'Customers migrating to specific competitors',
-      solution_to: 'Competitor migration',
-      expected_impact: 'High',
-      confidence: 0.82,
-    });
-  }
-
-  // Add generic recommendations if few insights
-  if (recommendations.length < 3) {
-    recommendations.push({
-      id: '4',
-      recommendation: 'Improve customer support',
-      problem: 'Enhance support response times and quality',
-      solution_to: 'Support-related issues',
-      expected_impact: 'Medium',
-      confidence: 0.60,
-    });
-  }
-
-  return recommendations.slice(0, 3);
+  return recommendations.slice(0, 5);
 }
 
 function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
@@ -218,13 +274,6 @@ function Dashboard() {
   const { data: insightsData } = useQuery({
     queryKey: ["insights-data"],
     queryFn: () => listInsightsFn({ data: undefined }),
-    retry: false,
-  });
-
-  const getUsageFn = useServerFn(getCompanyUsage);
-  const { data: usage } = useQuery({
-    queryKey: ["company-usage"],
-    queryFn: () => getUsageFn({ data: undefined }),
     retry: false,
   });
 
@@ -315,25 +364,6 @@ function Dashboard() {
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            {usage && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200">
-                <Activity className="h-4 w-4 text-slate-600" />
-                <span className="text-sm text-slate-700">
-                  {usage.interviews_count}/{usage.limit === Infinity ? '∞' : usage.limit} interviews
-                </span>
-                {usage.remaining <= 0 && (
-                  <Badge variant="destructive" className="ml-2">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    Limit reached
-                  </Badge>
-                )}
-                {usage.remaining > 0 && usage.remaining <= 3 && (
-                  <Badge variant="outline" className="ml-2 border-amber-500 text-amber-700">
-                    {usage.remaining} left
-                  </Badge>
-                )}
-              </div>
-            )}
             {canCreate && !canCreate.canCreate && (
               <Link to="/pricing">
                 <Button size="sm" className="gap-2">
@@ -441,15 +471,8 @@ function DashboardStats({ data }: { data: any }) {
 }
 
 function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
-  const colorClasses = {
-    blue: "border-blue-200 bg-blue-50",
-    green: "border-green-200 bg-green-50",
-    amber: "border-amber-200 bg-amber-50",
-    violet: "border-violet-200 bg-violet-50",
-  };
-
   return (
-    <div className={`rounded-lg border ${colorClasses[color as keyof typeof colorClasses]} p-4 md:p-6 shadow-sm`}>
+    <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6 shadow-sm">
       <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-2">{label}</p>
       <p className="text-2xl font-bold text-gray-900">{value}</p>
     </div>

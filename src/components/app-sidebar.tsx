@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Settings, Palette, Plug, BookOpen, Activity, User } from "lucide-react";
+import { LayoutDashboard, Inbox, Settings, Palette, Plug, BookOpen, Activity, User, AlertCircle } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +15,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getCompanyUsage, canCreateInterview } from "@/lib/pricing.functions";
 
 const intelligence = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
@@ -40,9 +43,11 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [integrationData, setIntegrationData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string>("");
 
   useEffect(() => {
     loadIntegrations();
+    loadUserInfo();
   }, []);
 
   const loadIntegrations = async () => {
@@ -70,6 +75,31 @@ export function AppSidebar() {
       setLoading(false);
     }
   };
+
+  const loadUserInfo = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || "");
+      }
+    } catch (error) {
+      console.error("Failed to load user info:", error);
+    }
+  };
+
+  const getUsageFn = useServerFn(getCompanyUsage);
+  const { data: usage } = useQuery({
+    queryKey: ["company-usage"],
+    queryFn: () => getUsageFn({ data: undefined }),
+    retry: false,
+  });
+
+  const canCreateFn = useServerFn(canCreateInterview);
+  const { data: canCreate } = useQuery({
+    queryKey: ["can-create-interview"],
+    queryFn: () => canCreateFn({ data: undefined }),
+    retry: false,
+  });
 
   const renderItems = (items: typeof intelligence) =>
     items.map((item) => {
@@ -118,12 +148,33 @@ export function AppSidebar() {
             <SidebarMenu>{renderItems(workspace)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {usage && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <div className="px-2 py-2 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Usage</span>
+                  <span className="font-medium">
+                    {usage.interviews_count}/{usage.limit === Infinity ? '∞' : usage.limit}
+                  </span>
+                </div>
+                {usage.remaining <= 0 && (
+                  <div className="flex items-center gap-1 text-destructive text-[11px]">
+                    <AlertCircle className="h-3 w-3" />
+                    <span>Limit reached</span>
+                  </div>
+                )}
+                {usage.remaining > 0 && usage.remaining <= 3 && (
+                  <div className="text-amber-600 text-[11px]">
+                    {usage.remaining} interviews left
+                  </div>
+                )}
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
-        <div className="px-2 py-2 text-[11px] leading-relaxed text-muted-foreground group-data-[collapsible=icon]:hidden">
-          <p className="font-medium text-foreground">Auto-pilot active</p>
-          <p className="hidden md:block">Interviews trigger on every cancellation event.</p>
-        </div>
       </SidebarFooter>
     </Sidebar>
   );
