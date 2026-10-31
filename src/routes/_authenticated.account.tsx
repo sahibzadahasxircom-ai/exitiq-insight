@@ -1,11 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, ExternalLink, CreditCard, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowRight, ExternalLink, CreditCard, RefreshCw, CheckCircle2, AlertCircle, Settings, Activity, User, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { generateCustomerPortalSession, getPaddleCustomerId } from "@/lib/pricing.functions";
+import { generateCustomerPortalSession, getPaddleCustomerId, getCompanyUsage } from "@/lib/pricing.functions";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({ meta: [{ title: "Account — leaveesy" }] }),
@@ -13,10 +14,18 @@ export const Route = createFileRoute("/_authenticated/account")({
 });
 
 function AccountPage() {
+  const { profile, company } = useAuth();
   const getCustomerIdFn = useServerFn(getPaddleCustomerId);
   const { data: paddleData, isLoading } = useQuery({
     queryKey: ["paddle-customer-id"],
     queryFn: () => getCustomerIdFn({ data: undefined }),
+  });
+
+  const getUsageFn = useServerFn(getCompanyUsage);
+  const { data: usage } = useQuery({
+    queryKey: ["company-usage"],
+    queryFn: () => getUsageFn({ data: undefined }),
+    retry: false,
   });
 
   const generateSessionFn = useServerFn(generateCustomerPortalSession);
@@ -35,9 +44,74 @@ function AccountPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Account</h1>
           <p className="mt-2 text-slate-600">
-            Manage your subscription and billing
+            Manage your profile, usage, and subscription
           </p>
         </div>
+
+        {/* Profile Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-slate-500 mb-1">Name</p>
+                <p className="text-slate-900 font-medium">{profile?.full_name || 'Not set'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 mb-1">Email</p>
+                <p className="text-slate-900 font-medium">{profile?.email || 'Not set'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 mb-1">Company</p>
+                <p className="text-slate-900 font-medium">{company?.company_name || 'Not set'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Usage Section */}
+        {usage && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Usage
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-700">Interviews Used</span>
+                  <span className="font-medium text-slate-900">
+                    {usage.interviews_count}/{usage.limit === Infinity ? '∞' : usage.limit}
+                  </span>
+                </div>
+                {usage.remaining <= 0 && (
+                  <div className="flex items-center gap-2 text-red-600 text-sm">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Limit reached - upgrade your plan</span>
+                  </div>
+                )}
+                {usage.remaining > 0 && usage.remaining <= 3 && (
+                  <div className="text-amber-600 text-sm">
+                    {usage.remaining} interviews remaining this month
+                  </div>
+                )}
+                <Link to="/usage">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    View Details
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Subscription Status */}
         <Card className="mb-6">
@@ -72,6 +146,12 @@ function AccountPage() {
                 <p className="text-sm text-slate-600">
                   You don't have an active subscription. Choose a plan to get started.
                 </p>
+                <Link to="/pricing">
+                  <Button size="sm" className="gap-2">
+                    View Plans
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             )}
           </CardContent>
@@ -97,6 +177,27 @@ function AccountPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Settings Link */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-slate-600 mb-4">
+              Manage your workspace settings, integrations, and preferences.
+            </p>
+            <Link to="/settings">
+              <Button variant="outline" size="sm" className="gap-2">
+                Open Settings
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
 
         {/* Billing Information */}
         <Card>

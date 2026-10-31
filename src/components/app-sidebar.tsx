@@ -144,7 +144,7 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel>Account</SidebarGroupLabel>
             <SidebarGroupContent>
-              <div className="px-2 py-2 space-y-3">
+              <div className="px-2 py-2 space-y-2">
                 {/* Profile Info */}
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
@@ -179,24 +179,6 @@ export function AppSidebar() {
 
                 {/* Menu Items */}
                 <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/settings">
-                        <Settings className="h-4 w-4" />
-                        <span>Settings</span>
-                        <ChevronRight className="ml-auto h-4 w-4" />
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/usage">
-                        <Activity className="h-4 w-4" />
-                        <span>Usage</span>
-                        <ChevronRight className="ml-auto h-4 w-4" />
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <Link to="/account">

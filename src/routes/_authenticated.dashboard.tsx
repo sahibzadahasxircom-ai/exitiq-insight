@@ -724,44 +724,40 @@ function ChurnDriverModal({ driver, onClose }: { driver: any; onClose: () => voi
 
 function RecommendationModal({ recommendation, onClose }: { recommendation: any; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-w-lg w-full rounded-lg bg-white p-5 md:p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Recommendation Details</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold">Recommendation Details</DialogTitle>
+          <button onClick={onClose} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600">
             <X className="h-5 w-5" />
           </button>
-        </div>
-        <div className="space-y-4">
-          <div className="rounded-lg bg-blue-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Recommended Action</p>
-            <p className="mt-2 text-sm text-gray-800">{recommendation.recommendation}</p>
+        </DialogHeader>
+        <div className="space-y-3 mt-4">
+          <div className="rounded-lg bg-blue-50 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-700">Recommended Action</p>
+            <p className="mt-1 text-sm text-gray-800">{recommendation.recommendation}</p>
           </div>
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Problem Statement</p>
-            <p className="mt-2 text-sm text-gray-700">{recommendation.problem}</p>
+          <div className="rounded-lg bg-red-50 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-red-700">Problem</p>
+            <p className="mt-1 text-sm text-gray-700">{recommendation.problem}</p>
           </div>
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Solution To</p>
-            <p className="mt-2 text-sm text-gray-700">{recommendation.solution_to}</p>
+          <div className="rounded-lg bg-green-50 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-green-700">Specific Solution</p>
+            <p className="mt-1 text-sm text-gray-700">{recommendation.solution_to}</p>
           </div>
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Expected Impact</p>
-            <p className="mt-2 text-sm text-gray-700">{recommendation.expected_impact}</p>
-          </div>
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Rationale</p>
-            <p className="mt-2 text-sm text-gray-700">
-              This recommendation addresses the root cause identified in customer interviews. By implementing this change, we can reduce cancellations by targeting the specific pain points that drive customers away.
-            </p>
-          </div>
-          <div className="rounded-lg bg-green-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-green-700">Confidence Level</p>
-            <p className="mt-2 text-sm font-medium text-green-900">{Math.round(recommendation.confidence * 100)}% confidence based on customer feedback</p>
+          <div className="flex gap-2">
+            <div className="flex-1 rounded-lg bg-gray-50 p-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Impact</p>
+              <p className="mt-1 text-sm text-gray-700">{recommendation.expected_impact}</p>
+            </div>
+            <div className="flex-1 rounded-lg bg-gray-50 p-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Confidence</p>
+              <p className="mt-1 text-sm font-medium text-gray-700">{Math.round(recommendation.confidence * 100)}%</p>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
