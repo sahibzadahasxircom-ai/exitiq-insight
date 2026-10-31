@@ -35,7 +35,6 @@ const integrations = [
 const workspace = [
   { title: "Workspace", url: "/workspace", icon: Palette },
   { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Usage", url: "/usage", icon: Activity },
   { title: "Account", url: "/account", icon: User },
 ];
 
@@ -150,6 +149,7 @@ export function AppSidebar() {
         </SidebarGroup>
         {usage && (
           <SidebarGroup>
+            <SidebarGroupLabel>Account</SidebarGroupLabel>
             <SidebarGroupContent>
               <div className="px-2 py-2 text-xs space-y-2">
                 <div className="flex items-center justify-between">
