@@ -1,5 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Settings, Palette, Plug, BookOpen, Activity, User, AlertCircle } from "lucide-react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { LayoutDashboard, Inbox, Palette, Plug, BookOpen, Activity, User, AlertCircle, LogOut, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getCompanyUsage, canCreateInterview } from "@/lib/pricing.functions";
+import { useAuth } from "@/hooks/use-auth";
 
 const intelligence = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
@@ -34,19 +35,17 @@ const integrations = [
 
 const workspace = [
   { title: "Workspace", url: "/workspace", icon: Palette },
-  { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Account", url: "/account", icon: User },
 ];
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [integrationData, setIntegrationData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState<string>("");
+  const { profile, company, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadIntegrations();
-    loadUserInfo();
   }, []);
 
   const loadIntegrations = async () => {
@@ -75,15 +74,9 @@ export function AppSidebar() {
     }
   };
 
-  const loadUserInfo = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserEmail(user.email || "");
-      }
-    } catch (error) {
-      console.error("Failed to load user info:", error);
-    }
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/auth", replace: true });
   };
 
   const getUsageFn = useServerFn(getCompanyUsage);
@@ -151,24 +144,72 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel>Account</SidebarGroupLabel>
             <SidebarGroupContent>
-              <div className="px-2 py-2 text-xs space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Usage</span>
-                  <span className="font-medium">
-                    {usage.interviews_count}/{usage.limit === Infinity ? '∞' : usage.limit}
-                  </span>
+              <div className="px-2 py-2 space-y-3">
+                {/* Profile Info */}
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                    {profile?.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || profile?.email?.[0].toUpperCase() || 'U'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium truncate">{profile?.full_name || profile?.email || 'User'}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{company?.company_name || 'Workspace'}</p>
+                  </div>
                 </div>
-                {usage.remaining <= 0 && (
-                  <div className="flex items-center gap-1 text-destructive text-[11px]">
-                    <AlertCircle className="h-3 w-3" />
-                    <span>Limit reached</span>
+
+                {/* Usage */}
+                <div className="text-xs space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Usage</span>
+                    <span className="font-medium">
+                      {usage.interviews_count}/{usage.limit === Infinity ? '∞' : usage.limit}
+                    </span>
                   </div>
-                )}
-                {usage.remaining > 0 && usage.remaining <= 3 && (
-                  <div className="text-amber-600 text-[11px]">
-                    {usage.remaining} interviews left
-                  </div>
-                )}
+                  {usage.remaining <= 0 && (
+                    <div className="flex items-center gap-1 text-destructive text-[10px]">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>Limit reached</span>
+                    </div>
+                  )}
+                  {usage.remaining > 0 && usage.remaining <= 3 && (
+                    <div className="text-amber-600 text-[10px]">
+                      {usage.remaining} interviews left
+                    </div>
+                  )}
+                </div>
+
+                {/* Menu Items */}
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/settings">
+                        <Settings className="h-4 w-4" />
+                        <span>Settings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/usage">
+                        <Activity className="h-4 w-4" />
+                        <span>Usage</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/account">
+                        <User className="h-4 w-4" />
+                        <span>Account</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton onClick={handleSignOut}>
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign out</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
               </div>
             </SidebarGroupContent>
           </SidebarGroup>

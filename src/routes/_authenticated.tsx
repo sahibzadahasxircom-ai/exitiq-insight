@@ -2,7 +2,6 @@ import { createFileRoute, Outlet, useNavigate, Link } from "@tanstack/react-rout
 import { useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { UserMenu } from "@/components/user-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -76,9 +75,6 @@ function AuthenticatedLayout() {
             <SidebarTrigger className="md:hidden" />
             <div className="hidden md:block h-5 w-px bg-border" />
             <span className="text-sm text-muted-foreground hidden md:block">leaveesy Console</span>
-            <div className="ml-auto">
-              <UserMenu />
-            </div>
           </header>
           <main className="flex-1">
             <Outlet />
