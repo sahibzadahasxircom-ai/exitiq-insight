@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Palette, Plug, BookOpen, Activity, User, AlertCircle, LogOut, Settings, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Inbox, Palette, Plug, BookOpen, User, LogOut, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,9 +15,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { getCompanyUsage, canCreateInterview } from "@/lib/pricing.functions";
 import { useAuth } from "@/hooks/use-auth";
 
 const intelligence = [
@@ -41,7 +38,7 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [integrationData, setIntegrationData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { profile, company, signOut } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -140,65 +137,28 @@ export function AppSidebar() {
             <SidebarMenu>{renderItems(workspace)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {usage && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Account</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <div className="px-2 py-2 space-y-2">
-                {/* Profile Info */}
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {profile?.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || profile?.email?.[0].toUpperCase() || 'U'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">{profile?.full_name || profile?.email || 'User'}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{company?.company_name || 'Workspace'}</p>
-                  </div>
-                </div>
-
-                {/* Usage */}
-                <div className="text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Usage</span>
-                    <span className="font-medium">
-                      {usage.interviews_count}/{usage.limit === Infinity ? '∞' : usage.limit}
-                    </span>
-                  </div>
-                  {usage.remaining <= 0 && (
-                    <div className="flex items-center gap-1 text-destructive text-[10px]">
-                      <AlertCircle className="h-3 w-3" />
-                      <span>Limit reached</span>
-                    </div>
-                  )}
-                  {usage.remaining > 0 && usage.remaining <= 3 && (
-                    <div className="text-amber-600 text-[10px]">
-                      {usage.remaining} interviews left
-                    </div>
-                  )}
-                </div>
-
-                {/* Menu Items */}
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/account">
-                        <User className="h-4 w-4" />
-                        <span>Account</span>
-                        <ChevronRight className="ml-auto h-4 w-4" />
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={handleSignOut}>
-                      <LogOut className="h-4 w-4" />
-                      <span>Sign out</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </div>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        <SidebarGroup>
+          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/account">
+                    <User className="h-4 w-4" />
+                    <span>Account</span>
+                    <ChevronRight className="ml-auto h-4 w-4" />
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign out</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
       </SidebarFooter>
