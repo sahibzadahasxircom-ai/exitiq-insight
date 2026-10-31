@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Palette, Plug, BookOpen, Activity, User, AlertCircle, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, Inbox, Palette, Plug, BookOpen, Activity, User, AlertCircle, LogOut, Settings, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -184,6 +184,7 @@ export function AppSidebar() {
                       <Link to="/settings">
                         <Settings className="h-4 w-4" />
                         <span>Settings</span>
+                        <ChevronRight className="ml-auto h-4 w-4" />
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -192,6 +193,7 @@ export function AppSidebar() {
                       <Link to="/usage">
                         <Activity className="h-4 w-4" />
                         <span>Usage</span>
+                        <ChevronRight className="ml-auto h-4 w-4" />
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -200,6 +202,7 @@ export function AppSidebar() {
                       <Link to="/account">
                         <User className="h-4 w-4" />
                         <span>Account</span>
+                        <ChevronRight className="ml-auto h-4 w-4" />
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
