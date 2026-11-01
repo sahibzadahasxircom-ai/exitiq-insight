@@ -9,7 +9,6 @@ import {
 import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Calendar, Filter, TrendingUp, TrendingDown, Users, Activity, MessageSquare, AlertCircle, CreditCard } from "lucide-react";
 import { getDashboardData, listInsights } from "@/lib/interview.functions";
 import { canCreateInterview } from "@/lib/pricing.functions";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -724,15 +723,15 @@ function ChurnDriverModal({ driver, onClose }: { driver: any; onClose: () => voi
 
 function RecommendationModal({ recommendation, onClose }: { recommendation: any; onClose: () => void }) {
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">Recommendation Details</DialogTitle>
-          <button onClick={onClose} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-w-md w-full rounded-lg bg-white p-5 shadow-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">Recommendation Details</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="h-5 w-5" />
           </button>
-        </DialogHeader>
-        <div className="space-y-3 mt-4">
+        </div>
+        <div className="space-y-3">
           <div className="rounded-lg bg-blue-50 p-3">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-700">Recommended Action</p>
             <p className="mt-1 text-sm text-gray-800">{recommendation.recommendation}</p>
@@ -756,8 +755,8 @@ function RecommendationModal({ recommendation, onClose }: { recommendation: any;
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
 
