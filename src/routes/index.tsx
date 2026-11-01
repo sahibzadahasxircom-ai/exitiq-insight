@@ -64,10 +64,10 @@ function Landing() {
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <Link to="/pricing">
+            <Link to="/auth">
               <Button variant="ghost" size="sm" className="hidden md:inline-flex">Sign in</Button>
             </Link>
-            <Link to="/pricing">
+            <Link to="/auth">
               <Button size="sm">Get started</Button>
             </Link>
           </div>
