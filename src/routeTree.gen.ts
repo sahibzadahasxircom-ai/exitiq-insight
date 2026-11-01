@@ -14,7 +14,10 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ExitInterviewRouteImport } from './routes/exit-interview'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RefundRouteImport } from './routes/refund'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TestInterviewRouteImport } from './routes/test-interview'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated.account'
 import { Route as AuthenticatedCompanyDetailsRouteImport } from './routes/_authenticated.company-details'
@@ -59,9 +62,24 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundRoute = RefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TestInterviewRoute = TestInterviewRouteImport.update({
@@ -171,7 +189,10 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/test-interview': typeof TestInterviewRoute
   '/account': typeof AuthenticatedAccountRoute
   '/company-details': typeof AuthenticatedCompanyDetailsRoute
@@ -197,7 +218,10 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/test-interview': typeof TestInterviewRoute
   '/account': typeof AuthenticatedAccountRoute
   '/company-details': typeof AuthenticatedCompanyDetailsRoute
@@ -225,7 +249,10 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/exit-interview': typeof ExitInterviewRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/test-interview': typeof TestInterviewRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/company-details': typeof AuthenticatedCompanyDetailsRoute
@@ -253,7 +280,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/exit-interview'
     | '/forgot-password'
+    | '/privacy'
+    | '/refund'
     | '/reset-password'
+    | '/terms'
     | '/test-interview'
     | '/account'
     | '/company-details'
@@ -279,7 +309,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/exit-interview'
     | '/forgot-password'
+    | '/privacy'
+    | '/refund'
     | '/reset-password'
+    | '/terms'
     | '/test-interview'
     | '/account'
     | '/company-details'
@@ -306,7 +339,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/exit-interview'
     | '/forgot-password'
+    | '/privacy'
+    | '/refund'
     | '/reset-password'
+    | '/terms'
     | '/test-interview'
     | '/_authenticated/account'
     | '/_authenticated/company-details'
@@ -334,7 +370,10 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ExitInterviewRoute: typeof ExitInterviewRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RefundRoute: typeof RefundRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TermsRoute: typeof TermsRoute
   TestInterviewRoute: typeof TestInterviewRoute
   InterviewSessionIdRoute: typeof InterviewSessionIdRoute
   PreFormSessionIdRoute: typeof PreFormSessionIdRoute
@@ -377,11 +416,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund': {
+      id: '/refund'
+      path: '/refund'
+      fullPath: '/refund'
+      preLoaderRoute: typeof RefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/test-interview': {
@@ -580,7 +640,10 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ExitInterviewRoute: ExitInterviewRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  PrivacyRoute: PrivacyRoute,
+  RefundRoute: RefundRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TermsRoute: TermsRoute,
   TestInterviewRoute: TestInterviewRoute,
   InterviewSessionIdRoute: InterviewSessionIdRoute,
   PreFormSessionIdRoute: PreFormSessionIdRoute,
