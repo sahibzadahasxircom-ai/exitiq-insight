@@ -26,28 +26,8 @@ function AuthenticatedLayout() {
 
       // Only redirect if we're on the base authenticated path
       if (window.location.pathname === "/_authenticated" || window.location.pathname === "/") {
-        if (profile.company_id) {
-          // Check if user has verified integrations
-          const { data: integrations } = await supabase
-            .from("integrations")
-            .select("*")
-            .eq("company_id", profile.company_id);
-
-          const hasConnectedIntegration = integrations?.some(
-            (i) => i.status === "connected" || i.status === "listening_for_events"
-          );
-
-          if (hasConnectedIntegration) {
-            // User has verified integrations, go to dashboard
-            navigate({ to: "/dashboard", replace: true });
-          } else {
-            // User has company but no verified integrations, go to setup-wizard
-            navigate({ to: "/setup-wizard", replace: true });
-          }
-        } else {
-          // No company_id, go to setup-wizard
-          navigate({ to: "/setup-wizard", replace: true });
-        }
+        // Always go to dashboard after sign in
+        navigate({ to: "/dashboard", replace: true });
       }
     };
 
