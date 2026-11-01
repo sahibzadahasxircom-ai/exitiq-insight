@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -27,7 +26,11 @@ function AuthenticatedLayout() {
       // Only redirect if we're on the base authenticated path
       if (window.location.pathname === "/_authenticated" || window.location.pathname === "/") {
         // Always go to dashboard after sign in
-        navigate({ to: "/dashboard", replace: true });
+        try {
+          navigate({ to: "/dashboard", replace: true });
+        } catch (error) {
+          console.error("Navigation error:", error);
+        }
       }
     };
 

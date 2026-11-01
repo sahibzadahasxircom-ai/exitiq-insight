@@ -45,8 +45,12 @@ function AuthPage() {
         return;
       }
 
-      // Always go to dashboard after sign in
-      navigate({ to: "/dashboard", replace: true });
+      // Go to dashboard after sign in
+      try {
+        navigate({ to: "/dashboard", replace: true });
+      } catch (error) {
+        console.error("Navigation error:", error);
+      }
       setCheckingCompany(false);
     };
 
