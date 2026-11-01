@@ -46,27 +46,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (profileError) {
         console.error("Profile load error:", profileError);
+        setProfile(null);
+        return;
       }
       
       setProfile(p ?? null);
       
       if (p?.company_id) {
-        const [{ data: c, error: companyError }, { data: r, error: roleError }] = await Promise.all([
-          supabase.from("companies").select("id, company_name").eq("id", p.company_id).maybeSingle(),
-          supabase.from("user_roles").select("role").eq("user_id", userId).eq("company_id", p.company_id).maybeSingle(),
-        ]);
-        
-        if (companyError) console.error("Company load error:", companyError);
-        if (roleError) console.error("Role load error:", roleError);
-        
-        setCompany(c ?? null);
-        setRole((r?.role as Role | undefined) ?? null);
+        try {
+          const [{ data: c, error: companyError }, { data: r, error: roleError }] = await Promise.all([
+            supabase.from("companies").select("id, company_name").eq("id", p.company_id).maybeSingle(),
+            supabase.from("user_roles").select("role").eq("user_id", userId).eq("company_id", p.company_id).maybeSingle(),
+          ]);
+          
+          if (companyError) console.error("Company load error:", companyError);
+          if (roleError) console.error("Role load error:", roleError);
+          
+          setCompany(c ?? null);
+          setRole((r?.role as Role | undefined) ?? null);
+        } catch (error) {
+          console.error("Error loading company/role:", error);
+          setCompany(null);
+          setRole(null);
+        }
       } else {
         setCompany(null);
         setRole(null);
       }
     } catch (error) {
       console.error("loadProfile error:", error);
+      setProfile(null);
+      setCompany(null);
+      setRole(null);
     }
   }
 
