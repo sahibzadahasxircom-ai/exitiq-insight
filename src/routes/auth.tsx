@@ -32,26 +32,18 @@ function AuthPage() {
 
   useEffect(() => {
     const checkCompanyDetails = async () => {
-      if (loading) return;
-
-      if (!session) {
+      // Only redirect if we have a session and profile is loaded
+      if (!loading && session && profile) {
         setCheckingCompany(false);
-        return;
-      }
-
-      if (!profile) {
-        // Profile not loaded yet, wait for it
+        // Go to dashboard after sign in
+        try {
+          navigate({ to: "/dashboard", replace: true });
+        } catch (error) {
+          console.error("Navigation error:", error);
+        }
+      } else if (!loading && !session) {
         setCheckingCompany(false);
-        return;
       }
-
-      // Go to dashboard after sign in
-      try {
-        navigate({ to: "/dashboard", replace: true });
-      } catch (error) {
-        console.error("Navigation error:", error);
-      }
-      setCheckingCompany(false);
     };
 
     checkCompanyDetails();
