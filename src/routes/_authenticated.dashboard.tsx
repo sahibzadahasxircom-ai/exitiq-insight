@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Force rebuild to fix useServerFn import
+
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
