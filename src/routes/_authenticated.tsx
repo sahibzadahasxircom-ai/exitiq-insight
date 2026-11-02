@@ -21,15 +21,16 @@ function AuthenticatedLayout() {
 
   useEffect(() => {
     const handleRouting = async () => {
-      if (loading || !session || !profile) return;
-
-      // Only redirect if we're on the base authenticated path
-      if (window.location.pathname === "/_authenticated" || window.location.pathname === "/") {
-        // Always go to dashboard after sign in
-        try {
-          navigate({ to: "/dashboard", replace: true });
-        } catch (error) {
-          console.error("Navigation error:", error);
+      // Only redirect if we have a session and profile
+      if (!loading && session && profile) {
+        // Only redirect if we're on the base authenticated path
+        if (window.location.pathname === "/_authenticated" || window.location.pathname === "/") {
+          // Always go to dashboard after sign in
+          try {
+            navigate({ to: "/dashboard", replace: true });
+          } catch (error) {
+            console.error("Navigation error:", error);
+          }
         }
       }
     };
