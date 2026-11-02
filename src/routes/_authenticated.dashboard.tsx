@@ -8,7 +8,6 @@ import {
 } from "recharts";
 import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Calendar, Filter, TrendingUp, TrendingDown, Users, Activity, MessageSquare, AlertCircle, CreditCard } from "lucide-react";
 import { getDashboardData, listInsights } from "@/lib/interview.functions";
-import { canCreateInterview } from "@/lib/pricing.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -276,13 +275,6 @@ function Dashboard() {
     retry: false,
   });
 
-  const canCreateFn = useServerFn(canCreateInterview);
-  const { data: canCreate } = useQuery({
-    queryKey: ["can-create-interview"],
-    queryFn: () => canCreateFn({ data: undefined }),
-    retry: false,
-  });
-
   const [selectedChurnDriver, setSelectedChurnDriver] = useState<any>(null);
   const [selectedRecommendation, setSelectedRecommendation] = useState<any>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -309,13 +301,17 @@ function Dashboard() {
 
         // Load integration status
         if (profile?.company_id) {
-          const { data: company } = await supabase
-            .from("companies")
-            .select("integration_type, setup_completed")
-            .eq("id", profile.company_id)
-            .single();
-          
-          setIntegrationStatus(company);
+          try {
+            const { data: company } = await supabase
+              .from("companies")
+              .select("integration_type, setup_completed")
+              .eq("id", profile.company_id)
+              .single();
+            
+            setIntegrationStatus(company);
+          } catch (error) {
+            console.error("Failed to load integration status:", error);
+          }
         }
       } catch (error) {
         console.error("Failed to check onboarding status:", error);
@@ -363,14 +359,6 @@ function Dashboard() {
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            {canCreate && !canCreate.canCreate && (
-              <Link to="/pricing">
-                <Button size="sm" className="gap-2">
-                  <CreditCard className="h-4 w-4" />
-                  Upgrade Plan
-                </Button>
-              </Link>
-            )}
             {integrationStatus && (
               <div className="flex items-center gap-2">
                 {integrationStatus.setup_completed ? (
@@ -413,6 +401,14 @@ function Dashboard() {
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center space-y-4">
+            <p className="text-red-500">Error loading dashboard</p>
+            <p className="text-sm text-muted-foreground">{error.message || 'Unknown error'}</p>
+            <Button onClick={() => window.location.reload()}>Try again</Button>
+          </div>
         </div>
       ) : (
         <>
