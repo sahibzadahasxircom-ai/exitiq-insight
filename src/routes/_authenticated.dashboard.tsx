@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+// import { useQuery } from "@tanstack/react-query";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, Legend, PieChart, Pie, Cell,
@@ -259,23 +259,29 @@ function highlightSummary(text: string, churnDrivers: any[]) {
 }
 
 function Dashboard() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["dashboard-data"],
-    queryFn: async () => {
-      const { getDashboardData } = await import("@/lib/interview.functions");
-      return getDashboardData();
-    },
-    retry: false, // Don't retry on error to avoid hanging
-  });
+  // Temporarily disabled queries to isolate the crash
+  // const { data, isLoading, error } = useQuery({
+  //   queryKey: ["dashboard-data"],
+  //   queryFn: async () => {
+  //     const { getDashboardData } = await import("@/lib/interview.functions");
+  //     return getDashboardData();
+  //   },
+  //   retry: false, // Don't retry on error to avoid hanging
+  // });
 
-  const { data: insightsData } = useQuery({
-    queryKey: ["insights-data"],
-    queryFn: async () => {
-      const { listInsights } = await import("@/lib/interview.functions");
-      return listInsights();
-    },
-    retry: false,
-  });
+  // const { data: insightsData } = useQuery({
+  //   queryKey: ["insights-data"],
+  //   queryFn: async () => {
+  //     const { listInsights } = await import("@/lib/interview.functions");
+  //     return listInsights();
+  //   },
+  //   retry: false,
+  // });
+
+  const data = null;
+  const insightsData = null;
+  const isLoading = false;
+  const error = null;
 
   const [selectedChurnDriver, setSelectedChurnDriver] = useState<any>(null);
   const [selectedRecommendation, setSelectedRecommendation] = useState<any>(null);
