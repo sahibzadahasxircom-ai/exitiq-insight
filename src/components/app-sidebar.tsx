@@ -16,7 +16,9 @@ import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-// import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getCompanyUsage, canCreateInterview } from "@/lib/pricing.functions";
 
 const intelligence = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
@@ -77,27 +79,19 @@ export function AppSidebar() {
     navigate({ to: "/auth", replace: true });
   };
 
-  // Temporarily disabled queries to isolate the crash
-  // const { data: usage } = useQuery({
-  //   queryKey: ["company-usage"],
-  //   queryFn: async () => {
-  //     const { getCompanyUsage } = await import("@/lib/pricing.functions");
-  //     return getCompanyUsage();
-  //   },
-  //   retry: false,
-  // });
+  const getUsageFn = useServerFn(getCompanyUsage);
+  const { data: usage } = useQuery({
+    queryKey: ["company-usage"],
+    queryFn: () => getUsageFn({ data: undefined }),
+    retry: false,
+  });
 
-  // const { data: canCreate } = useQuery({
-  //   queryKey: ["can-create-interview"],
-  //   queryFn: async () => {
-  //     const { canCreateInterview } = await import("@/lib/pricing.functions");
-  //     return canCreateInterview();
-  //   },
-  //   retry: false,
-  // });
-
-  const usage = null;
-  const canCreate = null;
+  const canCreateFn = useServerFn(canCreateInterview);
+  const { data: canCreate } = useQuery({
+    queryKey: ["can-create-interview"],
+    queryFn: () => canCreateFn({ data: undefined }),
+    retry: false,
+  });
 
   const renderItems = (items: typeof intelligence) =>
     items.map((item) => {
