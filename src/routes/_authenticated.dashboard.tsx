@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, Legend, PieChart, Pie, Cell,
@@ -260,21 +261,17 @@ function highlightSummary(text: string, churnDrivers: any[]) {
 }
 
 function Dashboard() {
+  const getFn = useServerFn(getDashboardData);
   const { data, isLoading, error } = useQuery({
     queryKey: ["dashboard-data"],
-    queryFn: async () => {
-      const { getDashboardData } = await import("@/lib/interview.functions");
-      return getDashboardData();
-    },
+    queryFn: () => getFn({ data: undefined }),
     retry: false, // Don't retry on error to avoid hanging
   });
 
+  const listInsightsFn = useServerFn(listInsights);
   const { data: insightsData } = useQuery({
     queryKey: ["insights-data"],
-    queryFn: async () => {
-      const { listInsights } = await import("@/lib/interview.functions");
-      return listInsights();
-    },
+    queryFn: () => listInsightsFn({ data: undefined }),
     retry: false,
   });
 
@@ -343,6 +340,26 @@ function Dashboard() {
   // Process real data for dashboard
   const processedData = processDashboardData(data, insightsData);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center space-y-4">
+          <p className="text-red-500">Error loading dashboard</p>
+          <p className="text-sm text-muted-foreground">{error.message || 'Unknown error'}</p>
+          <Button onClick={() => window.location.reload()}>Try again</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 md:space-y-8 px-4 py-4 md:px-6 md:py-6 lg:py-8">
       <header className="mb-6 md:mb-8">
@@ -401,27 +418,11 @@ function Dashboard() {
         )}
       </header>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
-        </div>
-      ) : error ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center space-y-4">
-            <p className="text-red-500">Error loading dashboard</p>
-            <p className="text-sm text-muted-foreground">{error.message || 'Unknown error'}</p>
-            <Button onClick={() => window.location.reload()}>Try again</Button>
-          </div>
-        </div>
-      ) : (
-        <>
-          <DashboardStats data={processedData} />
-          <ExecutiveBrief data={processedData} />
-          <ChurnDrivers data={processedData} onSelectDriver={setSelectedChurnDriver} />
-          <CustomerVoice data={processedData} />
-          <ActionPlan data={processedData} onSelectRecommendation={setSelectedRecommendation} />
-        </>
-      )}
+      <DashboardStats data={processedData} />
+      <ExecutiveBrief data={processedData} />
+      <ChurnDrivers data={processedData} onSelectDriver={setSelectedChurnDriver} />
+      <CustomerVoice data={processedData} />
+      <ActionPlan data={processedData} onSelectRecommendation={setSelectedRecommendation} />
 
       {selectedChurnDriver && (
         <ChurnDriverModal driver={selectedChurnDriver} onClose={() => setSelectedChurnDriver(null)} />
