@@ -76,17 +76,21 @@ export function AppSidebar() {
     navigate({ to: "/auth", replace: true });
   };
 
-  const getUsageFn = useServerFn(getCompanyUsage);
   const { data: usage } = useQuery({
     queryKey: ["company-usage"],
-    queryFn: () => getUsageFn({ data: undefined }),
+    queryFn: async () => {
+      const { getCompanyUsage } = await import("@/lib/pricing.functions");
+      return getCompanyUsage();
+    },
     retry: false,
   });
 
-  const canCreateFn = useServerFn(canCreateInterview);
   const { data: canCreate } = useQuery({
     queryKey: ["can-create-interview"],
-    queryFn: () => canCreateFn({ data: undefined }),
+    queryFn: async () => {
+      const { canCreateInterview } = await import("@/lib/pricing.functions");
+      return canCreateInterview();
+    },
     retry: false,
   });
 

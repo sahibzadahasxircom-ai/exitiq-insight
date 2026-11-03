@@ -1,13 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   LineChart, Line, Legend, PieChart, Pie, Cell,
 } from "recharts";
 import { ArrowUpRight, ArrowDownRight, Minus, ArrowRight, X, Plug, Check, RefreshCw, Calendar, Filter, TrendingUp, TrendingDown, Users, Activity, MessageSquare, AlertCircle, CreditCard } from "lucide-react";
-import { getDashboardData, listInsights } from "@/lib/interview.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -261,17 +259,21 @@ function highlightSummary(text: string, churnDrivers: any[]) {
 }
 
 function Dashboard() {
-  const getFn = useServerFn(getDashboardData);
   const { data, isLoading, error } = useQuery({
     queryKey: ["dashboard-data"],
-    queryFn: () => getFn({ data: undefined }),
+    queryFn: async () => {
+      const { getDashboardData } = await import("@/lib/interview.functions");
+      return getDashboardData();
+    },
     retry: false, // Don't retry on error to avoid hanging
   });
 
-  const listInsightsFn = useServerFn(listInsights);
   const { data: insightsData } = useQuery({
     queryKey: ["insights-data"],
-    queryFn: () => listInsightsFn({ data: undefined }),
+    queryFn: async () => {
+      const { listInsights } = await import("@/lib/interview.functions");
+      return listInsights();
+    },
     retry: false,
   });
 
