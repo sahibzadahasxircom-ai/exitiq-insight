@@ -25,16 +25,10 @@ const intelligence = [
   { title: "Cancellations", url: "/interviews", icon: Inbox },
 ];
 
-const productKnowledge = [
-  { title: "Product Knowledge", url: "/product-knowledge", icon: BookOpen },
-];
-
-const integrations = [
-  { title: "Integrations", url: "/integrations", icon: Plug },
-];
-
-const workspace = [
+const operations = [
   { title: "Workspace", url: "/workspace", icon: Palette },
+  { title: "Product Knowledge", url: "/product-knowledge", icon: BookOpen },
+  { title: "Integrations", url: "/integrations", icon: Plug },
 ];
 
 export function AppSidebar() {
@@ -123,21 +117,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Product Knowledge</SidebarGroupLabel>
+          <SidebarGroupLabel>Operations</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>{renderItems(productKnowledge)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Integrations</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(integrations)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(workspace)}</SidebarMenu>
+            <SidebarMenu>{renderItems(operations)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>

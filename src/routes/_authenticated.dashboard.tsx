@@ -121,64 +121,49 @@ function generateRecommendations(insights: any[]) {
     categoryMap[category].push(insight);
   });
 
-  // Generate specific recommendations based on actual insights
+  // Generate specific recommendations based on actual insights - one per category
   Object.entries(categoryMap).forEach(([category, categoryInsights]) => {
     const summaries = categoryInsights.map(i => i.summary).filter(Boolean);
     const uniqueSummaries = [...new Set(summaries)];
 
-    if (category === 'ai_assistant' || category === 'feature') {
-      if (uniqueSummaries.some(s => s.toLowerCase().includes('capability') || s.toLowerCase().includes('limited'))) {
-        recommendations.push({
-          id: `rec-${category}-1`,
-          recommendation: 'Enhance AI assistant capabilities',
-          problem: `Customers reported: ${uniqueSummaries.slice(0, 2).join(', ')}`,
-          solution_to: 'AI assistant limitations',
-          expected_impact: 'High',
-          confidence: 0.85,
-        });
-      }
-    }
-
-    if (category === 'ux' || category === 'workflow') {
-      if (uniqueSummaries.some(s => s.toLowerCase().includes('workflow') || s.toLowerCase().includes('confusing'))) {
-        recommendations.push({
-          id: `rec-${category}-1`,
-          recommendation: 'Simplify user workflows',
-          problem: `Customers found workflows difficult: ${uniqueSummaries.slice(0, 2).join(', ')}`,
-          solution_to: 'Complex workflow issues',
-          expected_impact: 'Medium',
-          confidence: 0.75,
-        });
-      }
-    }
-
-    if (category === 'design') {
-      if (uniqueSummaries.some(s => s.toLowerCase().includes('design') || s.toLowerCase().includes('ui'))) {
-        recommendations.push({
-          id: `rec-${category}-1`,
-          recommendation: 'Improve UI/UX design',
-          problem: `Customers mentioned design issues: ${uniqueSummaries.slice(0, 2).join(', ')}`,
-          solution_to: 'Design-related complaints',
-          expected_impact: 'Medium',
-          confidence: 0.70,
-        });
-      }
-    }
-
-    if (category === 'feature') {
-      if (uniqueSummaries.some(s => s.toLowerCase().includes('missing') || s.toLowerCase().includes('need'))) {
-        recommendations.push({
-          id: `rec-${category}-2`,
-          recommendation: 'Add missing core features',
-          problem: `Customers needed features: ${uniqueSummaries.slice(0, 2).join(', ')}`,
-          solution_to: 'Missing feature requests',
-          expected_impact: 'High',
-          confidence: 0.80,
-        });
-      }
-    }
-
-    if (category === 'support') {
+    // Always create a recommendation for each category with insights
+    if (category === 'ai_assistant') {
+      recommendations.push({
+        id: `rec-${category}-1`,
+        recommendation: 'Enhance AI assistant capabilities',
+        problem: `Customers reported: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        solution_to: 'AI assistant limitations',
+        expected_impact: 'High',
+        confidence: 0.85,
+      });
+    } else if (category === 'ux' || category === 'workflow') {
+      recommendations.push({
+        id: `rec-${category}-1`,
+        recommendation: 'Simplify user workflows',
+        problem: `Customers found workflows difficult: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        solution_to: 'Complex workflow issues',
+        expected_impact: 'Medium',
+        confidence: 0.75,
+      });
+    } else if (category === 'design') {
+      recommendations.push({
+        id: `rec-${category}-1`,
+        recommendation: 'Improve UI/UX design',
+        problem: `Customers mentioned design issues: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        solution_to: 'Design-related complaints',
+        expected_impact: 'Medium',
+        confidence: 0.70,
+      });
+    } else if (category === 'feature') {
+      recommendations.push({
+        id: `rec-${category}-1`,
+        recommendation: 'Add missing core features',
+        problem: `Customers needed features: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        solution_to: 'Missing feature requests',
+        expected_impact: 'High',
+        confidence: 0.80,
+      });
+    } else if (category === 'support') {
       recommendations.push({
         id: `rec-${category}-1`,
         recommendation: 'Improve customer support quality',
@@ -187,9 +172,7 @@ function generateRecommendations(insights: any[]) {
         expected_impact: 'Medium',
         confidence: 0.65,
       });
-    }
-
-    if (category === 'pricing') {
+    } else if (category === 'pricing') {
       recommendations.push({
         id: `rec-${category}-1`,
         recommendation: 'Review pricing model',
@@ -197,6 +180,16 @@ function generateRecommendations(insights: any[]) {
         solution_to: 'Pricing-related cancellations',
         expected_impact: 'High',
         confidence: 0.78,
+      });
+    } else {
+      // Generic recommendation for other categories
+      recommendations.push({
+        id: `rec-${category}-1`,
+        recommendation: `Address ${category.replace('_', ' ')} concerns`,
+        problem: `Issues reported: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        solution_to: `${category.replace('_', ' ')}-related issues`,
+        expected_impact: 'Medium',
+        confidence: 0.65,
       });
     }
   });
@@ -222,19 +215,24 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
     return "Start collecting customer feedback to get detailed insights into cancellation patterns.";
   }
 
-  const topDriver = churnDrivers[0];
   const totalInsights = insights.length;
 
-  if (!topDriver) {
+  if (churnDrivers.length === 0) {
     return `Analyzing ${totalInsights} customer interviews. Collect more data to identify specific churn patterns.`;
   }
 
-  const specificIssues = topDriver.issues?.slice(0, 2) || [];
-  const issuesText = specificIssues.length > 0
-    ? ` Customers specifically mentioned: ${specificIssues.join(", ")}.`
-    : "";
+  // Build summary covering all churn drivers
+  const driverSummaries = churnDrivers.map(driver => {
+    const specificIssues = driver.issues?.slice(0, 2) || [];
+    const issuesText = specificIssues.length > 0
+      ? ` (${specificIssues.join(", ")})`
+      : "";
+    return `${driver.pct}% ${driver.name.toLowerCase()}${issuesText}`;
+  });
 
-  return `${topDriver.pct}% of cancellations are due to ${topDriver.name.toLowerCase()} issues.${issuesText} ${totalInsights} interviews analyzed to identify key pain points driving customer churn.`;
+  const driversText = driverSummaries.join("; ");
+  
+  return `Cancellation analysis shows: ${driversText}. ${totalInsights} interviews analyzed to identify key pain points driving customer churn.`;
 }
 
 function highlightSummary(text: string, churnDrivers: any[]) {
@@ -567,7 +565,7 @@ function CustomerVoice({ data }: { data: any }) {
   if (quotes.length === 0) {
     return (
       <section>
-        <SectionHead title="Customer feedback" subtitle="What customers said in their own words." />
+        <SectionHead title="Users Voice" subtitle="What customers said in their own words." />
         <div className="rounded-lg border border-gray-200 bg-white p-5 md:p-6">
           <p className="text-center text-gray-500">
             No customer quotes yet. Complete more interviews to see customer feedback here.
@@ -579,7 +577,7 @@ function CustomerVoice({ data }: { data: any }) {
 
   return (
     <section>
-      <SectionHead title="Customer feedback" subtitle="What customers said in their own words." />
+      <SectionHead title="Users Voice" subtitle="What customers said in their own words." />
       <div className="rounded-lg border border-gray-200 bg-white p-5 md:p-6">
         <blockquote key={idx} className="text-lg font-normal leading-relaxed tracking-tight text-gray-900 md:text-xl">
           &ldquo;{q.quote}&rdquo;
@@ -609,7 +607,7 @@ function ActionPlan({ data, onSelectRecommendation }: { data: any; onSelectRecom
   return (
     <section>
       <SectionHead title="Top recommendations" subtitle="High-impact actions to reduce churn." />
-      <div className="grid grid-cols-1 gap-4 md:gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="space-y-4">
         {recommendations.length > 0 ? (
           recommendations.map((r: any, i: number) => (
             <article key={r.id} className="rounded-lg border border-gray-200 bg-white p-4 md:p-5 shadow-sm cursor-pointer hover:border-gray-300" onClick={() => onSelectRecommendation(r)}>
@@ -644,7 +642,7 @@ function ActionPlan({ data, onSelectRecommendation }: { data: any; onSelectRecom
             </article>
           ))
         ) : (
-          <div className="col-span-full rounded-lg border border-gray-200 bg-white p-8 text-center">
+          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
             <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p className="text-sm text-gray-500">
               No recommendations yet. Collect more interview data to generate actionable insights.
