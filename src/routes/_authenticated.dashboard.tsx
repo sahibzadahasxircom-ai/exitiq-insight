@@ -238,24 +238,10 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
 function highlightSummary(text: string, churnDrivers: any[]) {
   if (!churnDrivers || churnDrivers.length === 0) return text;
 
-  const keyPhrases = churnDrivers.flatMap(driver => [
-    driver.name.toLowerCase(),
-    ...(driver.issues || []).map(issue => issue.toLowerCase())
-  ]);
+  // Bold percentages in the text
+  const boldPercentages = text.replace(/(\d+%)/g, '<strong>$1</strong>');
 
-  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(`(${keyPhrases.slice(0, 10).map(escape).join("|")})`, "gi");
-  const parts = text.split(pattern);
-
-  return parts.map((part, idx) =>
-    idx % 2 === 1 ? (
-      <mark key={idx} className="rounded-[3px] bg-yellow-200/70 px-0.5 py-0 text-slate-900">
-        {part}
-      </mark>
-    ) : (
-      <span key={idx}>{part}</span>
-    )
-  );
+  return <span dangerouslySetInnerHTML={{ __html: boldPercentages }} />;
 }
 
 function Dashboard() {
@@ -477,6 +463,7 @@ function ExecutiveBrief({ data }: { data: any }) {
   const now = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   const executiveSummary = data?.executiveSummary || "Start collecting customer feedback to get detailed insights into cancellation patterns.";
   const churnDrivers = data?.churnDrivers || [];
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-5 md:p-6 shadow-sm">
@@ -487,9 +474,27 @@ function ExecutiveBrief({ data }: { data: any }) {
         <h1 className="mt-3 text-xl font-semibold text-gray-900 md:text-2xl">
           Customer Cancellation Analysis
         </h1>
-        <p className="mt-3 max-w-4xl text-sm leading-relaxed text-gray-600">
-          {highlightSummary(executiveSummary, churnDrivers)}
-        </p>
+        <div className="mt-3 max-w-4xl">
+          <p 
+            className="text-sm leading-relaxed text-gray-600" 
+            style={{
+              display: !expanded ? '-webkit-box' : 'block',
+              WebkitLineClamp: !expanded ? 7 : 'unset',
+              WebkitBoxOrient: 'vertical',
+              overflow: !expanded ? 'hidden' : 'visible'
+            }}
+          >
+            {highlightSummary(executiveSummary, churnDrivers)}
+          </p>
+          {executiveSummary.length > 200 && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-700"
+            >
+              {expanded ? 'Show less' : 'Show more'}
+            </button>
+          )}
+        </div>
       </div>
     </section>
   );
@@ -607,7 +612,7 @@ function ActionPlan({ data, onSelectRecommendation }: { data: any; onSelectRecom
   return (
     <section>
       <SectionHead title="Top recommendations" subtitle="High-impact actions to reduce churn." />
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4 md:gap-5 md:grid-cols-2 xl:grid-cols-3">
         {recommendations.length > 0 ? (
           recommendations.map((r: any, i: number) => (
             <article key={r.id} className="rounded-lg border border-gray-200 bg-white p-4 md:p-5 shadow-sm cursor-pointer hover:border-gray-300" onClick={() => onSelectRecommendation(r)}>
@@ -642,7 +647,7 @@ function ActionPlan({ data, onSelectRecommendation }: { data: any; onSelectRecom
             </article>
           ))
         ) : (
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+          <div className="col-span-full rounded-lg border border-gray-200 bg-white p-8 text-center">
             <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p className="text-sm text-gray-500">
               No recommendations yet. Collect more interview data to generate actionable insights.
