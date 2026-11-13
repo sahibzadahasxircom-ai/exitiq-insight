@@ -222,7 +222,7 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
     return `Analyzing ${totalInsights} customer interviews. Collect more data to identify specific churn patterns.`;
   }
 
-  // Build summary covering all churn drivers
+  // Build summary covering all churn drivers - each on new line
   const driverSummaries = churnDrivers.map(driver => {
     const specificIssues = driver.issues?.slice(0, 2) || [];
     const issuesText = specificIssues.length > 0
@@ -231,18 +231,19 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
     return `${driver.pct}% ${driver.name.toLowerCase()}${issuesText}`;
   });
 
-  const driversText = driverSummaries.join("; ");
+  const driversText = driverSummaries.join(".\n");
   
-  return `Cancellation analysis shows: ${driversText}. ${totalInsights} interviews analyzed to identify key pain points driving customer churn.`;
+  return `Cancellation analysis shows:\n${driversText}.\n${totalInsights} interviews analyzed to identify key pain points driving customer churn.`;
 }
 
 function highlightSummary(text: string, churnDrivers: any[]) {
   if (!churnDrivers || churnDrivers.length === 0) return text;
 
-  // Bold percentages in the text
+  // Bold percentages in the text and preserve newlines
   const boldPercentages = text.replace(/(\d+%)/g, '<strong>$1</strong>');
+  const withLineBreaks = boldPercentages.replace(/\n/g, '<br />');
 
-  return <span dangerouslySetInnerHTML={{ __html: boldPercentages }} />;
+  return <span dangerouslySetInnerHTML={{ __html: withLineBreaks }} />;
 }
 
 function Dashboard() {
@@ -487,7 +488,7 @@ function ExecutiveBrief({ data }: { data: any }) {
           >
             {highlightSummary(executiveSummary, churnDrivers)}
           </p>
-          {executiveSummary.split('\n').length > 7 && (
+          {churnDrivers.length > 2 && (
             <button
               onClick={() => setExpanded(!expanded)}
               className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-700"
