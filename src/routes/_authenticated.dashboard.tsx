@@ -130,8 +130,8 @@ function generateRecommendations(insights: any[]) {
     if (category === 'ai_assistant') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Enhance AI assistant capabilities',
-        problem: `Customers reported: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        recommendation: 'Implement advanced AI capabilities to handle complex multi-step tasks and improve accuracy for user queries',
+        problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'AI assistant limitations',
         expected_impact: 'High',
         confidence: 0.85,
@@ -139,8 +139,8 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'ux' || category === 'workflow') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Simplify user workflows',
-        problem: `Customers found workflows difficult: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        recommendation: 'Streamline user workflows by reducing the number of steps required to complete common tasks and simplify navigation',
+        problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Complex workflow issues',
         expected_impact: 'Medium',
         confidence: 0.75,
@@ -148,8 +148,8 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'design') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Improve UI/UX design',
-        problem: `Customers mentioned design issues: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        recommendation: 'Redesign the user interface to improve visual hierarchy, enhance readability, and create a more intuitive layout',
+        problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Design-related complaints',
         expected_impact: 'Medium',
         confidence: 0.70,
@@ -157,8 +157,8 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'feature') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Add missing core features',
-        problem: `Customers needed features: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        recommendation: 'Develop and launch the most requested missing features based on customer feedback to increase product value',
+        problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Missing feature requests',
         expected_impact: 'High',
         confidence: 0.80,
@@ -166,8 +166,8 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'support') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Improve customer support quality',
-        problem: `Support issues reported: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        recommendation: 'Enhance customer support by improving response times, adding live chat, and providing better self-service resources',
+        problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Customer support complaints',
         expected_impact: 'Medium',
         confidence: 0.65,
@@ -175,8 +175,8 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'pricing') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Review pricing model',
-        problem: `Pricing concerns: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        recommendation: 'Reevaluate the pricing structure to align with market rates and offer more flexible plans for different user segments',
+        problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Pricing-related cancellations',
         expected_impact: 'High',
         confidence: 0.78,
@@ -185,8 +185,8 @@ function generateRecommendations(insights: any[]) {
       // Generic recommendation for other categories
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: `Address ${category.replace('_', ' ')} concerns`,
-        problem: `Issues reported: ${uniqueSummaries.slice(0, 2).join(', ')}`,
+        recommendation: `Analyze and resolve ${category.replace('_', ' ')} issues to improve overall user satisfaction and reduce cancellations`,
+        problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: `${category.replace('_', ' ')}-related issues`,
         expected_impact: 'Medium',
         confidence: 0.65,
@@ -199,8 +199,8 @@ function generateRecommendations(insights: any[]) {
     const topIssues = insights.slice(0, 3).map(i => i.summary).filter(Boolean);
     recommendations.push({
       id: 'rec-generic-1',
-      recommendation: 'Address top customer concerns',
-      problem: `Key issues mentioned: ${topIssues.join(', ')}`,
+      recommendation: 'Address the most frequently mentioned customer issues to improve product experience and reduce churn',
+      problem: topIssues.slice(0, 1).join(', '),
       solution_to: 'Overall customer feedback',
       expected_impact: 'High',
       confidence: 0.70,
@@ -486,7 +486,7 @@ function ExecutiveBrief({ data }: { data: any }) {
           >
             {highlightSummary(executiveSummary, churnDrivers)}
           </p>
-          {executiveSummary.length > 200 && (
+          {executiveSummary.split('\n').length > 7 && (
             <button
               onClick={() => setExpanded(!expanded)}
               className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-700"
@@ -616,22 +616,23 @@ function ActionPlan({ data, onSelectRecommendation }: { data: any; onSelectRecom
         {recommendations.length > 0 ? (
           recommendations.map((r: any, i: number) => (
             <article key={r.id} className="rounded-lg border border-gray-200 bg-white p-4 md:p-5 shadow-sm cursor-pointer hover:border-gray-300" onClick={() => onSelectRecommendation(r)}>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mb-3">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
                   {i + 1}
                 </span>
                 <div className="flex-1">
-                  <h3 className="text-sm font-semibold leading-snug tracking-tight text-gray-900">
-                    {r.recommendation}
-                  </h3>
-                  <p className="mt-1 text-xs text-gray-500">Solution to: {r.solution_to}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Solution to: {r.solution_to}</p>
                 </div>
               </div>
 
-              <div className="mt-4 space-y-3">
-                <div className="rounded-lg bg-gray-50 p-3">
+              <div className="space-y-3">
+                <div className="rounded-lg bg-blue-50 p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-700">Recommended Action</p>
+                  <p className="mt-1 text-sm font-medium text-gray-900">{r.recommendation}</p>
+                </div>
+                <div className="rounded-lg bg-gray-50 p-2">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Problem</p>
-                  <p className="mt-1 text-sm text-gray-700">{r.problem}</p>
+                  <p className="mt-0.5 text-xs text-gray-600 line-clamp-2">{r.problem}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="rounded-lg bg-gray-50 p-2">
