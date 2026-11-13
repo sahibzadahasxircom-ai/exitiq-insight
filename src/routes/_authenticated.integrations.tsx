@@ -108,30 +108,26 @@ function Integrations() {
 
       setCompany(company);
 
-      // Load integrations from the integrations table
-      const { data: integrationsData, error: integrationsError } = await supabase
-        .from("integrations")
-        .select("*")
-        .eq("company_id", companyId);
-
-      if (integrationsError) {
-        console.error("Failed to load integrations:", integrationsError);
-        setLoading(false);
-        return;
-      }
-
-      const integrationList: IntegrationData[] = (integrationsData || []).map((integration) => ({
-        id: integration.id,
-        integration_type: integration.integration_type as "javascript" | "webhook",
-        status: integration.status as "not_connected" | "waiting_for_verification" | "connected" | "listening_for_events",
-        config: integration.config,
-        connected_at: integration.connected_at,
-        last_event_at: company.last_event_at,
-        last_error: integration.last_error,
-        created_at: integration.created_at,
-        updated_at: integration.updated_at,
-        company_id: integration.company_id,
-      }));
+      // Determine integration status from companies table instead of integrations table
+      // Use integration_type and setup_completed from companies to determine connection status
+      const integrationTypes = ['javascript', 'webhook'];
+      const integrationList: IntegrationData[] = integrationTypes.map((type) => {
+        const isSetupComplete = company.setup_completed && company.integration_type === type;
+        const lastEventAt = company.last_event_at || null;
+        
+        return {
+          id: `${type}-${companyId}`, // Generate a virtual ID
+          integration_type: type as "javascript" | "webhook",
+          status: isSetupComplete ? "listening_for_events" : "not_connected",
+          config: company,
+          connected_at: company.created_at,
+          last_event_at: lastEventAt,
+          last_error: null,
+          created_at: company.created_at,
+          updated_at: company.updated_at,
+          company_id: companyId,
+        };
+      });
 
       setIntegrations(integrationList);
     } catch (error) {
@@ -209,10 +205,14 @@ function Integrations() {
     }
 
     try {
+      // Update companies table to mark as not set up
       const { error } = await supabase
-        .from("integrations")
-        .delete()
-        .eq("id", integrationId);
+        .from("companies")
+        .update({
+          setup_completed: false,
+          integration_type: null,
+        })
+        .eq("id", companyId);
 
       if (error) {
         toast.error("Failed to disconnect integration");
@@ -244,27 +244,24 @@ function Integrations() {
 
     setVerifying(true);
     try {
-      // Create integration record with waiting_for_verification status
-      const { data: newIntegration, error: createError } = await supabase
-        .from("integrations")
-        .insert({
-          company_id: companyId,
+      // Update companies table to mark integration type and setup completed
+      const { error } = await supabase
+        .from("companies")
+        .update({
           integration_type: type,
-          status: "waiting_for_verification",
-          config: {},
+          setup_completed: true,
         })
-        .select()
-        .single();
+        .eq("id", companyId);
 
-      if (createError) throw createError;
+      if (error) throw error;
 
-      toast.success("Integration created. Waiting for verification...");
+      toast.success("Integration configured successfully");
       loadIntegrations();
       setShowSnippetModal(false);
       setConnectingIntegration(null);
     } catch (error) {
       console.error("Error starting verification:", error);
-      toast.error("Failed to start verification");
+      toast.error("Failed to configure integration");
     } finally {
       setVerifying(false);
     }
@@ -285,45 +282,31 @@ function Integrations() {
 
   const handleViewSnippet = (integration: IntegrationData) => {
     if (integration.integration_type === "javascript") {
-      const buttonName = integration.config?.buttonName || "Sign Out";
       const companyId = integration.company_id;
-      const snippet = `<!-- leaveesy Global Tracking Script Tag -->
+      const snippet = `<!-- leaveesy Widget Script -->
 <script src="${getWidgetScriptUrl(companyId)}"></script>
 
 <script>
-  // Wait for leaveesy to be ready before attaching event listeners
-  window.addEventListener('leaveesyReady', function() {
-    console.log('leaveesy is ready');
-    
-    // Auto-detect buttons by text
+  // The widget will automatically track cancellation events:
+  // - Sign Out
+  // - Log Out  
+  // - Cancel Subscription
+  // - Delete Account
+  
+  // Auto-detect buttons by text and attach listeners
+  document.addEventListener('DOMContentLoaded', function() {
     const buttons = document.querySelectorAll('button, a');
     buttons.forEach(function(btn) {
       const buttonText = btn.textContent?.trim().toLowerCase();
-      if (buttonText === '${buttonName.toLowerCase()}' || buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account' || buttonText === 'cancel subscription') {
+      if (buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account' || buttonText === 'cancel subscription') {
         btn.addEventListener('click', function(e) {
           if (window.leaveesy) {
-            console.log('Tracking event');
             window.leaveesy.track("SignOut", { action: "process_started" });
           }
         });
       }
     });
   });
-  
-  // Fallback: if leaveesy is already loaded, attach listeners immediately
-  if (window.leaveesy) {
-    console.log('leaveesy already loaded');
-    const buttons = document.querySelectorAll('button, a');
-    buttons.forEach(function(btn) {
-      const buttonText = btn.textContent?.trim().toLowerCase();
-      if (buttonText === '${buttonName.toLowerCase()}' || buttonText === 'sign out' || buttonText === 'log out' || buttonText === 'delete account' || buttonText === 'cancel subscription') {
-        btn.addEventListener('click', function(e) {
-          console.log('Tracking event');
-          window.leaveesy.track("SignOut", { action: "process_started" });
-        });
-      }
-    });
-  }
 </script>`;
       setSnippetContent(snippet);
     } else if (integration.integration_type === "webhook") {
@@ -400,6 +383,14 @@ Example webhook payload:
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
+                        onClick={() => handleViewSnippet(integration)}
+                      >
+                        <Settings className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
                         onClick={() => handleDisconnect(integration.id, integration.integration_type)}
                       >
                         <Trash2 className="h-4 w-4 text-muted-foreground" />
@@ -444,7 +435,7 @@ Example webhook payload:
                         variant="outline"
                         size="sm"
                         className="h-8"
-                        onClick={() => handleReconnect(integration.id, integration.integration_type)}
+                        onClick={() => router.push("/setup-wizard")}
                       >
                         Configure
                       </Button>
