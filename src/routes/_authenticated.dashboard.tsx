@@ -125,12 +125,13 @@ function generateRecommendations(insights: any[]) {
   Object.entries(categoryMap).forEach(([category, categoryInsights]) => {
     const summaries = categoryInsights.map(i => i.summary).filter(Boolean);
     const uniqueSummaries = [...new Set(summaries)];
+    const categoryDisplay = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
     // Always create a recommendation for each category with insights
     if (category === 'ai_assistant') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Implement advanced AI capabilities to handle complex multi-step tasks and improve accuracy for user queries',
+        recommendation: `Improve AI assistant capabilities by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Enhance context retention and memory to provide more accurate and consistent responses across conversations.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'AI assistant limitations',
         expected_impact: 'High',
@@ -139,7 +140,7 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'ux' || category === 'workflow') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Streamline user workflows by reducing the number of steps required to complete common tasks and simplify navigation',
+        recommendation: `Fix workflow issues by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Simplify navigation and reduce the number of steps required to complete common tasks.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Complex workflow issues',
         expected_impact: 'Medium',
@@ -148,7 +149,7 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'design') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Redesign the user interface to improve visual hierarchy, enhance readability, and create a more intuitive layout',
+        recommendation: `Address design problems by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Improve visual hierarchy, enhance readability, and create a more intuitive user interface layout.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Design-related complaints',
         expected_impact: 'Medium',
@@ -157,7 +158,7 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'feature') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Develop and launch the most requested missing features based on customer feedback to increase product value',
+        recommendation: `Add missing features by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Develop and launch the most requested capabilities to increase product value and meet customer needs.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Missing feature requests',
         expected_impact: 'High',
@@ -166,7 +167,7 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'support') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Enhance customer support by improving response times, adding live chat, and providing better self-service resources',
+        recommendation: `Improve customer support by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Enhance response times, add live chat options, and provide better self-service resources.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Customer support complaints',
         expected_impact: 'Medium',
@@ -175,7 +176,7 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'pricing') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: 'Reevaluate the pricing structure to align with market rates and offer more flexible plans for different user segments',
+        recommendation: `Address pricing concerns by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Reevaluate the pricing structure to align with market rates and offer more flexible plans.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Pricing-related cancellations',
         expected_impact: 'High',
@@ -185,9 +186,9 @@ function generateRecommendations(insights: any[]) {
       // Generic recommendation for other categories
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: `Analyze and resolve ${category.replace('_', ' ')} issues to improve overall user satisfaction and reduce cancellations`,
+        recommendation: `Resolve ${categoryDisplay.toLowerCase()} issues by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Analyze the specific problems and implement targeted solutions to improve user satisfaction.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
-        solution_to: `${category.replace('_', ' ')}-related issues`,
+        solution_to: `${categoryDisplay}-related issues`,
         expected_impact: 'Medium',
         confidence: 0.65,
       });
@@ -199,7 +200,7 @@ function generateRecommendations(insights: any[]) {
     const topIssues = insights.slice(0, 3).map(i => i.summary).filter(Boolean);
     recommendations.push({
       id: 'rec-generic-1',
-      recommendation: 'Address the most frequently mentioned customer issues to improve product experience and reduce churn',
+      recommendation: `Address customer issues by ${topIssues.slice(0, 1).join(', ').toLowerCase()}. Improve the most frequently mentioned problems to enhance product experience and reduce churn.`,
       problem: topIssues.slice(0, 1).join(', '),
       solution_to: 'Overall customer feedback',
       expected_impact: 'High',
@@ -621,7 +622,7 @@ function ActionPlan({ data, onSelectRecommendation }: { data: any; onSelectRecom
                   {i + 1}
                 </span>
                 <div className="flex-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Solution to: {r.solution_to}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Specific Solution</p>
                 </div>
               </div>
 
