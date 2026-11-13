@@ -476,9 +476,9 @@ function ExecutiveBrief({ data }: { data: any }) {
         <h1 className="mt-3 text-xl font-semibold text-gray-900 md:text-2xl">
           Customer Cancellation Analysis
         </h1>
-        <div className="mt-3 max-w-4xl">
+        <div className="mt-4 rounded-lg bg-gray-50 p-4">
           <p 
-            className="text-sm leading-relaxed text-gray-600" 
+            className="text-sm leading-relaxed text-gray-700 whitespace-pre-line" 
             style={{
               display: !expanded ? '-webkit-box' : 'block',
               WebkitLineClamp: !expanded ? 7 : 'unset',
@@ -491,9 +491,9 @@ function ExecutiveBrief({ data }: { data: any }) {
           {churnDrivers.length > 2 && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-700"
+              className="mt-3 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
             >
-              {expanded ? 'Show less' : 'Show more'}
+              {expanded ? '▲ Show less' : '▼ Show more'}
             </button>
           )}
         </div>

@@ -21,14 +21,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { getCompanyUsage, canCreateInterview } from "@/lib/pricing.functions";
 
 const intelligence = [
-  { title: "Overview", url: "/dashboard", icon: LayoutDashboard, color: "text-blue-500" },
-  { title: "Cancellations", url: "/interviews", icon: Inbox, color: "text-blue-500" },
+  { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Cancellations", url: "/interviews", icon: Inbox },
 ];
 
 const operations = [
-  { title: "Workspace", url: "/workspace", icon: Palette, color: "text-purple-500" },
-  { title: "Product Knowledge", url: "/product-knowledge", icon: BookOpen, color: "text-purple-500" },
-  { title: "Integrations", url: "/integrations", icon: Plug, color: "text-purple-500" },
+  { title: "Workspace", url: "/workspace", icon: Palette },
+  { title: "Product Knowledge", url: "/product-knowledge", icon: BookOpen },
+  { title: "Integrations", url: "/integrations", icon: Plug },
 ];
 
 export function AppSidebar() {
@@ -94,7 +94,7 @@ export function AppSidebar() {
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
             <Link to={item.url}>
-              <item.icon className={`h-4 w-4 ${isActive ? "" : item.color || "text-gray-500"}`} />
+              <item.icon className="h-4 w-4 text-gray-500" />
               <span>{item.title}</span>
             </Link>
           </SidebarMenuButton>
