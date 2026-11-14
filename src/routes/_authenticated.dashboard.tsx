@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Overview — leaveesy" },
-      { name: "description", content: "Executive overview of customer cancellations, churn drivers, and revenue at risk." },
+      { name: "description", content: "Executive overview of user cancellations, churn drivers, and revenue at risk." },
     ],
   }),
   component: Dashboard,
@@ -50,7 +50,7 @@ function processDashboardData(dashboardData: any, insightsData: any) {
     .filter((i: any) => i.quote)
     .map((i: any) => ({
       quote: i.quote,
-      attribution: `Customer • ${new Date(i.created_at).toLocaleDateString()}`,
+      attribution: `User • ${new Date(i.created_at).toLocaleDateString()}`,
       category: i.category,
     }))
     .slice(0, 5);
@@ -70,7 +70,7 @@ function processDashboardData(dashboardData: any, insightsData: any) {
       completionRate: totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0,
     },
     churnDrivers,
-    customerQuotes,
+    userQuotes,
     recommendations,
     insights,
     executiveSummary,
@@ -99,12 +99,12 @@ function aggregateChurnDrivers(insights: any[]) {
   return Object.entries(categoryCounts)
     .map(([name, count]) => ({
       name: name.charAt(0).toUpperCase() + name.slice(1),
-      customers: count,
+      users: count,
       pct: total > 0 ? Math.round((count / total) * 100) : 0,
       trend: Math.random() > 0.5 ? 'up' : 'down' as any,
       issues: categoryDetails[name]?.slice(0, 3) || [],
     }))
-    .sort((a, b) => b.customers - a.customers)
+    .sort((a, b) => b.users - a.users)
     .slice(0, 5);
 }
 
@@ -158,7 +158,7 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'feature') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: `Add missing features by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Develop and launch the most requested capabilities to increase product value and meet customer needs.`,
+        recommendation: `Add missing features by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Develop and launch the most requested capabilities to increase product value and meet user needs.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Missing feature requests',
         expected_impact: 'High',
@@ -167,7 +167,7 @@ function generateRecommendations(insights: any[]) {
     } else if (category === 'support') {
       recommendations.push({
         id: `rec-${category}-1`,
-        recommendation: `Improve customer support by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Enhance response times, add live chat options, and provide better self-service resources.`,
+        recommendation: `Improve user support by ${uniqueSummaries.slice(0, 1).join(', ').toLowerCase()}. Enhance response times, add live chat options, and provide better self-service resources.`,
         problem: uniqueSummaries.slice(0, 1).join(', '),
         solution_to: 'Customer support complaints',
         expected_impact: 'Medium',
@@ -200,9 +200,9 @@ function generateRecommendations(insights: any[]) {
     const topIssues = insights.slice(0, 3).map(i => i.summary).filter(Boolean);
     recommendations.push({
       id: 'rec-generic-1',
-      recommendation: `Address customer issues by ${topIssues.slice(0, 1).join(', ').toLowerCase()}. Improve the most frequently mentioned problems to enhance product experience and reduce churn.`,
+      recommendation: `Address user issues by ${topIssues.slice(0, 1).join(', ').toLowerCase()}. Improve the most frequently mentioned problems to enhance product experience and reduce churn.`,
       problem: topIssues.slice(0, 1).join(', '),
-      solution_to: 'Overall customer feedback',
+      solution_to: 'Overall user feedback',
       expected_impact: 'High',
       confidence: 0.70,
     });
@@ -213,13 +213,13 @@ function generateRecommendations(insights: any[]) {
 
 function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
   if (insights.length === 0) {
-    return "Start collecting customer feedback to get detailed insights into cancellation patterns.";
+    return "Start collecting user feedback to get detailed insights into cancellation patterns.";
   }
 
   const totalInsights = insights.length;
 
   if (churnDrivers.length === 0) {
-    return `Analyzing ${totalInsights} customer interviews. Collect more data to identify specific churn patterns.`;
+    return `Analyzing ${totalInsights} user interviews. Collect more data to identify specific churn patterns.`;
   }
 
   // Build summary covering all churn drivers - each on new line
@@ -233,7 +233,7 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
 
   const driversText = driverSummaries.join(".\n");
   
-  return `Cancellation analysis shows:\n${driversText}.\n${totalInsights} interviews analyzed to identify key pain points driving customer churn.`;
+  return `Cancellation analysis shows:\n${driversText}.\n${totalInsights} interviews analyzed to identify key pain points driving user churn.`;
 }
 
 function highlightSummary(text: string, churnDrivers: any[]) {
@@ -333,7 +333,7 @@ function Dashboard() {
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Overview</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Executive summary of customer cancellations and churn drivers.
+              Executive summary of user cancellations and churn drivers.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -465,7 +465,7 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
 /* ---------- 2. Executive Brief ---------- */
 function ExecutiveBrief({ data }: { data: any }) {
   const now = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-  const executiveSummary = data?.executiveSummary || "Start collecting customer feedback to get detailed insights into cancellation patterns.";
+  const executiveSummary = data?.executiveSummary || "Start collecting user feedback to get detailed insights into cancellation patterns.";
   const churnDrivers = data?.churnDrivers || [];
   const [expanded, setExpanded] = useState(false);
 
@@ -523,7 +523,7 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
 
   return (
     <section>
-      <SectionHead title="Cancellation reasons" subtitle="Top reasons for customer cancellations." />
+      <SectionHead title="Cancellation reasons" subtitle="Top reasons for user cancellations." />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {rows.length > 0 ? (
           rows.map((r: any) => (
@@ -535,13 +535,12 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900 text-lg">{r.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{r.pct}% of cancellations</p>
+                  <div className="text-2xl font-bold text-blue-600 mt-1">{r.pct}%</div>
                 </div>
-                <div className="text-2xl font-bold text-blue-600">{r.pct}%</div>
               </div>
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <span className="text-sm text-gray-500">Affected customers</span>
-                <span className="text-base font-semibold text-gray-900">{r.customers}</span>
+                <span className="text-sm text-gray-500">Affected users</span>
+                <span className="text-base font-semibold text-gray-900">{r.users}</span>
               </div>
             </div>
           ))
@@ -563,7 +562,7 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
 /* ---------- 4. Customer Voice ---------- */
 function CustomerVoice({ data }: { data: any }) {
   const [idx, setIdx] = useState(0);
-  const quotes = data?.customerQuotes || [];
+  const quotes = data?.userQuotes || [];
 
   useEffect(() => {
     if (quotes.length > 0) {
@@ -577,10 +576,10 @@ function CustomerVoice({ data }: { data: any }) {
   if (quotes.length === 0) {
     return (
       <section>
-        <SectionHead title="Users Voice" subtitle="What customers said in their own words." />
+        <SectionHead title="Users Voice" subtitle="What users said in their own words." />
         <div className="rounded-lg border border-gray-200 bg-white p-5 md:p-6">
           <p className="text-center text-gray-500">
-            No customer quotes yet. Complete more interviews to see customer feedback here.
+            No user quotes yet. Complete more interviews to see user feedback here.
           </p>
         </div>
       </section>
@@ -589,7 +588,7 @@ function CustomerVoice({ data }: { data: any }) {
 
   return (
     <section>
-      <SectionHead title="Users Voice" subtitle="What customers said in their own words." />
+      <SectionHead title="Users Voice" subtitle="What users said in their own words." />
       <div className="rounded-lg border border-gray-200 bg-white p-5 md:p-6">
         <blockquote key={idx} className="text-lg font-normal leading-relaxed tracking-tight text-gray-900 md:text-xl">
           &ldquo;{q.quote}&rdquo;
@@ -700,7 +699,7 @@ function ChurnDriverModal({ driver, onClose }: { driver: any; onClose: () => voi
           <div className="rounded-lg bg-blue-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Issue Details</p>
             <p className="mt-2 text-sm text-gray-800">
-              {driver.name.toLowerCase()} is a leading cause of cancellations with {driver.customers} affected customers ({driver.pct}% of total cancellations).
+              {driver.name.toLowerCase()} is a leading cause of cancellations with {driver.users} affected users ({driver.pct}% of total cancellations).
             </p>
           </div>
           {driver.issues && driver.issues.length > 0 && (
@@ -719,7 +718,7 @@ function ChurnDriverModal({ driver, onClose }: { driver: any; onClose: () => voi
           <div className="rounded-lg bg-gray-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Impact Assessment</p>
             <p className="mt-2 text-sm text-gray-700">
-              Addressing {driver.name.toLowerCase()} issues could significantly reduce churn by targeting the specific pain points that drive customers away.
+              Addressing {driver.name.toLowerCase()} issues could significantly reduce churn by targeting the specific pain points that drive users away.
             </p>
           </div>
         </div>
@@ -809,12 +808,12 @@ function OnboardingModal({ open, onClose }: { open: boolean; onClose: () => void
         <DialogHeader>
           <DialogTitle>Welcome to Leaveesy</DialogTitle>
           <DialogDescription>
-            Set up your workspace to start collecting customer feedback.
+            Set up your workspace to start collecting user feedback.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
-            Complete your setup wizard to configure integrations and start tracking customer cancellations.
+            Complete your setup wizard to configure integrations and start tracking user cancellations.
           </p>
           <Button onClick={onClose} className="w-full">
             Go to Setup Wizard
