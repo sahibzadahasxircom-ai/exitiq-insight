@@ -452,32 +452,11 @@ function DashboardStats({ data }: { data: any }) {
 }
 
 function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
-  const colorClasses = {
-    blue: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-600" },
-    green: { bg: "bg-green-50", border: "border-green-200", icon: "text-green-600" },
-    amber: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600" },
-    violet: { bg: "bg-violet-50", border: "border-violet-200", icon: "text-violet-600" },
-  };
-
-  const classes = colorClasses[color as keyof typeof colorClasses];
-  const icons = {
-    blue: Activity,
-    green: Check,
-    amber: RefreshCw,
-    violet: TrendingUp,
-  };
-  const Icon = icons[color as keyof typeof icons];
-
   return (
-    <div className={`rounded-xl border ${classes.border} ${classes.bg} p-5 shadow-sm hover:shadow-md transition-shadow`}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
-          <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
-        </div>
-        <div className={`p-2 rounded-lg ${classes.bg}`}>
-          <Icon className={`h-5 w-5 ${classes.icon}`} />
-        </div>
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex-1">
+        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
+        <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
       </div>
     </div>
   );
@@ -493,14 +472,9 @@ function ExecutiveBrief({ data }: { data: any }) {
   return (
     <section className="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 md:p-8 shadow-sm">
       <div className="mb-5">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-            {now}
-          </p>
-          <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
-            Executive Summary
-          </span>
-        </div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+          {now}
+        </p>
         <h1 className="mt-4 text-2xl font-bold text-gray-900 md:text-3xl">
           Customer Cancellation Analysis
         </h1>
