@@ -452,10 +452,33 @@ function DashboardStats({ data }: { data: any }) {
 }
 
 function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
+  const colorClasses = {
+    blue: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-600" },
+    green: { bg: "bg-green-50", border: "border-green-200", icon: "text-green-600" },
+    amber: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600" },
+    violet: { bg: "bg-violet-50", border: "border-violet-200", icon: "text-violet-600" },
+  };
+
+  const classes = colorClasses[color as keyof typeof colorClasses];
+  const icons = {
+    blue: Activity,
+    green: Check,
+    amber: RefreshCw,
+    violet: TrendingUp,
+  };
+  const Icon = icons[color as keyof typeof icons];
+
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-2">{label}</p>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
+    <div className={`rounded-xl border ${classes.border} ${classes.bg} p-5 shadow-sm hover:shadow-md transition-shadow`}>
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</p>
+          <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
+        </div>
+        <div className={`p-2 rounded-lg ${classes.bg}`}>
+          <Icon className={`h-5 w-5 ${classes.icon}`} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -468,15 +491,20 @@ function ExecutiveBrief({ data }: { data: any }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 md:p-6 shadow-sm">
-      <div className="mb-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-          {now} · Summary
-        </p>
-        <h1 className="mt-3 text-xl font-semibold text-gray-900 md:text-2xl">
+    <section className="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 md:p-8 shadow-sm">
+      <div className="mb-5">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {now}
+          </p>
+          <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+            Executive Summary
+          </span>
+        </div>
+        <h1 className="mt-4 text-2xl font-bold text-gray-900 md:text-3xl">
           Customer Cancellation Analysis
         </h1>
-        <div className="mt-4 rounded-lg bg-gray-50 p-4">
+        <div className="mt-5 rounded-xl bg-white border border-gray-100 p-5 shadow-sm">
           <p 
             className="text-sm leading-relaxed text-gray-700 whitespace-pre-line" 
             style={{
@@ -491,9 +519,13 @@ function ExecutiveBrief({ data }: { data: any }) {
           {churnDrivers.length > 2 && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="mt-3 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              className="mt-4 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
             >
-              {expanded ? '▲ Show less' : '▼ Show more'}
+              {expanded ? (
+                <>Show less <ArrowUpRight className="h-3 w-3" /></>
+              ) : (
+                <>Show more <ArrowDownRight className="h-3 w-3" /></>
+              )}
             </button>
           )}
         </div>
@@ -518,36 +550,37 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
   return (
     <section>
       <SectionHead title="Cancellation reasons" subtitle="Top reasons for customer cancellations." />
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
-            <tr>
-              <th className="px-4 py-3 text-left md:px-5">Reason</th>
-              <th className="px-4 py-3 text-right md:px-5">Customers</th>
-              <th className="px-4 py-3 text-right md:px-5">Trend</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length > 0 ? (
-              rows.map((r: any) => (
-                <tr key={r.name} className="border-t border-gray-100 cursor-pointer hover:bg-gray-50" onClick={() => onSelectDriver(r)}>
-                  <td className="px-4 py-3 md:px-5">
-                    <p className="font-medium text-gray-900">{r.name}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">{r.pct}% share</p>
-                  </td>
-                  <td className="px-4 py-3 text-right tabular-nums text-gray-800 md:px-5">{r.customers}</td>
-                  <td className="px-4 py-3 text-right md:px-5"><TrendGlyph trend={r.trend} /></td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                  No churn data yet. Collect more interviews to see cancellation reasons.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {rows.length > 0 ? (
+          rows.map((r: any) => (
+            <div
+              key={r.name}
+              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
+              onClick={() => onSelectDriver(r)}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{r.name}</h3>
+                  <p className="text-xs text-gray-500 mt-1">{r.pct}% of cancellations</p>
+                </div>
+                <TrendGlyph trend={r.trend} />
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">Affected customers</span>
+                  <span className="text-sm font-semibold text-gray-900">{r.customers}</span>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full rounded-xl border border-gray-200 bg-white p-8 text-center">
+            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-sm text-gray-500">
+              No churn data yet. Collect more interviews to see cancellation reasons.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

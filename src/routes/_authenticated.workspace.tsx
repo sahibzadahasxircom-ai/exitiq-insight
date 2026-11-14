@@ -3,14 +3,11 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Layout, Save, Upload, ArrowRight } from "lucide-react";
+import { Save, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/workspace")({
@@ -228,516 +225,386 @@ function Workspace() {
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Workspace</h1>
-        <p className="text-muted-foreground mt-2">
+    <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Workspace</h1>
+        <p className="text-gray-500 mt-2">
           Customize your workspace branding and customer experience.
         </p>
       </div>
 
-      <Tabs defaultValue="pre-form" className="space-y-8">
-        <TabsList className="bg-muted/50 p-1 rounded-lg">
-          <TabsTrigger value="pre-form" className="rounded-md">Pre-Form Customization</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="pre-form" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column - Live Preview */}
-            <div className="space-y-4">
-              <Card className="border border-gray-200">
-                <CardHeader className="bg-white pb-4">
-                  <CardTitle className="text-base font-semibold">Live Preview</CardTitle>
-                  <CardDescription className="text-xs">
-                    See how your pre-form will look to customers
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div
-                    className={`mx-auto border rounded-lg overflow-hidden relative max-w-lg`}
-                    style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
-                  >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column - Preview */}
+        <div className="space-y-6">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Live Preview</h2>
+            <div
+              className="mx-auto border rounded-xl overflow-hidden relative max-w-lg"
+              style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
+            >
+              {/* Background effect */}
+              {backgroundStyle === "mesh" && (
                 <div
-                  className="mx-auto border rounded-lg overflow-hidden relative max-w-lg"
-                  style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
-                >
-                  {/* Background effect for the card - overlays on solid background if set */}
-                  {backgroundStyle === "mesh" && (
-                    <div
-                      className="absolute inset-0 opacity-40 pointer-events-none"
-                      style={{
-                        background: `
-                          radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
-                          radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
-                          radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
-                          radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
-                          radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
-                          radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
-                        `
-                      }}
-                    />
+                  className="absolute inset-0 opacity-40 pointer-events-none"
+                  style={{
+                    background: `
+                      radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
+                      radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
+                      radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
+                      radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
+                      radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
+                      radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
+                    `
+                  }}
+                />
+              )}
+              {backgroundStyle === "aurora" && (
+                <div
+                  className="absolute inset-0 opacity-30 pointer-events-none"
+                  style={{
+                    background: `
+                      linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
+                      linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
+                      linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
+                    `
+                  }}
+                />
+              )}
+              {backgroundStyle === "dots" && (
+                <div
+                  className="absolute inset-0 opacity-25 pointer-events-none"
+                  style={{
+                    backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
+                    backgroundSize: '30px 30px'
+                  }}
+                />
+              )}
+              {backgroundStyle === "layers" && (
+                <>
+                  <div
+                    className="absolute inset-0 opacity-25 pointer-events-none"
+                    style={{
+                      background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+                    }}
+                  />
+                  <div
+                    className="absolute inset-0 opacity-15 pointer-events-none"
+                    style={{
+                      background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
+                    }}
+                  />
+                </>
+              )}
+              {backgroundStyle === "gradient" && (
+                <div
+                  className="absolute inset-0 opacity-30 pointer-events-none"
+                  style={{
+                    background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+                  }}
+                />
+              )}
+
+              {/* Logo and Company Name */}
+              {(logoPreview || logo || companyName) && (
+                <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 ${
+                  preFormStyle === "minimal" ? "hidden" : ""
+                }`}>
+                  {(logoPreview || logo) && (
+                    <img src={logoPreview || logo} alt="Logo" className="h-8 w-8 object-contain flex-shrink-0 rounded-lg" />
                   )}
-                  {backgroundStyle === "aurora" && (
-                    <div
-                      className="absolute inset-0 opacity-30 pointer-events-none"
-                      style={{
-                        background: `
-                          linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
-                          linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
-                          linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
-                        `
-                      }}
-                    />
+                  {companyName && (
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold" style={{ color: textColor }}>
+                        {companyName}
+                      </span>
+                      <span className="text-[10px] text-gray-500">Exit Interview</span>
+                    </div>
                   )}
-                  {backgroundStyle === "dots" && (
-                    <div
-                      className="absolute inset-0 opacity-25 pointer-events-none"
-                      style={{
-                        backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
-                        backgroundSize: '30px 30px'
-                      }}
-                    />
-                  )}
-                  {backgroundStyle === "layers" && (
-                    <>
-                      <div
-                        className="absolute inset-0 opacity-25 pointer-events-none"
-                        style={{
-                          background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
-                        }}
+                </div>
+              )}
+
+              <div className={`p-8 pt-20 space-y-6 relative z-10 ${
+                preFormStyle === "minimal" ? "text-center" : ""
+              }`} style={{ color: textColor }}>
+                <div className={`space-y-1 ${
+                  preFormStyle === "minimal" ? "text-center" : ""
+                }`}>
+                  <h3 className={`${
+                    preFormStyle === "casual" ? "text-2xl font-semibold" :
+                    preFormStyle === "minimal" ? "text-xl font-medium" : "text-xl font-bold"
+                  } tracking-tight`} style={{ color: textColor }}>
+                    {preFormTitle}
+                  </h3>
+                  <p className={`${
+                    preFormStyle === "casual" ? "text-base" :
+                    preFormStyle === "minimal" ? "text-sm" : "text-sm"
+                  }`} style={{ color: textColor, opacity: 0.8 }}>
+                    {preFormDescription}
+                  </p>
+                </div>
+
+                {/* Form Fields */}
+                <div className="space-y-3">
+                  {showNameField && (
+                    <div className="space-y-1">
+                      <Label className="text-xs" style={{ color: textColor }}>
+                        Your name{requireName ? " *" : " (optional)"}
+                      </Label>
+                      <Input 
+                        placeholder="John Doe"
+                        disabled
+                        className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
                       />
-                      <div
-                        className="absolute inset-0 opacity-15 pointer-events-none"
-                        style={{
-                          background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
-                        }}
+                    </div>
+                  )}
+                  {showEmailField && (
+                    <div className="space-y-1">
+                      <Label className="text-xs" style={{ color: textColor }}>
+                        Your email{requireEmail ? " *" : " (optional)"}
+                      </Label>
+                      <Input 
+                        type="email"
+                        placeholder="john@example.com"
+                        disabled
+                        className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
                       />
-                    </>
+                    </div>
                   )}
-                  {backgroundStyle === "gradient" && (
-                    <div
-                      className="absolute inset-0 opacity-30 pointer-events-none"
-                      style={{
-                        background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
-                      }}
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
+                      preFormStyle === "casual" ? "rounded-xl" :
+                      preFormStyle === "minimal" ? "rounded-md" : "rounded-lg"
+                    }`}
+                    style={{ backgroundColor: buttonColor, color: buttonTextColor }}
+                  >
+                    Start Conversation
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Settings */}
+        <div className="space-y-6">
+          {/* Brand Identity */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Brand Identity</h2>
+            
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="company-name" className="text-sm font-medium">Company Name</Label>
+                <Input
+                  id="company-name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Your company name"
+                  className="h-10 text-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="logo-upload" className="text-sm font-medium">Company Logo</Label>
+                <div className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <Input
+                      id="logo-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      ref={fileInputRef}
+                      className="hidden"
                     />
-                  )}
-
-                  {/* Logo and Company Name in corner */}
-                  {(logoPreview || logo || companyName) && (
-                    <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 ${
-                      preFormStyle === "minimal" ? "hidden" : ""
-                    }`}>
-                      {(logoPreview || logo) && (
-                        <img src={logoPreview || logo} alt="Logo" className="h-8 w-8 object-contain flex-shrink-0 rounded-lg" />
-                      )}
-                      {companyName && (
-                        <div className="flex flex-col">
-                          <span className="text-xs font-semibold" style={{ color: textColor }}>
-                            {companyName}
-                          </span>
-                          <span className="text-[10px] text-gray-500">Exit Interview</span>
-                        </div>
-                      )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-10 text-sm"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Logo
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PNG, JPG, or SVG up to 2MB
+                    </p>
+                  </div>
+                  {(logoPreview || logo) && (
+                    <div className="h-12 w-12 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
+                      <img
+                        src={logoPreview || logo}
+                        alt="Logo preview"
+                        className="h-full w-full object-contain"
+                      />
                     </div>
                   )}
+                </div>
+              </div>
 
-                  <div className={`p-8 pt-20 space-y-6 relative z-10 ${
-                    preFormStyle === "minimal" ? "text-center" : ""
-                  }`} style={{ color: textColor }}>
-                    <div className={`space-y-1 ${
-                      preFormStyle === "minimal" ? "text-center" : ""
-                    }`}>
-                      <h3 className={`${
-                        preFormStyle === "casual" ? "text-2xl font-semibold" :
-                        preFormStyle === "minimal" ? "text-xl font-medium" : "text-xl font-bold"
-                      } tracking-tight`} style={{ color: textColor }}>
-                        {preFormTitle}
-                      </h3>
-                      <p className={`${
-                        preFormStyle === "casual" ? "text-base" :
-                        preFormStyle === "minimal" ? "text-sm" : "text-sm"
-                      }`} style={{ color: textColor, opacity: 0.8 }}>
-                        {preFormDescription}
-                      </p>
-                    </div>
+              <div className="space-y-2">
+                <Label htmlFor="brand-color" className="text-sm font-medium">Brand Color</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="brand-color"
+                    type="color"
+                    value={brandColor}
+                    onChange={(e) => setBrandColor(e.target.value)}
+                    className="w-16 h-10 p-1"
+                  />
+                  <Input
+                    value={brandColor}
+                    onChange={(e) => setBrandColor(e.target.value)}
+                    placeholder="#2563eb"
+                    className="flex-1 h-10 text-sm"
+                  />
+                </div>
+              </div>
 
-                    {/* Form Fields */}
-                    <div className="space-y-3">
-                      {showNameField && (
-                        <div className="space-y-1">
-                          <Label className="text-xs" style={{ color: textColor }}>
-                            Your name{requireName ? " *" : " (optional)"}
-                          </Label>
-                          <Input 
-                            placeholder="John Doe"
-                            disabled
-                            className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
-                          />
-                        </div>
-                      )}
-                      {showEmailField && (
-                        <div className="space-y-1">
-                          <Label className="text-xs" style={{ color: textColor }}>
-                            Your email{requireEmail ? " *" : " (optional)"}
-                          </Label>
-                          <Input 
-                            type="email"
-                            placeholder="john@example.com"
-                            disabled
-                            className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
-                          />
-                        </div>
-                      )}
-                    </div>
+              <Button onClick={handleSave} disabled={saving} className="w-full h-10">
+                {saving ? "Saving..." : "Save Branding"}
+              </Button>
+            </div>
+          </div>
 
-                    <div className="pt-2">
-                      <button
-                        className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
-                          preFormStyle === "casual" ? "rounded-xl" :
-                          preFormStyle === "minimal" ? "rounded-md" : "rounded-lg"
-                        }`}
-                        style={{ backgroundColor: buttonColor, color: buttonTextColor }}
-                      >
-                        Start Conversation
-                      </button>
-                    </div>
+          {/* Pre-Form Settings */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Pre-Form Settings</h2>
+            
+            <div className="space-y-5">
+              {/* Form Style */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Form Style</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {preFormTemplates.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => setPreFormStyle(template.id)}
+                      className={`p-3 rounded-lg border text-left transition-all ${
+                        preFormStyle === template.id
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div className="font-semibold text-sm mb-1">{template.name}</div>
+                      <div className="text-xs text-gray-500">{template.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Background Effect */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Background Effect</Label>
+                <Select value={backgroundStyle} onValueChange={(value) => {
+                  setBackgroundStyle(value);
+                }}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select background effect" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gradient">Gradient</SelectItem>
+                    <SelectItem value="mesh">Mesh Gradient</SelectItem>
+                    <SelectItem value="aurora">Aurora</SelectItem>
+                    <SelectItem value="dots">Dots Pattern</SelectItem>
+                    <SelectItem value="layers">Layers</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Content Customization */}
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="pre-form-title" className="text-sm font-medium mb-2 block">
+                    Form Title
+                  </Label>
+                  <Input
+                    id="pre-form-title"
+                    value={preFormTitle}
+                    onChange={(e) => setPreFormTitle(e.target.value)}
+                    placeholder="We're sorry to see you go"
+                    className="text-sm h-10"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pre-form-description" className="text-sm font-medium mb-2 block">
+                    Form Description
+                  </Label>
+                  <Textarea
+                    id="pre-form-description"
+                    value={preFormDescription}
+                    onChange={(e) => setPreFormDescription(e.target.value)}
+                    placeholder="Help us improve by sharing your feedback"
+                    rows={2}
+                    className="text-sm resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Colors */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Button Color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={buttonColor}
+                      onChange={(e) => setButtonColor(e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={buttonColor}
+                      onChange={(e) => setButtonColor(e.target.value)}
+                      placeholder="#2563eb"
+                      className="flex-1 h-10 text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Button Text Color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={buttonTextColor}
+                      onChange={(e) => setButtonTextColor(e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={buttonTextColor}
+                      onChange={(e) => setButtonTextColor(e.target.value)}
+                      placeholder="#ffffff"
+                      className="flex-1 h-10 text-sm"
+                    />
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-              {/* Quick Settings Below Preview */}
-              <Card className="border border-gray-200">
-                <CardHeader className="bg-white pb-4">
-                  <CardTitle className="text-base font-semibold">Quick Settings</CardTitle>
-                  <CardDescription className="text-xs">
-                    Common customizations for your pre-form
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-4">
-                  {/* Form Style */}
-                  <div>
-                    <Label className="text-sm font-medium mb-3 block">Form Style</Label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {preFormTemplates.map((template) => (
-                        <button
-                          key={template.id}
-                          onClick={() => setPreFormStyle(template.id)}
-                          className={`p-3 rounded-lg border text-left transition-all ${
-                            preFormStyle === template.id
-                              ? "border-primary bg-primary/10"
-                              : "border-gray-200 hover:border-primary/50 hover:bg-gray-50"
-                          }`}
-                        >
-                          <div className="font-semibold text-sm mb-1">{template.name}</div>
-                          <div className="text-xs text-gray-500">{template.description}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Text Color</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="w-16 h-10 p-1"
+                  />
+                  <Input
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    placeholder="#000000"
+                    className="flex-1 h-10 text-sm"
+                  />
+                </div>
+              </div>
 
-                  {/* Background Effect */}
-                  <div>
-                    <Label className="text-sm font-medium mb-3 block">Background Effect</Label>
-                    <Select value={backgroundStyle} onValueChange={(value) => {
-                      setBackgroundStyle(value);
-                    }}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select background effect" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gradient">Gradient</SelectItem>
-                        <SelectItem value="mesh">Mesh Gradient</SelectItem>
-                        <SelectItem value="aurora">Aurora</SelectItem>
-                        <SelectItem value="dots">Dots Pattern</SelectItem>
-                        <SelectItem value="layers">Layers</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Content Customization */}
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="pre-form-title" className="text-sm font-medium mb-2 block">
-                        Form Title
-                      </Label>
-                      <Input
-                        id="pre-form-title"
-                        value={preFormTitle}
-                        onChange={(e) => setPreFormTitle(e.target.value)}
-                        placeholder="We're sorry to see you go"
-                        className="text-sm h-10"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="pre-form-description" className="text-sm font-medium mb-2 block">
-                        Form Description
-                      </Label>
-                      <Textarea
-                        id="pre-form-description"
-                        value={preFormDescription}
-                        onChange={(e) => setPreFormDescription(e.target.value)}
-                        placeholder="Help us improve by sharing your feedback"
-                        rows={2}
-                        className="text-sm resize-none"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Right Column - Detailed Settings */}
-            <div className="space-y-4">
-              <Card className="border border-gray-200">
-                <CardHeader className="bg-white pb-4">
-                  <CardTitle className="text-base font-semibold">Brand Identity</CardTitle>
-                  <CardDescription className="text-xs">
-                    Customize your company logo, name, and brand color
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="company-name" className="text-sm font-medium">Company Name</Label>
-                    <Input
-                      id="company-name"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="Your company name"
-                      className="h-10 text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="logo-upload" className="text-sm font-medium">Company Logo</Label>
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1">
-                        <Input
-                          id="logo-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLogoUpload}
-                          ref={fileInputRef}
-                          className="hidden"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-full h-10 text-sm"
-                        >
-                          <Upload className="h-4 w-4 mr-2" />
-                          Upload Logo
-                        </Button>
-                        <p className="text-xs text-gray-500 mt-1">
-                          PNG, JPG, or SVG up to 2MB
-                        </p>
-                      </div>
-                      {(logoPreview || logo) && (
-                        <div className="h-12 w-12 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
-                          <img
-                            src={logoPreview || logo}
-                            alt="Logo preview"
-                            className="h-full w-full object-contain"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="brand-color" className="text-sm font-medium">Brand Color</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="brand-color"
-                        type="color"
-                        value={brandColor}
-                        onChange={(e) => setBrandColor(e.target.value)}
-                        className="w-16 h-10 p-1"
-                      />
-                      <Input
-                        value={brandColor}
-                        onChange={(e) => setBrandColor(e.target.value)}
-                        placeholder="#2563eb"
-                        className="flex-1 h-10 text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-4">
-                    <Button onClick={handleSave} disabled={saving} className="w-full h-10">
-                      {saving ? "Saving..." : "Save Branding"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-gray-200">
-                <CardHeader className="bg-white pb-4">
-                  <CardTitle className="text-base font-semibold">Pre-Form Settings</CardTitle>
-                  <CardDescription className="text-xs">
-                    Save your pre-form customization settings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="pt-2">
-                    <Button onClick={handleSavePreForm} disabled={saving} className="w-full h-10">
-                      {saving ? "Saving..." : "Save Pre-Form Settings"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-gray-200">
-                <CardHeader className="bg-white pb-4">
-                  <CardTitle className="text-base font-semibold">Colors & Advanced Settings</CardTitle>
-                  <CardDescription className="text-xs">
-                    Customize colors and advanced form options
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-4">
-                  {/* Button Colors - Side by Side */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">Button Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={buttonColor}
-                          onChange={(e) => setButtonColor(e.target.value)}
-                          className="w-16 h-10 p-1"
-                        />
-                        <Input
-                          value={buttonColor}
-                          onChange={(e) => setButtonColor(e.target.value)}
-                          placeholder="#2563eb"
-                          className="flex-1 h-10 text-sm"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">Button Text Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={buttonTextColor}
-                          onChange={(e) => setButtonTextColor(e.target.value)}
-                          className="w-16 h-10 p-1"
-                        />
-                        <Input
-                          value={buttonTextColor}
-                          onChange={(e) => setButtonTextColor(e.target.value)}
-                          placeholder="#ffffff"
-                          className="flex-1 h-10 text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Text Color */}
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Pre-Form Text Color</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        value={textColor}
-                        onChange={(e) => setTextColor(e.target.value)}
-                        className="w-16 h-10 p-1"
-                      />
-                      <Input
-                        value={textColor}
-                        onChange={(e) => setTextColor(e.target.value)}
-                        placeholder="#000000"
-                        className="flex-1 h-10 text-sm"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Color of the title and description text
-                    </p>
-                  </div>
-
-                  {/* Solid Background Color */}
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Solid Background Color</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        value={solidBackgroundColor}
-                        onChange={(e) => setSolidBackgroundColor(e.target.value)}
-                        className="w-16 h-10 p-1"
-                      />
-                      <Input
-                        value={solidBackgroundColor}
-                        onChange={(e) => setSolidBackgroundColor(e.target.value)}
-                        placeholder="#000000"
-                        className="flex-1 h-10 text-sm"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Solid background color for the pre-form card
-                    </p>
-                  </div>
-
-                  {/* Form Fields Settings */}
-                  <div className="pt-4 border-t space-y-4">
-                    <Label className="text-sm font-medium mb-3 block">Form Fields</Label>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <Label className="text-sm font-medium">Show Name Field</Label>
-                          <p className="text-xs text-gray-500">Display the name input field</p>
-                        </div>
-                        <Switch checked={showNameField} onCheckedChange={setShowNameField} />
-                      </div>
-                      
-                      {showNameField && (
-                        <div className="p-3 border rounded-lg bg-gray-50">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-sm font-medium">Require Name</Label>
-                            <Switch checked={requireName} onCheckedChange={setRequireName} />
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <Label className="text-sm font-medium">Show Email Field</Label>
-                          <p className="text-xs text-gray-500">Display the email input field</p>
-                        </div>
-                        <Switch checked={showEmailField} onCheckedChange={setShowEmailField} />
-                      </div>
-                      
-                      {showEmailField && (
-                        <div className="p-3 border rounded-lg bg-gray-50">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-sm font-medium">Require Email</Label>
-                            <Switch checked={requireEmail} onCheckedChange={setRequireEmail} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end pt-4 border-t">
-                    <Button
-                      onClick={handleSavePreForm}
-                      disabled={saving}
-                      className="gap-2 h-10"
-                    >
-                      <Save className="h-4 w-4" />
-                      {saving ? "Saving..." : "Save Settings"}
-                    </Button>
-                  </div>
-
-                </CardContent>
-              </Card>
+              <Button onClick={handleSavePreForm} disabled={saving} className="w-full h-10">
+                {saving ? "Saving..." : "Save Pre-Form Settings"}
+              </Button>
             </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
