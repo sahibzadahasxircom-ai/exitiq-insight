@@ -225,214 +225,75 @@ function Workspace() {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+    <div className="w-full max-w-5xl mx-auto px-4 md:px-6 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Workspace</h1>
-        <p className="text-gray-500 mt-2">
-          Customize your workspace branding and customer experience.
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Workspace</h1>
+        <p className="text-gray-500 mt-2 text-lg">
+          Customize your brand and interview experience
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Preview */}
-        <div className="space-y-6">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Live Preview</h2>
-            <div
-              className="mx-auto border rounded-xl overflow-hidden relative max-w-lg"
-              style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
-            >
-              {/* Background effect */}
-              {backgroundStyle === "mesh" && (
-                <div
-                  className="absolute inset-0 opacity-40 pointer-events-none"
-                  style={{
-                    background: `
-                      radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
-                      radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
-                    `
-                  }}
-                />
-              )}
-              {backgroundStyle === "aurora" && (
-                <div
-                  className="absolute inset-0 opacity-30 pointer-events-none"
-                  style={{
-                    background: `
-                      linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
-                      linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
-                      linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
-                    `
-                  }}
-                />
-              )}
-              {backgroundStyle === "dots" && (
-                <div
-                  className="absolute inset-0 opacity-25 pointer-events-none"
-                  style={{
-                    backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
-                    backgroundSize: '30px 30px'
-                  }}
-                />
-              )}
-              {backgroundStyle === "layers" && (
-                <>
-                  <div
-                    className="absolute inset-0 opacity-25 pointer-events-none"
-                    style={{
-                      background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
-                    }}
-                  />
-                  <div
-                    className="absolute inset-0 opacity-15 pointer-events-none"
-                    style={{
-                      background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
-                    }}
-                  />
-                </>
-              )}
-              {backgroundStyle === "gradient" && (
-                <div
-                  className="absolute inset-0 opacity-30 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
-                  }}
-                />
-              )}
-
-              {/* Logo and Company Name */}
-              {(logoPreview || logo || companyName) && (
-                <div className={`absolute top-4 left-4 flex items-center gap-2 z-20 ${
-                  preFormStyle === "minimal" ? "hidden" : ""
-                }`}>
-                  {(logoPreview || logo) && (
-                    <img src={logoPreview || logo} alt="Logo" className="h-8 w-8 object-contain flex-shrink-0 rounded-lg" />
-                  )}
-                  {companyName && (
-                    <div className="flex flex-col">
-                      <span className="text-xs font-semibold" style={{ color: textColor }}>
-                        {companyName}
-                      </span>
-                      <span className="text-[10px] text-gray-500">Exit Interview</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className={`p-8 pt-20 space-y-6 relative z-10 ${
-                preFormStyle === "minimal" ? "text-center" : ""
-              }`} style={{ color: textColor }}>
-                <div className={`space-y-1 ${
-                  preFormStyle === "minimal" ? "text-center" : ""
-                }`}>
-                  <h3 className={`${
-                    preFormStyle === "casual" ? "text-2xl font-semibold" :
-                    preFormStyle === "minimal" ? "text-xl font-medium" : "text-xl font-bold"
-                  } tracking-tight`} style={{ color: textColor }}>
-                    {preFormTitle}
-                  </h3>
-                  <p className={`${
-                    preFormStyle === "casual" ? "text-base" :
-                    preFormStyle === "minimal" ? "text-sm" : "text-sm"
-                  }`} style={{ color: textColor, opacity: 0.8 }}>
-                    {preFormDescription}
-                  </p>
-                </div>
-
-                {/* Form Fields */}
-                <div className="space-y-3">
-                  {showNameField && (
-                    <div className="space-y-1">
-                      <Label className="text-xs" style={{ color: textColor }}>
-                        Your name{requireName ? " *" : " (optional)"}
-                      </Label>
-                      <Input 
-                        placeholder="John Doe"
-                        disabled
-                        className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
-                      />
-                    </div>
-                  )}
-                  {showEmailField && (
-                    <div className="space-y-1">
-                      <Label className="text-xs" style={{ color: textColor }}>
-                        Your email{requireEmail ? " *" : " (optional)"}
-                      </Label>
-                      <Input 
-                        type="email"
-                        placeholder="john@example.com"
-                        disabled
-                        className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
-                      preFormStyle === "casual" ? "rounded-xl" :
-                      preFormStyle === "minimal" ? "rounded-md" : "rounded-lg"
-                    }`}
-                    style={{ backgroundColor: buttonColor, color: buttonTextColor }}
-                  >
-                    Start Conversation
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Settings */}
-        <div className="space-y-6">
-          {/* Brand Identity */}
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Brand Identity</h2>
-            
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="company-name" className="text-sm font-medium">Company Name</Label>
+      <div className="space-y-8">
+        {/* Brand Section */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Brand</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
                 <Input
-                  id="company-name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="Your company name"
-                  className="h-10 text-sm"
+                  className="h-11 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="logo-upload" className="text-sm font-medium">Company Logo</Label>
-                <div className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <Input
-                      id="logo-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      ref={fileInputRef}
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full h-10 text-sm"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Logo
-                    </Button>
-                    <p className="text-xs text-gray-500 mt-1">
-                      PNG, JPG, or SVG up to 2MB
-                    </p>
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Brand Color</label>
+                <div className="flex gap-3">
+                  <div
+                    className="w-12 h-11 rounded-lg border-2 border-gray-200 cursor-pointer overflow-hidden"
+                    onClick={() => document.getElementById('brand-color-picker')?.click()}
+                    style={{ backgroundColor: brandColor }}
+                  />
+                  <Input
+                    id="brand-color-picker"
+                    type="color"
+                    value={brandColor}
+                    onChange={(e) => setBrandColor(e.target.value)}
+                    className="w-20 h-11 p-1 hidden"
+                  />
+                  <Input
+                    value={brandColor}
+                    onChange={(e) => setBrandColor(e.target.value)}
+                    placeholder="#2563eb"
+                    className="flex-1 h-11 text-base"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-11 px-6"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload
+                  </Button>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    ref={fileInputRef}
+                    className="hidden"
+                  />
                   {(logoPreview || logo) && (
-                    <div className="h-12 w-12 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
+                    <div className="h-11 w-11 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
                       <img
                         src={logoPreview || logo}
                         alt="Logo preview"
@@ -443,164 +304,323 @@ function Workspace() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="brand-color" className="text-sm font-medium">Brand Color</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="brand-color"
-                    type="color"
-                    value={brandColor}
-                    onChange={(e) => setBrandColor(e.target.value)}
-                    className="w-16 h-10 p-1"
-                  />
-                  <Input
-                    value={brandColor}
-                    onChange={(e) => setBrandColor(e.target.value)}
-                    placeholder="#2563eb"
-                    className="flex-1 h-10 text-sm"
-                  />
-                </div>
-              </div>
-
-              <Button onClick={handleSave} disabled={saving} className="w-full h-10">
-                {saving ? "Saving..." : "Save Branding"}
+              <Button onClick={handleSave} disabled={saving} className="w-full h-11 text-base">
+                {saving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
+
+            <div className="flex items-center justify-center bg-gray-50 rounded-xl p-8">
+              <div className="text-center">
+                {(logoPreview || logo) && (
+                  <img
+                    src={logoPreview || logo}
+                    alt="Logo"
+                    className="h-16 w-auto mx-auto mb-4 object-contain"
+                  />
+                )}
+                <h3 className="text-2xl font-bold" style={{ color: brandColor }}>
+                  {companyName || "Your Company"}
+                </h3>
+                <p className="text-gray-500 mt-1">Exit Interview</p>
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Pre-Form Settings */}
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Pre-Form Settings</h2>
-            
-            <div className="space-y-5">
-              {/* Form Style */}
+        {/* Interview Form Section */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Interview Form</h2>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">Style</label>
+              <div className="grid grid-cols-3 gap-4">
+                {preFormTemplates.map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => setPreFormStyle(template.id)}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${
+                      preFormStyle === template.id
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="font-semibold text-base mb-1">{template.name}</div>
+                    <div className="text-sm text-gray-500">{template.description}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label className="text-sm font-medium mb-3 block">Form Style</Label>
-                <div className="grid grid-cols-3 gap-3">
-                  {preFormTemplates.map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => setPreFormStyle(template.id)}
-                      className={`p-3 rounded-lg border text-left transition-all ${
-                        preFormStyle === template.id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="font-semibold text-sm mb-1">{template.name}</div>
-                      <div className="text-xs text-gray-500">{template.description}</div>
-                    </button>
-                  ))}
-                </div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                <Input
+                  value={preFormTitle}
+                  onChange={(e) => setPreFormTitle(e.target.value)}
+                  placeholder="We're sorry to see you go"
+                  className="h-11 text-base"
+                />
               </div>
-
-              {/* Background Effect */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Background Effect</Label>
-                <Select value={backgroundStyle} onValueChange={(value) => {
-                  setBackgroundStyle(value);
-                }}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select background effect" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="gradient">Gradient</SelectItem>
-                    <SelectItem value="mesh">Mesh Gradient</SelectItem>
-                    <SelectItem value="aurora">Aurora</SelectItem>
-                    <SelectItem value="dots">Dots Pattern</SelectItem>
-                    <SelectItem value="layers">Layers</SelectItem>
-                  </SelectContent>
-                </Select>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <Input
+                  value={preFormDescription}
+                  onChange={(e) => setPreFormDescription(e.target.value)}
+                  placeholder="Help us improve by sharing your feedback"
+                  className="h-11 text-base"
+                />
               </div>
+            </div>
 
-              {/* Content Customization */}
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="pre-form-title" className="text-sm font-medium mb-2 block">
-                    Form Title
-                  </Label>
-                  <Input
-                    id="pre-form-title"
-                    value={preFormTitle}
-                    onChange={(e) => setPreFormTitle(e.target.value)}
-                    placeholder="We're sorry to see you go"
-                    className="text-sm h-10"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="pre-form-description" className="text-sm font-medium mb-2 block">
-                    Form Description
-                  </Label>
-                  <Textarea
-                    id="pre-form-description"
-                    value={preFormDescription}
-                    onChange={(e) => setPreFormDescription(e.target.value)}
-                    placeholder="Help us improve by sharing your feedback"
-                    rows={2}
-                    className="text-sm resize-none"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">Background</label>
+              <div className="grid grid-cols-5 gap-3">
+                {[
+                  { id: "gradient", name: "Gradient" },
+                  { id: "mesh", name: "Mesh" },
+                  { id: "aurora", name: "Aurora" },
+                  { id: "dots", name: "Dots" },
+                  { id: "layers", name: "Layers" },
+                ].map((effect) => (
+                  <button
+                    key={effect.id}
+                    onClick={() => setBackgroundStyle(effect.id)}
+                    className={`p-3 rounded-lg border-2 text-center text-sm font-medium transition-all ${
+                      backgroundStyle === effect.id
+                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                        : "border-gray-200 hover:border-gray-300 text-gray-700"
+                    }`}
+                  >
+                    {effect.name}
+                  </button>
+                ))}
               </div>
+            </div>
 
-              {/* Colors */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Button Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={buttonColor}
-                      onChange={(e) => setButtonColor(e.target.value)}
-                      className="w-16 h-10 p-1"
-                    />
-                    <Input
-                      value={buttonColor}
-                      onChange={(e) => setButtonColor(e.target.value)}
-                      placeholder="#2563eb"
-                      className="flex-1 h-10 text-sm"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Button Text Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={buttonTextColor}
-                      onChange={(e) => setButtonTextColor(e.target.value)}
-                      className="w-16 h-10 p-1"
-                    />
-                    <Input
-                      value={buttonTextColor}
-                      onChange={(e) => setButtonTextColor(e.target.value)}
-                      placeholder="#ffffff"
-                      className="flex-1 h-10 text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <Label className="text-sm font-medium mb-2 block">Text Color</Label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Button Color</label>
                 <div className="flex gap-2">
-                  <Input
-                    type="color"
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    className="w-16 h-10 p-1"
+                  <div
+                    className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer"
+                    onClick={() => document.getElementById('button-color-picker')?.click()}
+                    style={{ backgroundColor: buttonColor }}
                   />
                   <Input
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    placeholder="#000000"
+                    id="button-color-picker"
+                    type="color"
+                    value={buttonColor}
+                    onChange={(e) => setButtonColor(e.target.value)}
+                    className="w-16 h-10 p-1 hidden"
+                  />
+                  <Input
+                    value={buttonColor}
+                    onChange={(e) => setButtonColor(e.target.value)}
                     className="flex-1 h-10 text-sm"
                   />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
+                <div className="flex gap-2">
+                  <div
+                    className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer"
+                    onClick={() => document.getElementById('button-text-color-picker')?.click()}
+                    style={{ backgroundColor: buttonTextColor }}
+                  />
+                  <Input
+                    id="button-text-color-picker"
+                    type="color"
+                    value={buttonTextColor}
+                    onChange={(e) => setButtonTextColor(e.target.value)}
+                    className="w-16 h-10 p-1 hidden"
+                  />
+                  <Input
+                    value={buttonTextColor}
+                    onChange={(e) => setButtonTextColor(e.target.value)}
+                    className="flex-1 h-10 text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                <div className="flex gap-2">
+                  <div
+                    className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer"
+                    onClick={() => document.getElementById('text-color-picker')?.click()}
+                    style={{ backgroundColor: textColor }}
+                  />
+                  <Input
+                    id="text-color-picker"
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="w-16 h-10 p-1 hidden"
+                  />
+                  <Input
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="flex-1 h-10 text-sm"
+                  />
+                </div>
+              </div>
+            </div>
 
-              <Button onClick={handleSavePreForm} disabled={saving} className="w-full h-10">
-                {saving ? "Saving..." : "Save Pre-Form Settings"}
-              </Button>
+            <Button onClick={handleSavePreForm} disabled={saving} className="w-full h-11 text-base">
+              {saving ? "Saving..." : "Save Interview Form"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Preview Section */}
+        <div className="bg-gray-900 rounded-2xl p-8">
+          <h2 className="text-xl font-semibold text-white mb-6">Preview</h2>
+          <div
+            className="mx-auto max-w-lg rounded-2xl overflow-hidden relative border border-gray-700"
+            style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
+          >
+            {/* Background effect */}
+            {backgroundStyle === "mesh" && (
+              <div
+                className="absolute inset-0 opacity-40 pointer-events-none"
+                style={{
+                  background: `
+                    radial-gradient(at 40% 20%, ${brandColor} 0px, transparent 50%),
+                    radial-gradient(at 80% 0%, ${brandColor} 0px, transparent 50%),
+                    radial-gradient(at 0% 50%, ${brandColor} 0px, transparent 50%),
+                    radial-gradient(at 80% 50%, ${brandColor} 0px, transparent 50%),
+                    radial-gradient(at 0% 100%, ${brandColor} 0px, transparent 50%),
+                    radial-gradient(at 80% 100%, ${brandColor} 0px, transparent 50%)
+                  `
+                }}
+              />
+            )}
+            {backgroundStyle === "aurora" && (
+              <div
+                className="absolute inset-0 opacity-30 pointer-events-none"
+                style={{
+                  background: `
+                    linear-gradient(135deg, ${brandColor} 0%, transparent 50%),
+                    linear-gradient(225deg, ${brandColor} 0%, transparent 50%),
+                    linear-gradient(45deg, ${brandColor} 0%, transparent 50%)
+                  `
+                }}
+              />
+            )}
+            {backgroundStyle === "dots" && (
+              <div
+                className="absolute inset-0 opacity-25 pointer-events-none"
+                style={{
+                  backgroundImage: `radial-gradient(circle, ${brandColor} 2px, transparent 2px)`,
+                  backgroundSize: '30px 30px'
+                }}
+              />
+            )}
+            {backgroundStyle === "layers" && (
+              <>
+                <div
+                  className="absolute inset-0 opacity-25 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+                  }}
+                />
+                <div
+                  className="absolute inset-0 opacity-15 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(180deg, transparent 0%, ${brandColor} 100%)`
+                  }}
+                />
+              </>
+            )}
+            {backgroundStyle === "gradient" && (
+              <div
+                className="absolute inset-0 opacity-30 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at 20% 20%, ${brandColor} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${brandColor} 0%, transparent 50%)`
+                }}
+              />
+            )}
+
+            {/* Logo and Company Name */}
+            {(logoPreview || logo || companyName) && (
+              <div className={`absolute top-6 left-6 flex items-center gap-3 z-20 ${
+                preFormStyle === "minimal" ? "hidden" : ""
+              }`}>
+                {(logoPreview || logo) && (
+                  <img src={logoPreview || logo} alt="Logo" className="h-10 w-10 object-contain flex-shrink-0 rounded-lg" />
+                )}
+                {companyName && (
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold" style={{ color: textColor }}>
+                      {companyName}
+                    </span>
+                    <span className="text-xs text-gray-500">Exit Interview</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className={`p-8 pt-24 space-y-6 relative z-10 ${
+              preFormStyle === "minimal" ? "text-center" : ""
+            }`} style={{ color: textColor }}>
+              <div className={`space-y-2 ${
+                preFormStyle === "minimal" ? "text-center" : ""
+              }`}>
+                <h3 className={`${
+                  preFormStyle === "casual" ? "text-2xl font-semibold" :
+                  preFormStyle === "minimal" ? "text-xl font-medium" : "text-2xl font-bold"
+                } tracking-tight`} style={{ color: textColor }}>
+                  {preFormTitle}
+                </h3>
+                <p className={`${
+                  preFormStyle === "casual" ? "text-base" :
+                  preFormStyle === "minimal" ? "text-sm" : "text-base"
+                }`} style={{ color: textColor, opacity: 0.8 }}>
+                  {preFormDescription}
+                </p>
+              </div>
+
+              {/* Form Fields */}
+              <div className="space-y-4">
+                {showNameField && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium" style={{ color: textColor }}>
+                      Your name{requireName ? " *" : " (optional)"}
+                    </Label>
+                    <Input 
+                      placeholder="John Doe"
+                      disabled
+                      className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                    />
+                  </div>
+                )}
+                {showEmailField && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium" style={{ color: textColor }}>
+                      Your email{requireEmail ? " *" : " (optional)"}
+                    </Label>
+                    <Input 
+                      type="email"
+                      placeholder="john@example.com"
+                      disabled
+                      className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-2">
+                <button
+                  className={`w-full py-4 px-6 rounded-xl font-semibold transition-all ${
+                    preFormStyle === "casual" ? "rounded-2xl" :
+                    preFormStyle === "minimal" ? "rounded-lg" : "rounded-xl"
+                  }`}
+                  style={{ backgroundColor: buttonColor, color: buttonTextColor }}
+                >
+                  Start Conversation
+                </button>
+              </div>
             </div>
           </div>
         </div>
