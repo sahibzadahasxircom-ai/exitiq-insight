@@ -143,7 +143,13 @@ function Workspace() {
           brand_color: brandColor,
           company_logo: logoUrl,
           company_name: companyName,
+          pre_form_style: preFormStyle,
+          pre_form_title: preFormTitle,
+          pre_form_description: preFormDescription,
           background_style: backgroundStyle,
+          button_color: buttonColor,
+          button_text_color: buttonTextColor,
+          text_color: textColor,
         })
         .eq("id", company.id);
 
@@ -152,52 +158,11 @@ function Workspace() {
         throw error;
       }
 
-      console.log("Branding saved successfully");
-      toast.success("Branding saved successfully");
+      console.log("Settings saved successfully");
+      toast.success("Settings saved successfully");
     } catch (error) {
-      console.error("Failed to save branding:", error);
-      toast.error("Failed to save branding. Check console for details.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSavePreForm = async () => {
-    if (!company?.id) return;
-
-    setSaving(true);
-    try {
-      // Build update object dynamically based on what fields exist
-      const updateData: any = {
-        pre_form_style: preFormStyle,
-        pre_form_title: preFormTitle,
-        pre_form_description: preFormDescription,
-        background_style: backgroundStyle,
-        button_color: buttonColor,
-        button_text_color: buttonTextColor,
-        text_color: textColor,
-        solid_background_color: solidBackgroundColor,
-        require_name: requireName,
-        require_email: requireEmail,
-        show_name_field: showNameField,
-        show_email_field: showEmailField,
-      };
-
-      const { error } = await (supabase as any)
-        .from("companies")
-        .update(updateData)
-        .eq("id", company.id);
-
-      if (error) {
-        console.error("Failed to save pre-form settings:", error);
-        throw error;
-      }
-
-      console.log("Pre-form settings saved successfully");
-      toast.success("Pre-form settings saved successfully");
-    } catch (error) {
-      console.error("Failed to save pre-form settings:", error);
-      toast.error("Failed to save pre-form settings. Check console for details.");
+      console.error("Failed to save settings:", error);
+      toast.error("Failed to save settings. Check console for details.");
     } finally {
       setSaving(false);
     }
@@ -225,157 +190,159 @@ function Workspace() {
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 md:px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Workspace</h1>
-        <p className="text-gray-500 mt-2 text-lg">
-          Customize your brand and interview experience
-        </p>
-      </div>
-
-      <div className="space-y-8">
-        {/* Brand Section */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Brand</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
-                <Input
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Your company name"
-                  className="h-11 text-base"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Brand Color</label>
-                <div className="flex gap-3">
-                  <div
-                    className="w-12 h-11 rounded-lg border-2 border-gray-200 cursor-pointer overflow-hidden"
-                    onClick={() => document.getElementById('brand-color-picker')?.click()}
-                    style={{ backgroundColor: brandColor }}
-                  />
-                  <Input
-                    id="brand-color-picker"
-                    type="color"
-                    value={brandColor}
-                    onChange={(e) => setBrandColor(e.target.value)}
-                    className="w-20 h-11 p-1 hidden"
-                  />
-                  <Input
-                    value={brandColor}
-                    onChange={(e) => setBrandColor(e.target.value)}
-                    placeholder="#2563eb"
-                    className="flex-1 h-11 text-base"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="h-11 px-6"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload
-                  </Button>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    ref={fileInputRef}
-                    className="hidden"
-                  />
-                  {(logoPreview || logo) && (
-                    <div className="h-11 w-11 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
-                      <img
-                        src={logoPreview || logo}
-                        alt="Logo preview"
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <Button onClick={handleSave} disabled={saving} className="w-full h-11 text-base">
-                {saving ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-center bg-gray-50 rounded-xl p-8">
-              <div className="text-center">
-                {(logoPreview || logo) && (
-                  <img
-                    src={logoPreview || logo}
-                    alt="Logo"
-                    className="h-16 w-auto mx-auto mb-4 object-contain"
-                  />
-                )}
-                <h3 className="text-2xl font-bold" style={{ color: brandColor }}>
-                  {companyName || "Your Company"}
-                </h3>
-                <p className="text-gray-500 mt-1">Exit Interview</p>
-              </div>
-            </div>
+    <div className="w-full h-screen flex flex-col">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Workspace</h1>
+            <p className="text-gray-500 text-sm mt-1">Customize your brand and interview experience</p>
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={handleSave} disabled={saving} className="h-10 px-6">
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </div>
+      </div>
 
-        {/* Interview Form Section */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Interview Form</h2>
-          
-          <div className="space-y-6">
+      {/* Main Content - Split Screen */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left - Settings */}
+        <div className="w-1/2 overflow-y-auto bg-white border-r border-gray-200">
+          <div className="p-6 space-y-8">
+            {/* Brand Section */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Style</label>
-              <div className="grid grid-cols-3 gap-4">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-1 h-5 bg-blue-500 rounded-full" />
+                Brand
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                  <Input
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Your company name"
+                    className="h-10"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Brand Color</label>
+                  <div className="flex gap-2">
+                    <div
+                      className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer overflow-hidden"
+                      onClick={() => document.getElementById('brand-color-picker')?.click()}
+                      style={{ backgroundColor: brandColor }}
+                    />
+                    <Input
+                      id="brand-color-picker"
+                      type="color"
+                      value={brandColor}
+                      onChange={(e) => setBrandColor(e.target.value)}
+                      className="w-14 h-10 p-1 hidden"
+                    />
+                    <Input
+                      value={brandColor}
+                      onChange={(e) => setBrandColor(e.target.value)}
+                      placeholder="#2563eb"
+                      className="flex-1 h-10"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload
+                    </Button>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      ref={fileInputRef}
+                      className="hidden"
+                    />
+                    {(logoPreview || logo) && (
+                      <div className="h-10 w-10 rounded-lg border overflow-hidden bg-gray-50 flex items-center justify-center">
+                        <img
+                          src={logoPreview || logo}
+                          alt="Logo preview"
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Form Style Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-1 h-5 bg-blue-500 rounded-full" />
+                Form Style
+              </h2>
+              <div className="grid grid-cols-3 gap-3">
                 {preFormTemplates.map((template) => (
                   <button
                     key={template.id}
                     onClick={() => setPreFormStyle(template.id)}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    className={`p-3 rounded-lg border-2 text-left transition-all ${
                       preFormStyle === template.id
                         ? "border-blue-500 bg-blue-50"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <div className="font-semibold text-base mb-1">{template.name}</div>
-                    <div className="text-sm text-gray-500">{template.description}</div>
+                    <div className="font-semibold text-sm mb-1">{template.name}</div>
+                    <div className="text-xs text-gray-500">{template.description}</div>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                <Input
-                  value={preFormTitle}
-                  onChange={(e) => setPreFormTitle(e.target.value)}
-                  placeholder="We're sorry to see you go"
-                  className="h-11 text-base"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <Input
-                  value={preFormDescription}
-                  onChange={(e) => setPreFormDescription(e.target.value)}
-                  placeholder="Help us improve by sharing your feedback"
-                  className="h-11 text-base"
-                />
+            {/* Content Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-1 h-5 bg-blue-500 rounded-full" />
+                Content
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                  <Input
+                    value={preFormTitle}
+                    onChange={(e) => setPreFormTitle(e.target.value)}
+                    placeholder="We're sorry to see you go"
+                    className="h-10"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <Input
+                    value={preFormDescription}
+                    onChange={(e) => setPreFormDescription(e.target.value)}
+                    placeholder="Help us improve by sharing your feedback"
+                    className="h-10"
+                  />
+                </div>
               </div>
             </div>
 
+            {/* Background Section */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Background</label>
-              <div className="grid grid-cols-5 gap-3">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-1 h-5 bg-blue-500 rounded-full" />
+                Background
+              </h2>
+              <div className="grid grid-cols-5 gap-2">
                 {[
                   { id: "gradient", name: "Gradient" },
                   { id: "mesh", name: "Mesh" },
@@ -386,7 +353,7 @@ function Workspace() {
                   <button
                     key={effect.id}
                     onClick={() => setBackgroundStyle(effect.id)}
-                    className={`p-3 rounded-lg border-2 text-center text-sm font-medium transition-all ${
+                    className={`p-2 rounded-lg border-2 text-center text-xs font-medium transition-all ${
                       backgroundStyle === effect.id
                         ? "border-blue-500 bg-blue-50 text-blue-700"
                         : "border-gray-200 hover:border-gray-300 text-gray-700"
@@ -398,86 +365,90 @@ function Workspace() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Button Color</label>
-                <div className="flex gap-2">
-                  <div
-                    className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer"
-                    onClick={() => document.getElementById('button-color-picker')?.click()}
-                    style={{ backgroundColor: buttonColor }}
-                  />
-                  <Input
-                    id="button-color-picker"
-                    type="color"
-                    value={buttonColor}
-                    onChange={(e) => setButtonColor(e.target.value)}
-                    className="w-16 h-10 p-1 hidden"
-                  />
-                  <Input
-                    value={buttonColor}
-                    onChange={(e) => setButtonColor(e.target.value)}
-                    className="flex-1 h-10 text-sm"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
-                <div className="flex gap-2">
-                  <div
-                    className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer"
-                    onClick={() => document.getElementById('button-text-color-picker')?.click()}
-                    style={{ backgroundColor: buttonTextColor }}
-                  />
-                  <Input
-                    id="button-text-color-picker"
-                    type="color"
-                    value={buttonTextColor}
-                    onChange={(e) => setButtonTextColor(e.target.value)}
-                    className="w-16 h-10 p-1 hidden"
-                  />
-                  <Input
-                    value={buttonTextColor}
-                    onChange={(e) => setButtonTextColor(e.target.value)}
-                    className="flex-1 h-10 text-sm"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
-                <div className="flex gap-2">
-                  <div
-                    className="w-10 h-10 rounded-lg border-2 border-gray-200 cursor-pointer"
-                    onClick={() => document.getElementById('text-color-picker')?.click()}
-                    style={{ backgroundColor: textColor }}
-                  />
-                  <Input
-                    id="text-color-picker"
-                    type="color"
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    className="w-16 h-10 p-1 hidden"
-                  />
-                  <Input
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    className="flex-1 h-10 text-sm"
-                  />
+            {/* Colors Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-1 h-5 bg-blue-500 rounded-full" />
+                Colors
+              </h2>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Button</label>
+                    <div className="flex gap-2">
+                      <div
+                        className="w-8 h-9 rounded-lg border-2 border-gray-200 cursor-pointer"
+                        onClick={() => document.getElementById('button-color-picker')?.click()}
+                        style={{ backgroundColor: buttonColor }}
+                      />
+                      <Input
+                        id="button-color-picker"
+                        type="color"
+                        value={buttonColor}
+                        onChange={(e) => setButtonColor(e.target.value)}
+                        className="w-12 h-9 p-1 hidden"
+                      />
+                      <Input
+                        value={buttonColor}
+                        onChange={(e) => setButtonColor(e.target.value)}
+                        className="flex-1 h-9 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
+                    <div className="flex gap-2">
+                      <div
+                        className="w-8 h-9 rounded-lg border-2 border-gray-200 cursor-pointer"
+                        onClick={() => document.getElementById('button-text-color-picker')?.click()}
+                        style={{ backgroundColor: buttonTextColor }}
+                      />
+                      <Input
+                        id="button-text-color-picker"
+                        type="color"
+                        value={buttonTextColor}
+                        onChange={(e) => setButtonTextColor(e.target.value)}
+                        className="w-12 h-9 p-1 hidden"
+                      />
+                      <Input
+                        value={buttonTextColor}
+                        onChange={(e) => setButtonTextColor(e.target.value)}
+                        className="flex-1 h-9 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Text</label>
+                    <div className="flex gap-2">
+                      <div
+                        className="w-8 h-9 rounded-lg border-2 border-gray-200 cursor-pointer"
+                        onClick={() => document.getElementById('text-color-picker')?.click()}
+                        style={{ backgroundColor: textColor }}
+                      />
+                      <Input
+                        id="text-color-picker"
+                        type="color"
+                        value={textColor}
+                        onChange={(e) => setTextColor(e.target.value)}
+                        className="w-12 h-9 p-1 hidden"
+                      />
+                      <Input
+                        value={textColor}
+                        onChange={(e) => setTextColor(e.target.value)}
+                        className="flex-1 h-9 text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <Button onClick={handleSavePreForm} disabled={saving} className="w-full h-11 text-base">
-              {saving ? "Saving..." : "Save Interview Form"}
-            </Button>
           </div>
         </div>
 
-        {/* Preview Section */}
-        <div className="bg-gray-900 rounded-2xl p-8">
-          <h2 className="text-xl font-semibold text-white mb-6">Preview</h2>
+        {/* Right - Live Preview */}
+        <div className="w-1/2 bg-gray-900 flex items-center justify-center p-8">
           <div
-            className="mx-auto max-w-lg rounded-2xl overflow-hidden relative border border-gray-700"
+            className="w-full max-w-md rounded-2xl overflow-hidden relative border border-gray-700 shadow-2xl"
             style={{ backgroundColor: solidBackgroundColor || (backgroundStyle === "none" ? "transparent" : "white") }}
           >
             {/* Background effect */}
@@ -548,73 +519,73 @@ function Workspace() {
                 preFormStyle === "minimal" ? "hidden" : ""
               }`}>
                 {(logoPreview || logo) && (
-                  <img src={logoPreview || logo} alt="Logo" className="h-10 w-10 object-contain flex-shrink-0 rounded-lg" />
+                  <img src={logoPreview || logo} alt="Logo" className="h-8 w-8 object-contain flex-shrink-0 rounded-lg" />
                 )}
                 {companyName && (
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold" style={{ color: textColor }}>
+                    <span className="text-xs font-semibold" style={{ color: textColor }}>
                       {companyName}
                     </span>
-                    <span className="text-xs text-gray-500">Exit Interview</span>
+                    <span className="text-[10px] text-gray-500">Exit Interview</span>
                   </div>
                 )}
               </div>
             )}
 
-            <div className={`p-8 pt-24 space-y-6 relative z-10 ${
+            <div className={`p-6 pt-20 space-y-5 relative z-10 ${
               preFormStyle === "minimal" ? "text-center" : ""
             }`} style={{ color: textColor }}>
-              <div className={`space-y-2 ${
+              <div className={`space-y-1 ${
                 preFormStyle === "minimal" ? "text-center" : ""
               }`}>
                 <h3 className={`${
-                  preFormStyle === "casual" ? "text-2xl font-semibold" :
-                  preFormStyle === "minimal" ? "text-xl font-medium" : "text-2xl font-bold"
+                  preFormStyle === "casual" ? "text-xl font-semibold" :
+                  preFormStyle === "minimal" ? "text-lg font-medium" : "text-xl font-bold"
                 } tracking-tight`} style={{ color: textColor }}>
                   {preFormTitle}
                 </h3>
                 <p className={`${
-                  preFormStyle === "casual" ? "text-base" :
-                  preFormStyle === "minimal" ? "text-sm" : "text-base"
+                  preFormStyle === "casual" ? "text-sm" :
+                  preFormStyle === "minimal" ? "text-xs" : "text-sm"
                 }`} style={{ color: textColor, opacity: 0.8 }}>
                   {preFormDescription}
                 </p>
               </div>
 
               {/* Form Fields */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {showNameField && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium" style={{ color: textColor }}>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium" style={{ color: textColor }}>
                       Your name{requireName ? " *" : " (optional)"}
                     </Label>
                     <Input 
                       placeholder="John Doe"
                       disabled
-                      className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                      className={preFormStyle === "minimal" ? "border-b rounded-none px-0 h-9" : "h-9"}
                     />
                   </div>
                 )}
                 {showEmailField && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium" style={{ color: textColor }}>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium" style={{ color: textColor }}>
                       Your email{requireEmail ? " *" : " (optional)"}
                     </Label>
                     <Input 
                       type="email"
                       placeholder="john@example.com"
                       disabled
-                      className={preFormStyle === "minimal" ? "border-b rounded-none px-0" : ""}
+                      className={preFormStyle === "minimal" ? "border-b rounded-none px-0 h-9" : "h-9"}
                     />
                   </div>
                 )}
               </div>
 
-              <div className="pt-2">
+              <div className="pt-1">
                 <button
-                  className={`w-full py-4 px-6 rounded-xl font-semibold transition-all ${
-                    preFormStyle === "casual" ? "rounded-2xl" :
-                    preFormStyle === "minimal" ? "rounded-lg" : "rounded-xl"
+                  className={`w-full py-3 px-5 rounded-lg font-semibold transition-all ${
+                    preFormStyle === "casual" ? "rounded-xl" :
+                    preFormStyle === "minimal" ? "rounded-md" : "rounded-lg"
                   }`}
                   style={{ backgroundColor: buttonColor, color: buttonTextColor }}
                 >
