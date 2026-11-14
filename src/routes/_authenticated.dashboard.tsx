@@ -529,28 +529,26 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
           rows.map((r: any) => (
             <div
               key={r.name}
-              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
+              className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer"
               onClick={() => onSelectDriver(r)}
             >
-              <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{r.name}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{r.pct}% of cancellations</p>
+                  <h3 className="font-semibold text-gray-900 text-lg">{r.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1">{r.pct}% of cancellations</p>
                 </div>
-                <TrendGlyph trend={r.trend} />
+                <div className="text-2xl font-bold text-blue-600">{r.pct}%</div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Affected customers</span>
-                  <span className="text-sm font-semibold text-gray-900">{r.customers}</span>
-                </div>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <span className="text-sm text-gray-500">Affected customers</span>
+                <span className="text-base font-semibold text-gray-900">{r.customers}</span>
               </div>
             </div>
           ))
         ) : (
-          <div className="col-span-full rounded-xl border border-gray-200 bg-white p-8 text-center">
-            <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-sm text-gray-500">
+          <div className="col-span-full rounded-2xl border border-gray-200 bg-white p-12 text-center">
+            <AlertCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <p className="text-base text-gray-500">
               No churn data yet. Collect more interviews to see cancellation reasons.
             </p>
           </div>
@@ -621,45 +619,45 @@ function ActionPlan({ data, onSelectRecommendation }: { data: any; onSelectRecom
   return (
     <section>
       <SectionHead title="Top recommendations" subtitle="High-impact actions to reduce churn." />
-      <div className="grid grid-cols-1 gap-4 md:gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 md:gap-6 md:grid-cols-2 xl:grid-cols-3">
         {recommendations.length > 0 ? (
           recommendations.map((r: any, i: number) => (
-            <article key={r.id} className="rounded-lg border border-gray-200 bg-white p-4 md:p-5 shadow-sm cursor-pointer hover:border-gray-300" onClick={() => onSelectRecommendation(r)}>
-              <div className="flex items-center gap-3 mb-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+            <article key={r.id} className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer" onClick={() => onSelectRecommendation(r)}>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-md">
                   {i + 1}
                 </span>
                 <div className="flex-1">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Specific Solution</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Action</p>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="rounded-lg bg-blue-50 p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-700">Recommended Action</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{r.recommendation}</p>
+              <div className="space-y-4">
+                <div className="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 mb-2">Recommended Action</p>
+                  <p className="text-sm font-medium text-gray-900 leading-relaxed">{r.recommendation}</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Problem</p>
-                  <p className="mt-0.5 text-xs text-gray-600 line-clamp-2">{r.problem}</p>
+                <div className="rounded-xl bg-gray-50 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Problem</p>
+                  <p className="text-xs text-gray-600 line-clamp-2">{r.problem}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-lg bg-gray-50 p-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Impact</p>
-                    <p className="mt-0.5 text-xs font-medium text-gray-900">{r.expected_impact}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-gray-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Impact</p>
+                    <p className="text-sm font-semibold text-gray-900">{r.expected_impact}</p>
                   </div>
-                  <div className="rounded-lg bg-gray-50 p-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Success rate</p>
-                    <p className="mt-0.5 text-xs font-medium text-green-600">{Math.round(r.confidence * 100)}%</p>
+                  <div className="rounded-xl bg-gray-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Success rate</p>
+                    <p className="text-sm font-semibold text-green-600">{Math.round(r.confidence * 100)}%</p>
                   </div>
                 </div>
               </div>
             </article>
           ))
         ) : (
-          <div className="col-span-full rounded-lg border border-gray-200 bg-white p-8 text-center">
-            <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-sm text-gray-500">
+          <div className="col-span-full rounded-2xl border border-gray-200 bg-white p-12 text-center">
+            <Activity className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <p className="text-base text-gray-500">
               No recommendations yet. Collect more interview data to generate actionable insights.
             </p>
           </div>
