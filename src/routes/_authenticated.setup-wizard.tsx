@@ -44,6 +44,15 @@ function SetupWizard() {
     const checkExistingIntegrations = async () => {
       if (profile?.company_id) {
         try {
+          // Check if user is coming from integrations page to configure a specific integration
+          const configureIntegration = sessionStorage.getItem('configureIntegration');
+
+          if (configureIntegration) {
+            // User wants to configure a specific integration, allow proceeding
+            console.log("Configuring specific integration:", configureIntegration);
+            return;
+          }
+
           const { data: integrations } = await supabase
             .from("integrations")
             .select("*")
@@ -72,14 +81,14 @@ function SetupWizard() {
       if (!profile?.company_id && profile?.id) {
         try {
           console.log("No company_id found, checking for company metadata");
-          
+
           // Check if user has company metadata from sign-up
           const metadata = profile.user_metadata as any;
           console.log("User metadata:", metadata);
-          
+
           if (metadata?.company_name) {
             console.log("Company metadata found, creating company from metadata");
-            
+
             // Create company using server function with metadata
             const newCompany = await createCompanyFn({
               data: {
@@ -105,15 +114,15 @@ function SetupWizard() {
             toast.success("Company created from your sign-up information");
             return;
           }
-          
+
           // Fallback: Try to find an existing company for this user
           const { data: companies } = await supabase
             .from("companies")
             .select("id, company_name")
             .limit(1);
-          
+
           let companyId: string;
-          
+
           if (companies && companies.length > 0) {
             // Link the first company to this profile
             companyId = companies[0].id;
@@ -121,7 +130,7 @@ function SetupWizard() {
               .from("profiles")
               .update({ company_id: companyId })
               .eq("id", profile.id);
-            
+
             setFallbackCompanyId(companyId);
             toast.success("Company linked to your profile");
           } else {
@@ -133,17 +142,17 @@ function SetupWizard() {
               })
               .select()
               .single();
-            
+
             if (createError) throw createError;
-            
+
             companyId = newCompany.id;
-            
+
             // Link the new company to this profile
             await supabase
               .from("profiles")
               .update({ company_id: companyId })
               .eq("id", profile.id);
-            
+
             // Create user role as owner
             await supabase
               .from("user_roles")
@@ -152,7 +161,7 @@ function SetupWizard() {
                 company_id: companyId,
                 role: "owner",
               });
-            
+
             setFallbackCompanyId(companyId);
             toast.success("Company created and linked to your profile");
           }
@@ -167,6 +176,23 @@ function SetupWizard() {
 
     ensureCompanyExists();
   }, [profile?.company_id, profile?.id]);
+
+  // Check if user is configuring a specific integration from integrations page
+  useEffect(() => {
+    const configureIntegration = sessionStorage.getItem('configureIntegration');
+    if (configureIntegration && profile?.company_id) {
+      // Skip to connection step directly
+      setStep("connection");
+      // Set the integration type based on what was selected
+      if (configureIntegration === 'javascript') {
+        setAnswers(prev => ({ ...prev, exitMethod: 'all' }));
+      } else if (configureIntegration === 'webhook') {
+        setAnswers(prev => ({ ...prev, exitMethod: 'cancel_subscription', billingPlatform: 'other' }));
+      }
+      // Clear the sessionStorage
+      sessionStorage.removeItem('configureIntegration');
+    }
+  }, [profile?.company_id]);
 
   // Handle Stripe OAuth callback
   useEffect(() => {
@@ -574,28 +600,39 @@ function SetupWizard() {
     </div>
   );
 
-  const renderRecommendation = () => (
-    <div className="space-y-6">
-      <div className="text-center space-y-4">
-        <div>
-          <h2 className="text-xl font-bold mb-2">{recommendation.title}</h2>
-          <p className="text-muted-foreground">{recommendation.description}</p>
+  const renderRecommendation = () => {
+    // Check if user is configuring a specific integration from integrations page
+    const configureIntegration = sessionStorage.getItem('configureIntegration');
+
+    // Skip recommendation step if coming from integrations page
+    if (configureIntegration) {
+      setTimeout(() => setStep("connection"), 0);
+      return null;
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="text-center space-y-4">
+          <div>
+            <h2 className="text-xl font-bold mb-2">{recommendation.title}</h2>
+            <p className="text-muted-foreground">{recommendation.description}</p>
+          </div>
         </div>
+
+        <Button
+          size="lg"
+          onClick={() => setStep("connection")}
+          className="w-full"
+        >
+          Continue <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+
+        <Button variant="ghost" onClick={() => setStep("exit-method")}>
+          Back
+        </Button>
       </div>
-
-      <Button 
-        size="lg" 
-        onClick={() => setStep("connection")}
-        className="w-full"
-      >
-        Continue <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
-
-      <Button variant="ghost" onClick={() => setStep("exit-method")}>
-        Back
-      </Button>
-    </div>
-  );
+    );
+  };
 
   const renderConnection = () => {
     const connectionSteps = {
@@ -632,11 +669,21 @@ function SetupWizard() {
       ],
     };
 
-    const steps = connectionSteps[recommendation.type as keyof typeof connectionSteps] || connectionSteps.widget;
+    // Determine if we're configuring a specific integration from integrations page
+    const configureIntegration = sessionStorage.getItem('configureIntegration');
+    let recommendationType = recommendation.type;
+
+    if (configureIntegration === 'javascript') {
+      recommendationType = 'widget';
+    } else if (configureIntegration === 'webhook') {
+      recommendationType = 'webhook';
+    }
+
+    const steps = connectionSteps[recommendationType as keyof typeof connectionSteps] || connectionSteps.widget;
 
     return (
       <div className="space-y-6">
-        {recommendation.type === "stripe" && (
+        {recommendationType === "stripe" && (
           <Button
             size="lg"
             onClick={() => {
@@ -653,8 +700,8 @@ function SetupWizard() {
             Connect Stripe
           </Button>
         )}
-        
-        {recommendation.type === "widget" && (
+
+        {recommendationType === "widget" && (
           <div className="space-y-3">
             <Label className="font-semibold">Installation Snippet</Label>
             <div className="relative">
@@ -851,7 +898,7 @@ function SetupWizard() {
           </div>
         )}
         
-        {recommendation.type === "webhook" && (
+        {recommendationType === "webhook" && (
           <div className="space-y-3">
             <Label className="font-semibold">Your Webhook URL</Label>
             <div className="relative">
@@ -977,7 +1024,7 @@ function SetupWizard() {
           </div>
         )}
         
-        {recommendation.type === "both" && (
+        {recommendationType === "both" && (
           <div className="space-y-6">
             <div className="space-y-3">
               <Label className="font-semibold">Step 1: Configure Webhook for Cancellations</Label>
@@ -1199,7 +1246,7 @@ function SetupWizard() {
           </div>
         )}
         
-        {recommendation.type === "api" && (
+        {recommendationType === "api" && (
           <div className="space-y-3">
             <Button
               onClick={async () => {
@@ -1226,7 +1273,7 @@ function SetupWizard() {
           </div>
         )}
         
-        {recommendation.type !== "stripe" && (
+        {recommendationType !== "stripe" && (
           <div className="flex justify-between pt-4">
             <Button variant="outline" onClick={() => setStep("recommendation")}>
               Back

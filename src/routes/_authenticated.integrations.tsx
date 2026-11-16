@@ -435,7 +435,11 @@ Example webhook payload:
                         variant="outline"
                         size="sm"
                         className="h-8"
-                        onClick={() => router.push("/setup-wizard")}
+                        onClick={() => {
+                          // Store the integration type to configure
+                          sessionStorage.setItem('configureIntegration', integration.integration_type);
+                          router.push("/setup-wizard");
+                        }}
                       >
                         Configure
                       </Button>
