@@ -46,7 +46,7 @@ function processDashboardData(dashboardData: any, insightsData: any) {
 
   // Calculate churn drivers from insights with more specific details
   const churnDrivers = aggregateChurnDrivers(insights);
-  const customerQuotes = insights
+  const userQuotes = insights
     .filter((i: any) => i.quote)
     .map((i: any) => ({
       quote: i.quote,
@@ -562,7 +562,7 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
 /* ---------- 4. Customer Voice ---------- */
 function CustomerVoice({ data }: { data: any }) {
   const [idx, setIdx] = useState(0);
-  const quotes = data?.userQuotes || [];
+  const quotes = data?.customerQuotes || [];
 
   useEffect(() => {
     if (quotes.length > 0) {
