@@ -520,6 +520,23 @@ function Stat({ label, value, small }: { label: string; value: string; small?: b
 function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (driver: any) => void }) {
   const rows = data?.churnDrivers || [];
 
+  // Generate mock monthly data for line chart
+  const generateMonthlyData = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    return months.map(month => {
+      const dataPoint: any = { month };
+      rows.forEach((r: any, index) => {
+        // Simulate different trends for each category
+        const baseValue = r.users * (0.5 + Math.random() * 0.5);
+        dataPoint[r.name] = Math.round(baseValue * (0.8 + Math.random() * 0.4));
+      });
+      return dataPoint;
+    });
+  };
+
+  const monthlyData = generateMonthlyData();
+  const colors = ['#2563eb', '#16a34a', '#d97706', '#7c3aed', '#64748b'];
+
   return (
     <section>
       <SectionHead title="Cancellation reasons" subtitle="Top reasons for user cancellations." />
@@ -530,36 +547,37 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
             <thead>
               <tr className="border-b border-gray-100">
                 <th className="text-left py-3 text-sm font-semibold text-gray-700">Reason</th>
-                <th className="text-right py-3 text-sm font-semibold text-gray-700">%</th>
+                <th className="text-right py-3 text-sm font-semibold text-gray-700">% share in churn</th>
                 <th className="text-right py-3 text-sm font-semibold text-gray-700">Users</th>
+                <th className="text-right py-3 text-sm font-semibold text-gray-700"></th>
               </tr>
             </thead>
             <tbody>
               {rows.length > 0 ? (
                 rows.map((r: any, index) => (
-                  <tr key={r.name} className="border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50" onClick={() => onSelectDriver(r)}>
+                  <tr key={r.name} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
                     <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-2 flex-1 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-blue-500 rounded-full transition-all"
-                            style={{ width: `${r.pct}%` }}
-                          />
-                        </div>
-                      </div>
                       <span className="font-medium text-gray-900">{r.name}</span>
                     </td>
                     <td className="text-right py-4">
-                      <span className="text-2xl font-bold text-blue-600">{r.pct}%</span>
+                      <span className="text-base font-semibold text-gray-900">{r.pct}%</span>
                     </td>
                     <td className="text-right py-4">
                       <span className="text-base font-semibold text-gray-900">{r.users}</span>
+                    </td>
+                    <td className="text-right py-4">
+                      <button 
+                        onClick={() => onSelectDriver(r)}
+                        className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                      >
+                        View details
+                      </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3} className="py-12 text-center text-gray-500">
+                  <td colSpan={4} className="py-12 text-center text-gray-500">
                     No churn data yet. Collect more interviews to see cancellation reasons.
                   </td>
                 </tr>
@@ -568,28 +586,36 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
           </table>
         </div>
 
-        {/* Right - Charts */}
+        {/* Right - Line Chart */}
         <div className="space-y-6">
           <div className="rounded-2xl border border-gray-200 bg-white p-6">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Churn Distribution</h3>
-            <div className="h-48">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Churn Over Time</h3>
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={rows.map(r => ({ name: r.name, value: r.users }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {rows.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={['#2563eb', '#16a34a', '#d97706', '#7c3aed', '#64748b'][index % 5]} />
-                    ))}
-                  </Pie>
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    dataKey="month" 
+                    stroke="#6b7280"
+                    fontSize={12}
+                  />
+                  <YAxis 
+                    stroke="#6b7280"
+                    fontSize={12}
+                  />
                   <Tooltip />
-                </PieChart>
+                  <Legend />
+                  {rows.map((r: any, index) => (
+                    <Line
+                      key={r.name}
+                      type="monotone"
+                      dataKey={r.name}
+                      stroke={colors[index % colors.length]}
+                      strokeWidth={2}
+                      dot={{ r: 4 }}
+                    />
+                  ))}
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
