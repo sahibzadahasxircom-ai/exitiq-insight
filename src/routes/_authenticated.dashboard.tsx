@@ -223,12 +223,15 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
   }
 
   // Build summary covering all churn drivers - each on new line
-  const driverSummaries = churnDrivers.map(driver => {
+  const driverSummaries = churnDrivers.map((driver, index) => {
     const specificIssues = driver.issues?.slice(0, 2) || [];
     const issuesText = specificIssues.length > 0
       ? ` (${specificIssues.join(", ")})`
       : "";
-    return `${driver.pct}% ${driver.name.toLowerCase()}${issuesText}`;
+    // Bold the first/main cause only and always bold percentages
+    const mainCause = index === 0 ? `<strong>${driver.name.toLowerCase()}</strong>` : driver.name.toLowerCase();
+    const boldPct = `<strong>${driver.pct}%</strong>`;
+    return `${boldPct} ${mainCause}${issuesText}`;
   });
 
   const driversText = driverSummaries.join(".\n");
@@ -239,7 +242,7 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
 function highlightSummary(text: string, churnDrivers: any[]) {
   if (!churnDrivers || churnDrivers.length === 0) return text;
 
-  // Bold percentages in the text and preserve newlines
+  // Bold percentages in the text and preserve newlines and bold tags
   const boldPercentages = text.replace(/(\d+%)/g, '<strong>$1</strong>');
   const withLineBreaks = boldPercentages.replace(/\n/g, '<br />');
 
@@ -464,7 +467,6 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
 
 /* ---------- 2. Executive Brief ---------- */
 function ExecutiveBrief({ data }: { data: any }) {
-  const now = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   const executiveSummary = data?.executiveSummary || "Start collecting user feedback to get detailed insights into cancellation patterns.";
   const churnDrivers = data?.churnDrivers || [];
   const [expanded, setExpanded] = useState(false);
@@ -472,11 +474,8 @@ function ExecutiveBrief({ data }: { data: any }) {
   return (
     <section className="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 md:p-8 shadow-sm">
       <div className="mb-5">
-        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-          {now}
-        </p>
-        <h1 className="mt-4 text-2xl font-bold text-gray-900 md:text-3xl">
-          Customer Cancellation Analysis
+        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
+          User Cancellation Analysis
         </h1>
         <div className="mt-5 rounded-xl bg-white border border-gray-100 p-5 shadow-sm">
           <p 
@@ -524,34 +523,77 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
   return (
     <section>
       <SectionHead title="Cancellation reasons" subtitle="Top reasons for user cancellations." />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {rows.length > 0 ? (
-          rows.map((r: any) => (
-            <div
-              key={r.name}
-              className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer"
-              onClick={() => onSelectDriver(r)}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 text-lg">{r.name}</h3>
-                  <div className="text-2xl font-bold text-blue-600 mt-1">{r.pct}%</div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <span className="text-sm text-gray-500">Affected users</span>
-                <span className="text-base font-semibold text-gray-900">{r.users}</span>
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left - Table/List */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left py-3 text-sm font-semibold text-gray-700">Reason</th>
+                <th className="text-right py-3 text-sm font-semibold text-gray-700">%</th>
+                <th className="text-right py-3 text-sm font-semibold text-gray-700">Users</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length > 0 ? (
+                rows.map((r: any, index) => (
+                  <tr key={r.name} className="border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50" onClick={() => onSelectDriver(r)}>
+                    <td className="py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-2 flex-1 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-500 rounded-full transition-all"
+                            style={{ width: `${r.pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="font-medium text-gray-900">{r.name}</span>
+                    </td>
+                    <td className="text-right py-4">
+                      <span className="text-2xl font-bold text-blue-600">{r.pct}%</span>
+                    </td>
+                    <td className="text-right py-4">
+                      <span className="text-base font-semibold text-gray-900">{r.users}</span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3} className="py-12 text-center text-gray-500">
+                    No churn data yet. Collect more interviews to see cancellation reasons.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Right - Charts */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Churn Distribution</h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={rows.map(r => ({ name: r.name, value: r.users }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {rows.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#2563eb', '#16a34a', '#d97706', '#7c3aed', '#64748b'][index % 5]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          ))
-        ) : (
-          <div className="col-span-full rounded-2xl border border-gray-200 bg-white p-12 text-center">
-            <AlertCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-base text-gray-500">
-              No churn data yet. Collect more interviews to see cancellation reasons.
-            </p>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );
