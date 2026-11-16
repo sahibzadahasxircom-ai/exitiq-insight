@@ -228,10 +228,10 @@ function generateExecutiveSummary(insights: any[], churnDrivers: any[]) {
     const issuesText = specificIssues.length > 0
       ? ` (${specificIssues.join(", ")})`
       : "";
-    // Bold the first/main cause only and always bold percentages
-    const mainCause = index === 0 ? `<strong>${driver.name.toLowerCase()}</strong>` : driver.name.toLowerCase();
+    // Bold the cause name (main category) but not the features/issues
+    const boldCause = `<strong>${driver.name.toLowerCase()}</strong>`;
     const boldPct = `<strong>${driver.pct}%</strong>`;
-    return `${boldPct} ${mainCause}${issuesText}`;
+    return `${boldPct} ${boldCause}${issuesText}`;
   });
 
   const driversText = driverSummaries.join(".\n");
@@ -593,26 +593,45 @@ function ChurnDrivers({ data, onSelectDriver }: { data: any; onSelectDriver: (dr
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#6b7280"
-                    fontSize={12}
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                  <XAxis
+                    dataKey="month"
+                    stroke="#9ca3af"
+                    fontSize={13}
+                    fontWeight={500}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e5e7eb' }}
                   />
-                  <YAxis 
-                    stroke="#6b7280"
-                    fontSize={12}
+                  <YAxis
+                    stroke="#9ca3af"
+                    fontSize={13}
+                    fontWeight={500}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e5e7eb' }}
                   />
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{
+                      paddingTop: '20px',
+                      fontSize: '13px',
+                    }}
+                  />
                   {rows.map((r: any, index) => (
                     <Line
                       key={r.name}
                       type="monotone"
                       dataKey={r.name}
                       stroke={colors[index % colors.length]}
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
+                      strokeWidth={2.5}
+                      dot={false}
+                      activeDot={false}
                     />
                   ))}
                 </LineChart>
