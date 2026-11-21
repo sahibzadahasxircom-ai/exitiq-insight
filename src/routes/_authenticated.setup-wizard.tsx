@@ -180,9 +180,7 @@ function SetupWizard() {
   // Check if user is configuring a specific integration from integrations page
   useEffect(() => {
     const configureIntegration = sessionStorage.getItem('configureIntegration');
-    console.log("Checking configureIntegration:", configureIntegration);
     if (configureIntegration && profile?.company_id) {
-      console.log("Skipping to connection step for:", configureIntegration);
       // Skip to connection step directly
       setStep("connection");
       // Set the integration type based on what was selected
@@ -297,9 +295,6 @@ function SetupWizard() {
   };
 
   const recommendation = getRecommendation();
-  console.log("Current recommendation:", recommendation);
-  console.log("Current answers:", answers);
-  console.log("Current step:", step);
 
   const handleConnect = async () => {
     // Save integration configuration to company

@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -435,15 +435,17 @@ Example webhook payload:
                         variant="outline"
                         size="sm"
                         className="h-8"
-                        onClick={() => {
-                          console.log("Configure clicked for:", integration.integration_type);
-                          // Store the integration type to configure
-                          sessionStorage.setItem('configureIntegration', integration.integration_type);
-                          console.log("Set sessionStorage:", sessionStorage.getItem('configureIntegration'));
-                          router.push("/setup-wizard");
-                        }}
+                        asChild
                       >
-                        Configure
+                        <Link
+                          to="/setup-wizard"
+                          onClick={() => {
+                            // Store the integration type to configure
+                            sessionStorage.setItem('configureIntegration', integration.integration_type);
+                          }}
+                        >
+                          Configure
+                        </Link>
                       </Button>
                     </div>
                   </div>
@@ -478,9 +480,16 @@ Example webhook payload:
                     variant="outline"
                     size="sm"
                     className="h-8"
-                    onClick={() => handleConnect(available.id)}
+                    asChild
                   >
-                    Connect
+                    <Link
+                      to="/setup-wizard"
+                      onClick={() => {
+                        sessionStorage.setItem('configureIntegration', available.id);
+                      }}
+                    >
+                      Connect
+                    </Link>
                   </Button>
                 </div>
               </div>
