@@ -180,26 +180,8 @@ function SetupWizard() {
   useEffect(() => {
     const configureIntegration = sessionStorage.getItem('configureIntegration');
     if (configureIntegration && profile?.company_id) {
-      // Pre-fill answers based on integration type selected
-      if (configureIntegration === 'javascript') {
-        setAnswers({
-          productType: "saas",
-          exitMethod: "all",
-          billingPlatform: "none",
-          buttonName: "Sign Out",
-        });
-        // Skip welcome and go to product-type
-        setStep("product-type");
-      } else if (configureIntegration === 'webhook') {
-        setAnswers({
-          productType: "saas",
-          exitMethod: "cancel_subscription",
-          billingPlatform: "other",
-          buttonName: "Cancel Subscription",
-        });
-        // Skip welcome and go to product-type
-        setStep("product-type");
-      }
+      // Skip welcome and go to product-type, but let user answer questions
+      setStep("product-type");
       // Clear the sessionStorage
       sessionStorage.removeItem('configureIntegration');
     }
@@ -384,149 +366,114 @@ function SetupWizard() {
     </div>
   );
 
-  const renderProductType = () => {
-    // Auto-advance if productType is already set (from integrations page)
-    if (answers.productType) {
-      setTimeout(() => setStep("exit-method"), 0);
-      return null;
-    }
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-bold mb-2">What is your Product?</h2>
-          <p className="text-sm text-muted-foreground">Select the option that best describes your product</p>
-        </div>
-        <div className="grid grid-cols-1 gap-3">
-          {productTypes.map((type) => (
-            <button
-              key={type.id}
-              onClick={() => setAnswers({ ...answers, productType: type.id })}
-              className={`p-4 rounded-lg border text-left transition-all ${
-                answers.productType === type.id
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50 hover:bg-muted/50"
-              }`}
-            >
-              <div className="font-medium">{type.label}</div>
-            </button>
-          ))}
-        </div>
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setStep("welcome")}>
-            Back
-          </Button>
-          <Button
-            onClick={() => setStep("exit-method")}
-            disabled={!answers.productType}
-          >
-            Continue <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+  const renderProductType = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold mb-2">What is your Product?</h2>
+        <p className="text-sm text-muted-foreground">Select the option that best describes your product</p>
       </div>
-    );
-  };
-
-  const renderExitMethod = () => {
-    // Auto-advance if exitMethod is already set (from integrations page)
-    if (answers.exitMethod) {
-      setTimeout(() => {
-        if (answers.exitMethod === "cancel-subscription" || answers.exitMethod === "all") {
-          setStep("billing-platform");
-        } else {
-          setStep("button-name");
-        }
-      }, 0);
-      return null;
-    }
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-bold mb-2">How do customers usually leave?</h2>
-          <p className="text-sm text-muted-foreground">This helps us recommend the right integration</p>
-        </div>
-        <div className="grid grid-cols-1 gap-3">
-          {exitMethods.map((method) => (
-            <button
-              key={method.id}
-              onClick={() => setAnswers({ ...answers, exitMethod: method.id })}
-              className={`p-4 rounded-lg border text-left transition-all ${
-                answers.exitMethod === method.id
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50 hover:bg-muted/50"
-              }`}
-            >
-              <div className="font-medium">{method.label}</div>
-            </button>
-          ))}
-        </div>
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setStep("product-type")}>
-            Back
-          </Button>
-          <Button
-            onClick={() => {
-              // If cancel subscription or all (which includes cancel), ask about billing platform
-              if (answers.exitMethod === "cancel-subscription" || answers.exitMethod === "all") {
-                setStep("billing-platform");
-              } else {
-                setStep("button-name");
-              }
-            }}
-            disabled={!answers.exitMethod}
+      <div className="grid grid-cols-1 gap-3">
+        {productTypes.map((type) => (
+          <button
+            key={type.id}
+            onClick={() => setAnswers({ ...answers, productType: type.id })}
+            className={`p-4 rounded-lg border text-left transition-all ${
+              answers.productType === type.id
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 hover:bg-muted/50"
+            }`}
           >
-            Continue <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+            <div className="font-medium">{type.label}</div>
+          </button>
+        ))}
       </div>
-    );
-  };
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setStep("welcome")}>
+          Back
+        </Button>
+        <Button
+          onClick={() => setStep("exit-method")}
+          disabled={!answers.productType}
+        >
+          Continue <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
 
-  const renderBillingPlatform = () => {
-    // Auto-advance if billingPlatform is already set (from integrations page)
-    if (answers.billingPlatform) {
-      setTimeout(() => {
-        if (answers.exitMethod === "all" || answers.billingPlatform === "none") {
-          setStep("button-name");
-        } else {
-          setStep("recommendation");
-        }
-      }, 0);
-      return null;
-    }
+  const renderExitMethod = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold mb-2">How do customers usually leave?</h2>
+        <p className="text-sm text-muted-foreground">This helps us recommend the right integration</p>
+      </div>
+      <div className="grid grid-cols-1 gap-3">
+        {exitMethods.map((method) => (
+          <button
+            key={method.id}
+            onClick={() => setAnswers({ ...answers, exitMethod: method.id })}
+            className={`p-4 rounded-lg border text-left transition-all ${
+              answers.exitMethod === method.id
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 hover:bg-muted/50"
+            }`}
+          >
+            <div className="font-medium">{method.label}</div>
+          </button>
+        ))}
+      </div>
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setStep("product-type")}>
+          Back
+        </Button>
+        <Button
+          onClick={() => {
+            // If cancel subscription or all (which includes cancel), ask about billing platform
+            if (answers.exitMethod === "cancel-subscription" || answers.exitMethod === "all") {
+              setStep("billing-platform");
+            } else {
+              setStep("button-name");
+            }
+          }}
+          disabled={!answers.exitMethod}
+        >
+          Continue <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
 
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-bold mb-2">Which billing platform do you use?</h2>
-          <p className="text-sm text-muted-foreground">Select your subscription management platform</p>
-        </div>
-        <div className="grid grid-cols-1 gap-3">
-          {billingPlatforms.map((platform) => (
-            <button
-              key={platform.id}
-              onClick={() => setAnswers({ ...answers, billingPlatform: platform.id })}
-              className={`p-4 rounded-lg border text-left transition-all ${
-                answers.billingPlatform === platform.id
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50 hover:bg-muted/50"
-              }`}
-            >
-              <div className="font-medium">{platform.label}</div>
-            </button>
-          ))}
-        </div>
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setStep("exit-method")}>
-            Back
-          </Button>
-          <Button
-            onClick={() => {
-              // Always go to button name selection for "All" or if not using billing platform
-              if (answers.exitMethod === "all" || answers.billingPlatform === "none") {
-                setStep("button-name");
-              } else {
+  const renderBillingPlatform = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold mb-2">Which billing platform do you use?</h2>
+        <p className="text-sm text-muted-foreground">Select your subscription management platform</p>
+      </div>
+      <div className="grid grid-cols-1 gap-3">
+        {billingPlatforms.map((platform) => (
+          <button
+            key={platform.id}
+            onClick={() => setAnswers({ ...answers, billingPlatform: platform.id })}
+            className={`p-4 rounded-lg border text-left transition-all ${
+              answers.billingPlatform === platform.id
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 hover:bg-muted/50"
+            }`}
+          >
+            <div className="font-medium">{platform.label}</div>
+          </button>
+        ))}
+      </div>
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setStep("exit-method")}>
+          Back
+        </Button>
+        <Button
+          onClick={() => {
+            // Always go to button name selection for "All" or if not using billing platform
+            if (answers.exitMethod === "all" || answers.billingPlatform === "none") {
+              setStep("button-name");
+            } else {
               setStep("recommendation");
             }
           }}
@@ -536,8 +483,7 @@ function SetupWizard() {
         </Button>
       </div>
     </div>
-    );
-  };
+  );
 
   const getButtonNameOptions = () => {
     if (answers.exitMethod === "cancel-subscription") {
@@ -573,87 +519,79 @@ function SetupWizard() {
     ];
   };
 
-  const renderButtonName = () => {
-    // Auto-advance if buttonName is already set (from integrations page)
-    if (answers.buttonName) {
-      setTimeout(() => setStep("recommendation"), 0);
-      return null;
-    }
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-bold mb-2">What's the text on your button?</h2>
-          <p className="text-sm text-muted-foreground">
-            {answers.exitMethod === "all"
+  const renderButtonName = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold mb-2">What's the text on your button?</h2>
+        <p className="text-sm text-muted-foreground">
+          {answers.exitMethod === "all"
             ? "Select the button text for Sign Out / Log Out (we'll also track Cancel Subscription and Delete Account)"
             : answers.exitMethod === "cancel-subscription"
             ? "Select the button text that users click to cancel"
             : answers.exitMethod === "delete-account"
             ? "Select the button text that users click to delete"
             : "Select the button text that users click to sign out"}
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-3">
-          {getButtonNameOptions().map((option) => (
-            <button
-              key={option.id}
-              onClick={() => {
-                if (option.id === "other") {
-                  setAnswers({ ...answers, buttonName: "" });
-                } else {
-                  setAnswers({ ...answers, buttonName: option.label });
-                }
-              }}
-              className={`p-4 rounded-lg border text-left transition-all ${
-                answers.buttonName === option.label || (option.id === "other" && answers.buttonName === "")
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50 hover:bg-muted/50"
-              }`}
-            >
-              <div className="font-medium">{option.label}</div>
-            </button>
-          ))}
-        </div>
-        {answers.buttonName === "" && (
-          <div>
-            <Label htmlFor="custom-button-name">Custom button text</Label>
-            <input
-              id="custom-button-name"
-              type="text"
-              value={customButtonName}
-              onChange={(e) => setCustomButtonName(e.target.value)}
-              placeholder="e.g., Close Account"
-              className="w-full mt-2 px-3 py-2 border rounded-md"
-            />
-          </div>
-        )}
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => {
-            // Go back to billing-platform if we came from there, otherwise go to exit-method
-            if (answers.exitMethod === "all" || answers.exitMethod === "cancel-subscription") {
-              setStep("billing-platform");
-            } else {
-              setStep("exit-method");
-            }
-          }}>
-            Back
-          </Button>
-          <Button
-            onClick={() => {
-              if (answers.buttonName === "" && customButtonName) {
-                setAnswers({ ...answers, buttonName: customButtonName });
-              }
-              setStep("recommendation");
-            }}
-            disabled={!answers.buttonName && !customButtonName}
-          >
-            Continue <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+        </p>
       </div>
-    );
-  };
+      <div className="grid grid-cols-1 gap-3">
+        {getButtonNameOptions().map((option) => (
+          <button
+            key={option.id}
+            onClick={() => {
+              if (option.id === "other") {
+                setAnswers({ ...answers, buttonName: "" });
+              } else {
+                setAnswers({ ...answers, buttonName: option.label });
+              }
+            }}
+            className={`p-4 rounded-lg border text-left transition-all ${
+              answers.buttonName === option.label || (option.id === "other" && answers.buttonName === "")
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 hover:bg-muted/50"
+            }`}
+          >
+            <div className="font-medium">{option.label}</div>
+          </button>
+        ))}
+      </div>
+      {answers.buttonName === "" && (
+        <div>
+          <Label htmlFor="custom-button-name">Custom button text</Label>
+          <input
+            id="custom-button-name"
+            type="text"
+            value={customButtonName}
+            onChange={(e) => setCustomButtonName(e.target.value)}
+            placeholder="e.g., Close Account"
+            className="w-full mt-2 px-3 py-2 border rounded-md"
+          />
+        </div>
+      )}
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => {
+          // Go back to billing-platform if we came from there, otherwise go to exit-method
+          if (answers.exitMethod === "all" || answers.exitMethod === "cancel-subscription") {
+            setStep("billing-platform");
+          } else {
+            setStep("exit-method");
+          }
+        }}>
+          Back
+        </Button>
+        <Button
+          onClick={() => {
+            if (answers.buttonName === "" && customButtonName) {
+              setAnswers({ ...answers, buttonName: customButtonName });
+            }
+            setStep("recommendation");
+          }}
+          disabled={!answers.buttonName && !customButtonName}
+        >
+          Continue <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
 
   const renderRecommendation = () => (
     <div className="space-y-6">
