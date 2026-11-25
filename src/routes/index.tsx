@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState, useRef } from "react";
 import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart, Menu, X, Check, CreditCard, Play, Webhook } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from "recharts";
 
 export const Route = createFileRoute("/")({
@@ -26,6 +26,8 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -43,6 +45,13 @@ function Landing() {
 
     return () => observer.disconnect();
   }, []);
+
+  const handlePlayClick = () => {
+    if (videoRef.current) {
+      setIsPlaying(true);
+      videoRef.current.play();
+    }
+  };
 
   // Add custom styles for animations
   useEffect(() => {
@@ -226,8 +235,11 @@ function Landing() {
               AI-powered churn intelligence for modern SaaS
             </div>
             <h1 className="mx-auto max-w-4xl text-balance text-3xl md:text-4xl lg:text-[72px] font-semibold tracking-tight md:leading-[1.1] animate-slide-up">
-              Understand why users leave. <span className="text-muted-foreground">Know what to fix.</span>
+              Understand why users leave
             </h1>
+            <p className="mx-auto mt-4 md:mt-6 max-w-2xl text-balance text-base md:text-lg md:text-xl text-muted-foreground leading-relaxed animate-slide-up">
+              Know what to fix. AI-powered exit interviews that automatically uncover churn reasons, competitor insights, revenue risks, and product opportunities.
+            </p>
             <p className="mx-auto mt-4 md:mt-6 max-w-2xl text-balance text-base md:text-lg md:text-xl text-muted-foreground leading-relaxed animate-slide-up">
               AI-powered exit interviews that automatically uncover churn reasons, competitor insights, revenue risks, and product opportunities.
             </p>
@@ -247,17 +259,23 @@ function Landing() {
           </div>
 
           {/* Video demo */}
-          <div id="demo-section" className="mx-auto mt-16 max-w-lg animate-slide-up stagger-3">
+          <div id="demo-section" className="mx-auto mt-16 max-w-3xl animate-slide-up stagger-3">
             <div className="relative w-full aspect-video rounded-2xl border border-border bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl overflow-hidden group cursor-pointer hover:shadow-3xl transition-all duration-300">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Play className="h-8 w-8 text-white fill-current ml-1" />
+              {!isPlaying && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <button 
+                    onClick={handlePlayClick}
+                    className="h-20 w-20 rounded-full bg-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300"
+                  >
+                    <Play className="h-10 w-10 text-white fill-current ml-1" />
+                  </button>
                 </div>
-              </div>
+              )}
               <video
+                ref={videoRef}
                 src="/leaveesy-demo.mp4"
                 controls
-                className="w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="w-full h-full"
                 poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%231a1a2e' width='1920' height='1080'/%3E%3C/svg%3E"
               >
                 Your browser does not support the video tag.
@@ -275,7 +293,7 @@ function Landing() {
               leaveesy knows your product
             </h2>
             <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              Simply provide your URLs. leaveesy learns your features, updates, and product context automatically.
+              Provide your product knowledge and what's new. leaveesy asks relevant questions based on this information.
             </p>
           </div>
 
@@ -287,15 +305,10 @@ function Landing() {
                     <Globe className="h-5 w-5 text-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold mb-1">Changelog URLs</h3>
+                    <h3 className="text-base md:text-lg font-semibold mb-1">Product Information</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Add your changelog or release notes URL. leaveesy scrapes and learns about your latest features and updates.
+                      Share your features, updates, and what's new in your product. leaveesy uses this to ask intelligent, relevant questions.
                     </p>
-                    <div className="rounded-md bg-muted border border-border p-3">
-                      <code className="text-xs md:text-sm text-foreground font-mono break-all">
-                        https://yourproduct.com/changelog
-                      </code>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -308,15 +321,10 @@ function Landing() {
                     <FileText className="h-5 w-5 text-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-semibold mb-1">Documentation URLs</h3>
+                    <h3 className="text-base md:text-lg font-semibold mb-1">Product Knowledge</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Link your docs. leaveesy understands your product capabilities, features, and use cases.
+                      Document your product capabilities, features, and use cases. leaveesy understands context and tailors questions accordingly.
                     </p>
-                    <div className="rounded-md bg-muted border border-border p-3">
-                      <code className="text-xs md:text-sm text-foreground font-mono break-all">
-                        https://docs.yourproduct.com
-                      </code>
-                    </div>
                   </div>
                 </div>
               </div>
