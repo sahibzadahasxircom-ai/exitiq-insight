@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart, Menu, X, Check, CreditCard, Play } from "lucide-react";
+import { ArrowRight, BarChart3, Target, Database, Bot, Shield, Zap, CheckCircle2, Settings, FileText, BarChart2, Users, Lock, Zap as Lightning, MessageSquare, Lightbulb, Code, Globe, BookOpen, Sparkles, Heart, DollarSign, LayoutDashboard, TrendingUp, LineChart, Menu, X, Check, CreditCard, Play, Webhook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from "recharts";
@@ -42,6 +42,108 @@ function Landing() {
     document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
+  }, []);
+
+  // Add custom styles for animations
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+      }
+      .animate-slide-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+      }
+      .animate-slide-left {
+        animation: slideInLeft 0.8s ease-out forwards;
+      }
+      .animate-slide-right {
+        animation: slideInRight 0.8s ease-out forwards;
+      }
+      .animate-scale-in {
+        animation: scaleIn 0.6s ease-out forwards;
+      }
+      .stagger-1 {
+        animation-delay: 0.1s;
+      }
+      .stagger-2 {
+        animation-delay: 0.2s;
+      }
+      .stagger-3 {
+        animation-delay: 0.3s;
+      }
+      .stagger-4 {
+        animation-delay: 0.4s;
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease-out;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+      }
+      .shadow-soft {
+        box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+      }
+      .shadow-3xl {
+        box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
   }, []);
 
   return (
@@ -124,7 +226,7 @@ function Landing() {
               AI-powered churn intelligence for modern SaaS
             </div>
             <h1 className="mx-auto max-w-4xl text-balance text-3xl md:text-4xl lg:text-[72px] font-semibold tracking-tight md:leading-[1.1] animate-slide-up">
-              Understand why customers leave. Know what to fix.
+              Understand why users leave. <span className="text-muted-foreground">Know what to fix.</span>
             </h1>
             <p className="mx-auto mt-4 md:mt-6 max-w-2xl text-balance text-base md:text-lg md:text-xl text-muted-foreground leading-relaxed animate-slide-up">
               AI-powered exit interviews that automatically uncover churn reasons, competitor insights, revenue risks, and product opportunities.
@@ -145,13 +247,18 @@ function Landing() {
           </div>
 
           {/* Video demo */}
-          <div id="demo-section" className="mx-auto mt-16 max-w-6xl animate-slide-up stagger-3">
-            <div className="relative w-full rounded-2xl border border-border bg-black shadow-2xl overflow-hidden">
+          <div id="demo-section" className="mx-auto mt-16 max-w-lg animate-slide-up stagger-3">
+            <div className="relative w-full aspect-video rounded-2xl border border-border bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl overflow-hidden group cursor-pointer hover:shadow-3xl transition-all duration-300">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Play className="h-8 w-8 text-white fill-current ml-1" />
+                </div>
+              </div>
               <video
                 src="/leaveesy-demo.mp4"
                 controls
-                className="w-full h-auto"
-                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%23000' width='1920' height='1080'/%3E%3C/svg%3E"
+                className="w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%231a1a2e' width='1920' height='1080'/%3E%3C/svg%3E"
               >
                 Your browser does not support the video tag.
               </video>
@@ -160,12 +267,12 @@ function Landing() {
         </div>
       </section>
 
-      {/* Leaveesy AI Knows Your Software */}
+      {/* Product Knowledge - First Section */}
       <section className="border-t border-border bg-background">
         <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
           <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
-              leaveesy AI knows your software
+              leaveesy knows your product
             </h2>
             <p className="mt-4 text-base md:text-lg text-muted-foreground">
               Simply provide your URLs. leaveesy learns your features, updates, and product context automatically.
@@ -218,37 +325,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* Conversation Example */}
-      <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
-          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
-              AI that understands your product
-            </h2>
-            <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              leaveesy asks relevant questions based on your product knowledge, not generic scripts.
-            </p>
-          </div>
 
-          <div className="mx-auto max-w-2xl">
-            <div className="border border-border rounded-lg p-4 md:p-6 bg-card">
-              <div className="space-y-4">
-                <div className="flex gap-3 justify-end">
-                  <div className="flex-1 max-w-[80%] rounded-lg bg-muted p-3 md:p-4 text-xs md:text-sm">
-                    The reporting feature doesn't have the filters I need.
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <img src="/leaveesy.png" alt="leaveesy" className="h-6 md:h-8 w-auto object-contain shrink-0" />
-                  <div className="flex-1 rounded-lg bg-muted border border-border p-3 md:p-4 text-xs md:text-sm">
-                    I understand. Are you looking for custom date range filters or specific data field filtering in your reports?
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Know What to Fix */}
       <section className="border-t border-border bg-background">
@@ -405,7 +482,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* Customize Your Own */}
+      {/* Customize Your Own - Real Pre-form Cards */}
       <section className="border-t border-border bg-background">
         <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
           <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
@@ -413,113 +490,232 @@ function Landing() {
               Customize your own
             </h2>
             <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              Professional pre-form templates that change automatically. Choose the perfect fit for your brand.
+              Professional pre-form templates that match your brand. Choose the perfect fit.
             </p>
           </div>
 
-          <div className="mt-12 md:mt-16">
-            <TemplateCarousel />
-          </div>
-        </div>
-      </section>
+          <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Professional Style */}
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="mb-4 p-4 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
+                <div className="text-center">
+                  <div className="h-2 w-16 mx-auto mb-2 bg-blue-600 rounded"></div>
+                  <div className="h-2 w-24 mx-auto mb-2 bg-gray-300 rounded"></div>
+                  <div className="h-2 w-20 mx-auto bg-gray-300 rounded"></div>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Professional</h3>
+              <p className="text-sm text-muted-foreground">Clean, corporate style with blue accents</p>
+            </div>
 
-      {/* Invite Your Team */}
-      <section className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
-          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
-              Invite your team
-            </h2>
-            <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              Collaborate with your team through email invitations. Share insights and work together on retention.
-            </p>
-          </div>
+            {/* Casual Style */}
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="mb-4 p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
+                <div className="text-center">
+                  <div className="h-2 w-16 mx-auto mb-2 bg-purple-600 rounded-full"></div>
+                  <div className="h-2 w-24 mx-auto mb-2 bg-gray-300 rounded-full"></div>
+                  <div className="h-2 w-20 mx-auto bg-gray-300 rounded-full"></div>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Casual</h3>
+              <p className="text-sm text-muted-foreground">Friendly, approachable with purple gradients</p>
+            </div>
 
-          <div className="mt-12 md:mt-16 max-w-2xl mx-auto">
-            <div className="border border-border rounded-lg p-4 md:p-6">
-              <div className="mb-4 md:mb-6 flex items-center gap-4">
-                <div className="h-10 md:h-12 w-10 md:w-12 rounded-full bg-muted flex items-center justify-center text-foreground font-semibold text-sm md:text-base">
-                  JD
-                </div>
-                <div>
-                  <h3 className="text-base md:text-lg font-semibold">John Doe</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground">Product Manager</p>
+            {/* Minimal Style */}
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="mb-4 p-4 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200">
+                <div className="text-center">
+                  <div className="h-2 w-20 mx-auto mb-2 bg-gray-800 rounded-sm"></div>
+                  <div className="h-2 w-16 mx-auto mb-2 bg-gray-400 rounded-sm"></div>
+                  <div className="h-2 w-12 mx-auto bg-gray-400 rounded-sm"></div>
                 </div>
               </div>
-              <div className="rounded-md bg-muted border border-border p-3 md:p-4 mb-4 md:mb-6">
-                <div className="text-xs text-muted-foreground mb-2">Email Invitation</div>
-                <div className="text-xs md:text-sm text-foreground">
-                  Join our leaveesy workspace to collaborate on customer insights and churn reduction strategies.
-                </div>
-              </div>
-              <div className="flex gap-2 md:gap-3">
-                <Button className="flex-1 text-xs md:text-sm">Send Invitation</Button>
-                <Button variant="outline" className="flex-1 text-xs md:text-sm">Copy Link</Button>
-              </div>
+              <h3 className="text-lg font-semibold mb-2">Minimal</h3>
+              <p className="text-sm text-muted-foreground">Simple, elegant with monochrome design</p>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Causes of Churn Extraction */}
+      <section className="border-t border-border bg-background">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
+              Extract causes of churn
+            </h2>
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
+              AI analyzes conversations to identify specific problems like missing features, pricing issues, UI/UX problems, and more.
+            </p>
+          </div>
+
+          <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <Zap className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold">AI Assistant Issues</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Context loss, weak memory, capability gaps in AI features
+              </p>
+              <div className="text-xs text-blue-600 font-medium">42% of cancellations</div>
+            </div>
+
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <LayoutDashboard className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold">UI/UX Problems</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Complex workflows, confusing navigation, design issues
+              </p>
+              <div className="text-xs text-purple-600 font-medium">33% of cancellations</div>
+            </div>
+
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                  <Target className="h-6 w-6 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Missing Features</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Functionality gaps, requested capabilities not available
+              </p>
+              <div className="text-xs text-green-600 font-medium">15% of cancellations</div>
+            </div>
+
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-amber-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Pricing Concerns</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Cost too high, need for more flexible plans
+              </p>
+              <div className="text-xs text-amber-600 font-medium">10% of cancellations</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
 
       {/* Dashboard Features */}
       <section className="border-t border-border bg-background">
         <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
           <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
-              Powerful dashboard features
+              Dashboard: What to fix
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Comprehensive analytics and insights at your fingertips to drive retention decisions.
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
+              Detailed analytics showing exactly what problems to solve with specific recommendations.
             </p>
           </div>
 
-          <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-border rounded-lg p-4 md:p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                  <BarChart3 className="h-5 w-5 text-foreground" />
+          <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <BarChart3 className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="text-base md:text-lg font-semibold">Churn Analytics</h3>
+                <h3 className="text-lg font-semibold">Churn Analytics</h3>
               </div>
-              <p className="text-xs md:text-sm text-muted-foreground">
-                Visual breakdown of cancellation reasons and trends
+              <p className="text-sm text-muted-foreground">
+                Visual breakdown of cancellation reasons with percentages and affected users
               </p>
             </div>
 
-            <div className="border border-border rounded-lg p-4 md:p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-foreground" />
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                  <LineChart className="h-6 w-6 text-green-600" />
                 </div>
-                <h3 className="text-base md:text-lg font-semibold">Revenue at Risk</h3>
+                <h3 className="text-lg font-semibold">Trend Analysis</h3>
               </div>
-              <p className="text-xs md:text-sm text-muted-foreground">
-                Track MRR impact and revenue loss from churn
+              <p className="text-sm text-muted-foreground">
+                Track churn trends over time to identify patterns and measure impact
               </p>
             </div>
 
-            <div className="border border-border rounded-lg p-4 md:p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                  <MessageSquare className="h-5 w-5 text-foreground" />
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <MessageSquare className="h-6 w-6 text-purple-600" />
                 </div>
-                <h3 className="text-base md:text-lg font-semibold">Customer Voice</h3>
+                <h3 className="text-lg font-semibold">Users Voice</h3>
               </div>
-              <p className="text-xs md:text-sm text-muted-foreground">
-                Direct quotes and feedback from customers
+              <p className="text-sm text-muted-foreground">
+                Direct quotes and feedback from users explaining their reasons
               </p>
             </div>
 
-            <div className="border border-border rounded-lg p-4 md:p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                  <Lightbulb className="h-5 w-5 text-foreground" />
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <Lightbulb className="h-6 w-6 text-amber-600" />
                 </div>
-                <h3 className="text-base md:text-lg font-semibold">AI Recommendations</h3>
+                <h3 className="text-lg font-semibold">AI Recommendations</h3>
               </div>
-              <p className="text-xs md:text-sm text-muted-foreground">
-                Actionable insights to reduce churn
+              <p className="text-sm text-muted-foreground">
+                Specific actionable fixes for each problem with expected impact
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Integrations */}
+      <section className="border-t border-border bg-background">
+        <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-24">
+          <div className="mx-auto max-w-2xl text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight md:text-4xl">
+              Easy integrations
+            </h2>
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
+              Connect leaveesy to your product in minutes with simple setup options.
+            </p>
+          </div>
+
+          <div className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <Zap className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold">JavaScript Widget</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Track button clicks automatically - Sign Out, Cancel Subscription, Delete Account
+              </p>
+              <div className="rounded-md bg-muted border border-border p-3">
+                <code className="text-xs text-foreground font-mono break-all">
+                  &lt;script src="/widget.js"&gt;&lt;/script&gt;
+                </code>
+              </div>
+            </div>
+
+            <div className="border border-border rounded-xl p-6 bg-card hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <Webhook className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Webhooks</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Receive events from billing platforms - Stripe, Paddle, Chargebee, and more
+              </p>
+              <div className="rounded-md bg-muted border border-border p-3">
+                <code className="text-xs text-foreground font-mono break-all">
+                  POST /webhook/company-id
+                </code>
+              </div>
             </div>
           </div>
         </div>
